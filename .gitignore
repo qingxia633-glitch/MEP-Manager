@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.cad-jobs/
+.env
+*.dwg
+*.dxf
+test-results/
+*.log
+.DS_Store

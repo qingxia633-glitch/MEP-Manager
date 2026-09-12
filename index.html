@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123b36">
+  <meta name="description" content="面向水电安装施工的轻量算量工具。看图测量、清楚算量、项目收支。">
+  <title>MEP-Manager · 水电小助手</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="core.js"></script>
+  <script defer src="management.js"></script>
+  <script defer src="snap.js"></script>
+  <script defer src="cad.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div id="app"><div class="loading">正在打开水电小助手…</div></div>
+  <dialog id="dialog"></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <input id="drawing-file" type="file" accept=".dwg,.dxf,image/png,image/jpeg,image/webp" hidden>
+  <input id="backup-file" type="file" accept=".json,application/json" hidden>
+  <noscript>请在浏览器中启用 JavaScript 后使用水电小助手。</noscript>
+</body>
+</html>
