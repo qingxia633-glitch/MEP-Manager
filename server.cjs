@@ -5,7 +5,7 @@ const path = require('node:path');
 const root = __dirname;
 const cadHandler = require('./cad-server.cjs').createHandler(root);
 const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8' };
-const files = new Set(['/index.html', '/styles.css', '/core.js', '/cad.js', '/app.js']);
+const files = new Set(['/index.html', '/styles.css', '/core.js', '/cad.js', '/snap.js', '/management.js', '/app.js']);
 const server = http.createServer(async (req, res) => {
   if (await cadHandler(req, res)) return;
   let name;

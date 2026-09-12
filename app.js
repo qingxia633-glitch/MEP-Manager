@@ -37,7 +37,11 @@
   let view = 'overview', tableMode = 'detail', filter = '', systemFilter = '', drawingId = null;
   let tool = 'select', points = [], zoom = 100, selectedItem = null, pendingSource = null;
   let db, storageError = '', saveQueue = Promise.resolve(), saveCount = 0, savedCount = 0, diskRevision = 0;
-  let toastTimer, confirmAction = null;
+  let toastTimer, confirmAction = null, nextBranch = false, pickMode = false, measureCategory='电线';
+  const snapCache=new WeakMap();
+  function snapIndex(d){if(d?.cad?.geometryVersion!==1)return null;if(!snapCache.has(d))snapCache.set(d,MEPSnap.index(d.cad.segments||[]));return snapCache.get(d);}
+  function capture(plan,e){const p=plan.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(plan.getScreenCTM().inverse()),d=drawing(),idx=snapIndex(d),t=12/Math.hypot(plan.getScreenCTM().a,plan.getScreenCTM().b);return {q,idx,t,hit:idx?MEPSnap.find(idx,q,t):null};}
+  const splitPaths=pts=>{const out=[];for(const p of pts){if(!out.length||p.breakBefore)out.push([]);out.at(-1).push(p);}return out;};
   const current = () => state.projects.find(p => p.id === state.currentProjectId) || null;
   const drawing = () => current()?.drawings.find(d => d.id === drawingId) || current()?.drawings[0] || null;
   const filtered = () => (current()?.items || []).filter(i => (!systemFilter || i.system === systemFilter) && [i.name, i.spec, i.location, i.note].join(' ').toLowerCase().includes(filter.toLowerCase()));
@@ -78,15 +82,15 @@
     });
     return saveQueue;
   }
-  function resetDrawing() { points = []; tool = 'select'; selectedItem = null; zoom = 100; pendingSource = null; }
+  function resetDrawing() { points = []; tool = 'select'; selectedItem = null; zoom = 100; pendingSource = null; nextBranch=false; }
   function go(next) {
     if (points.length) return confirmDialog('离开当前测量？', '当前还没有保存的测量点会被清除，已保存的工程量不受影响。', () => { points = []; go(next); }, '离开');
     view = next; render();
   }
   function art() { return `<svg viewBox="0 0 380 220" fill="none" aria-hidden="true"><g transform="translate(48 23) rotate(-8 145 90)"><rect x="9" y="12" width="270" height="174" rx="6" fill="#bfd1c1" opacity=".5"/><rect width="270" height="174" rx="6" fill="#fcfdf8"/><g stroke="#b8c9b6" stroke-width="2"><path d="M29 26h210v124H29zM107 26v79H29m78-33h75V26m0 46v78m-75-45v45M29 133h44"/><path d="M107 92c-17 0-29 13-29 29m104-40c16 0 28 12 28 28" stroke-width="1"/></g><path d="M47 126V46h45v79h70V88h55v43" stroke="#438b70" stroke-width="3" stroke-linecap="round"/><g fill="#fff" stroke="#438b70" stroke-width="2"><circle cx="47" cy="126" r="4"/><circle cx="92" cy="46" r="4"/><circle cx="162" cy="125" r="4"/><circle cx="217" cy="88" r="4"/></g><path d="M29 163h210" stroke="#c5a26e" stroke-dasharray="3 3"/><rect x="193" y="132" width="94" height="42" rx="8" fill="#2a6650"/><text x="207" y="150" fill="#bed6ba" font-size="8">MEASURED LENGTH</text><text x="207" y="166" fill="#fff" font-size="15" font-family="sans-serif">24.80 m</text></g></svg>`; }
   function shell(body) {
-    const navItems = [['overview', 'home', '项目总览'], ['drawings', 'plan', '图纸算量'], ['quantities', 'list', '工程量清单'], ['cash', 'wallet', '项目收支']];
-    return `<div class="layout"><aside class="sidebar"><div class="brand"><span class="brand-mark">M</span><div><strong>水电小助手</strong><small>MEP · MANAGER</small></div></div><div class="nav-label">我的工作台</div><nav class="nav" aria-label="主导航">${navItems.map(([id, ico, label]) => btn('nav', label, view === id ? 'active' : '', ico, `data-view="${id}" ${view === id ? 'aria-current="page"' : ''}`)).join('')}</nav><div class="sidebar-bottom"><div class="offline"><span class="dot"></span>本地工作，安心记录</div><p>项目数据保存在当前浏览器。<br>定期备份，换设备也能接着做。</p>${btn('help', '新手使用指南', '', 'help')}<p>CAD 试读版 · v0.2.0</p></div></aside><main class="workspace">${storageError ? `<div id="storage-alert" class="storage-error" role="alert">${h(storageError)}</div>` : ''}<header class="topbar"><div class="project-switch"><span>当前项目</span><select id="project-select" aria-label="当前项目">${state.projects.length ? state.projects.map(p => `<option value="${h(p.id)}" ${p.id === state.currentProjectId ? 'selected' : ''}>${h(p.name)}</option>`).join('') : '<option value="">还没有项目</option>'}</select>${btn('new-project', '', 'icon', 'plus', 'aria-label="新建项目" title="新建项目"')}</div><div class="top-actions"><span class="save-status">${storageError ? '尚未保存 · 请备份' : savedCount === saveCount ? '已保存在此设备' : '正在保存…'}</span>${btn('backup', '备份数据', '', 'download')}${btn('restore', '恢复备份', '', 'upload')}</div></header><div class="content">${body}</div></main></div>`;
+    const navItems = [['overview', 'home', '项目总览'], ['drawings', 'plan', '图纸算量'], ['quantities', 'list', '工程量清单'], ['materials','folder','材料库存'], ['workers','list','工人和工资'], ['cash', 'wallet', '项目收支']];
+    return `<div class="layout"><aside class="sidebar"><div class="brand"><span class="brand-mark">M</span><div><strong>水电小助手</strong><small>MEP · MANAGER</small></div></div><div class="nav-label">我的工作台</div><nav class="nav" aria-label="主导航">${navItems.map(([id, ico, label]) => btn('nav', label, view === id ? 'active' : '', ico, `data-view="${id}" ${view === id ? 'aria-current="page"' : ''}`)).join('')}</nav><div class="sidebar-bottom"><div class="offline"><span class="dot"></span>本地工作，安心记录</div><p>项目数据保存在当前浏览器。<br>定期备份，换设备也能接着做。</p>${btn('help', '新手使用指南', '', 'help')}<p>试用版 · v0.3.0</p></div></aside><main class="workspace">${storageError ? `<div id="storage-alert" class="storage-error" role="alert">${h(storageError)}</div>` : ''}<header class="topbar"><div class="project-switch"><span>当前项目</span><select id="project-select" aria-label="当前项目">${state.projects.length ? state.projects.map(p => `<option value="${h(p.id)}" ${p.id === state.currentProjectId ? 'selected' : ''}>${h(p.name)}</option>`).join('') : '<option value="">还没有项目</option>'}</select>${btn('new-project', '', 'icon', 'plus', 'aria-label="新建项目" title="新建项目"')}</div><div class="top-actions"><span class="save-status">${storageError ? '尚未保存 · 请备份' : savedCount === saveCount ? '已保存在此设备' : '正在保存…'}</span>${btn('backup', '备份数据', '', 'download')}${btn('restore', '恢复备份', '', 'upload')}</div></header><div class="content">${body}</div></main></div>`;
   }
   function heading(title, subtitle, actions = '') { return `<div class="page-heading"><div><div class="eyebrow">MEP WORKSPACE / ${view.toUpperCase()}</div><h1>${title}</h1><p>${subtitle}</p></div><div class="actions">${actions}</div></div>`; }
   function demoBanner() { return current()?.demo ? `<div class="banner"><span>你正在体验示例项目，图纸、工程量和收支均为演示数据。</span>${btn('new-project', '新建我的项目', 'small')}</div>` : ''; }
@@ -110,7 +114,7 @@
     const p = current(), d = drawing();
     if (!d) return `${heading('图纸算量', '沿管线点选，每一笔都能回到图上核对。', btn('upload-drawing', '添加图纸', 'primary', 'upload'))}<section class="card">${empty('先放入你的第一张图纸', '支持 DWG（本机转换）、ASCII DXF 和 PNG / JPG / WebP。<br>打开 CAD 后，可按标题定位、放大并选取要算的区域。图片每张不超过 15 MB。', btn('upload-drawing', '选择 CAD 或图片', 'primary', 'upload'), 'plan')}</section><p class="footer-note">图片必须保持原始长宽比例。同一张图中的不同缩放详图，应分别截图、分别标定。</p>`;
     drawingId = d.id;
-    return `${heading('图纸算量', '先定比例，再点管线。做过的测量，随时回看。', btn('manual', '手动录入', '', 'plus') + btn('upload-drawing', '添加图纸', 'primary', 'upload'))}${demoBanner()}<div class="drawing-layout"><section class="drawing-main"><div class="drawing-bar"><div class="actions">${icon('plan')}<select id="drawing-select" aria-label="选择图纸">${p.drawings.map(x => `<option value="${h(x.id)}" ${d.id === x.id ? 'selected' : ''}>${h(x.name)}</option>`).join('')}</select></div>${btn('delete-drawing', '', 'icon danger', 'trash', 'aria-label="删除当前图纸" title="删除当前图纸"')}</div><div class="toolbar">${[['select', 'pointer', '查看'], ['calibrate', 'ruler', d.scale ? '重新定比例' : '① 定比例'], ['length', 'line', '② 测长度'], ['count', 'count', '点设备']].map(([id, ico, label]) => btn('tool', label, tool === id ? 'selected' : '', ico, `data-tool="${id}" ${id === 'length' && !d.scale ? 'disabled title="请先标定图纸比例"' : ''}`)).join('')}${btn('undo-point', '撤回', '', 'undo', points.length ? '' : 'disabled')}${btn('cancel-points', '取消', '', 'close', points.length ? '' : 'disabled')}</div><div class="tool-hint" id="tool-hint">${hint()}</div><div class="drawing-viewport" id="drawing-viewport"><div class="paper" id="paper" style="width:${zoom}%">${svgPlan(d)}</div></div><div class="drawing-footer"><span>${d.scale ? '比例已设置 · ' + fmt(d.scale * 1000, 4) + ' 米 / 1000 像素' : '尚未设置比例 · 点数不需要比例'}</span><label class="zoom">缩放<input id="zoom" type="range" min="100" max="400" step="25" value="${zoom}" aria-label="图纸缩放"><span id="zoom-label">${zoom}%</span></label></div></section><aside class="card panel"><div class="panel-section"><div class="eyebrow">当前操作</div><h3 id="measure-title">${tool === 'count' ? '数一数设备' : tool === 'length' ? '量一段管线' : tool === 'calibrate' ? '设置图纸比例' : '准备好，开始算量'}</h3><div id="measure-value">${readout()}</div><div style="margin-top:16px">${btn('finish-measure', tool === 'calibrate' ? '输入实际长度' : '保存这笔', 'primary full', 'check', canFinish() ? '' : 'disabled')}</div><p style="margin-top:10px">${tool === 'length' ? '这里只测平面长度。立管、上下翻弯和预留长度，请在保存时填写补充数量。' : tool === 'count' ? '同一种规格放在一笔记录里，不同规格请分别点数。' : '图纸保持原始比例；实际尺寸优先于截图测量。'}</p></div><div class="steps panel-section"><div class="step"><span class="step-num">1</span><div><h3>找一段标注尺寸</h3><p>例如图上 3600 mm，输入 3.6 米。</p></div></div><div class="step"><span class="step-num">2</span><div><h3>沿管线依次点选</h3><p>转弯处加一个点，最后保存。</p></div></div><div class="step"><span class="step-num">3</span><div><h3>填写材料名称和规格</h3><p>下次回来，还能看到测量出处。</p></div></div></div><h3>本图记录 <small>${p.items.filter(i => i.source?.drawingId === d.id).length} 笔</small></h3><div class="drawing-list">${p.items.filter(i => i.source?.drawingId === d.id).map(i => `<div class="drawing-record"><span class="swatch" style="background:${colors[i.system]}"></span>${btn('edit-item', `${h(i.name)}<small>${h(i.spec)} · ${fmt(MEP.calculate(i).quantity)} ${unitLabel(i.unit)}</small>`, '', '', `data-id="${h(i.id)}"`)}</div>`).join('') || '<p>保存后，工程量会出现在这里。</p>'}</div></aside></div><p class="footer-note">本版为人工辅助测量，不会自动识别管线或设备。不要将同图不同缩放比例的区域混用。</p>`;
+    return `${heading('图纸算量', '先定比例，再点管线。做过的测量，随时回看。', btn('manual', '手动录入', '', 'plus') + btn('upload-drawing', '添加图纸', 'primary', 'upload'))}${demoBanner()}<div class="drawing-layout"><section class="drawing-main"><div class="drawing-bar"><div class="actions">${icon('plan')}<select id="drawing-select" aria-label="选择图纸">${p.drawings.map(x => `<option value="${h(x.id)}" ${d.id === x.id ? 'selected' : ''}>${h(x.name)}</option>`).join('')}</select></div>${btn('delete-drawing', '', 'icon danger', 'trash', 'aria-label="删除当前图纸" title="删除当前图纸"')}</div><div class="toolbar"><label>本次算量 <select id="measure-category" aria-label="本次算量类别">${['电线','电缆','桥架','给水','排水','其他'].map(x=>`<option ${measureCategory===x?'selected':''}>${x}</option>`).join('')}</select></label>${[['select', 'pointer', '查看'], ['calibrate', 'ruler', d.scale ? '重新定比例' : '① 定比例'], ['length', 'line', '② 测长度 / 自绘'], ['count', 'count', '点设备']].map(([id, ico, label]) => btn('tool', label, tool === id ? 'selected' : '', ico, `data-tool="${id}" ${id === 'length' && !d.scale ? 'disabled title="请先标定图纸比例"' : ''}`)).join('')}${tool==='length'?btn('pick-mode',pickMode?'选线段：开':'选线段：关',pickMode?'selected':'')+btn('new-branch','增加支路')+btn('bridge-lines','连接两段断线'):''}${btn('undo-point', '撤回', '', 'undo', points.length ? '' : 'disabled')}${btn('cancel-points', '取消', '', 'close', points.length ? '' : 'disabled')}</div><div class="tool-hint" id="tool-hint">${hint()}</div><div id="snap-status" role="status" class="tool-hint">${snapIndex(d)?'端点 / 交点捕捉已启用；按住 Alt 可自由落点，Shift 水平/垂直辅助。':d.cad?'旧图缺少可靠线段数据，请重新导入原 CAD 后使用捕捉。':'图片无 CAD 端点，仅能手动落点。'}</div><div class="drawing-viewport" id="drawing-viewport"><div class="paper" id="paper" style="width:${zoom}%">${svgPlan(d)}</div></div><div class="drawing-footer"><span>${d.scale ? '比例已设置 · ' + fmt(d.scale * 1000, 4) + ' 米 / 1000 像素' : '尚未设置比例 · 点数不需要比例'}</span><label class="zoom">缩放<input id="zoom" type="range" min="100" max="3200" step="25" value="${zoom}" aria-label="图纸缩放"><span id="zoom-label">${zoom}%</span></label></div></section><aside class="card panel"><div class="panel-section"><div class="eyebrow">当前操作</div><h3 id="measure-title">${tool === 'count' ? '数一数设备' : tool === 'length' ? '量一段管线' : tool === 'calibrate' ? '设置图纸比例' : '准备好，开始算量'}</h3><div id="measure-value">${readout()}</div><div style="margin-top:16px">${btn('finish-measure', tool === 'calibrate' ? '输入实际长度' : '保存这笔', 'primary full', 'check', canFinish() ? '' : 'disabled')}</div><p style="margin-top:10px">${tool === 'length' ? '这里只测平面长度。立管、上下翻弯和预留长度，请在保存时填写补充数量。' : tool === 'count' ? '同一种规格放在一笔记录里，不同规格请分别点数。' : '图纸保持原始比例；实际尺寸优先于截图测量。'}</p></div><div class="steps panel-section"><div class="step"><span class="step-num">1</span><div><h3>找一段标注尺寸</h3><p>例如图上 3600 mm，输入 3.6 米。</p></div></div><div class="step"><span class="step-num">2</span><div><h3>沿管线依次点选</h3><p>转弯处加一个点，最后保存。</p></div></div><div class="step"><span class="step-num">3</span><div><h3>填写材料名称和规格</h3><p>下次回来，还能看到测量出处。</p></div></div></div><h3>本图记录 <small>${p.items.filter(i => i.source?.drawingId === d.id).length} 笔</small></h3><div class="drawing-list">${p.items.filter(i => i.source?.drawingId === d.id).map(i => `<div class="drawing-record"><span class="swatch" style="background:${colors[i.system]}"></span>${btn('edit-item', `${h(i.name)}<small>${h(i.spec)} · ${fmt(MEP.calculate(i).quantity)} ${unitLabel(i.unit)}</small>`, '', '', `data-id="${h(i.id)}"`)}</div>`).join('') || '<p>保存后，工程量会出现在这里。</p>'}</div></aside></div><p class="footer-note">本版为人工辅助测量，不会自动识别管线或设备。不要将同图不同缩放比例的区域混用。</p>`;
   }
   function canFinish() { return tool === 'calibrate' ? points.length === 2 : tool === 'length' ? points.length >= 2 && MEP.distance(points) > 0 : tool === 'count' ? points.length > 0 : false; }
   function readout() {
@@ -120,13 +124,13 @@
     return '<p>点击上方工具，开始新的一笔。图纸可放大；放大后滚动查看其他位置。</p>';
   }
   function svgPlan(d) {
-    const radius = Math.max(d.width / 190, 2.5), labelSize = Math.max(d.width / 80, 10);
+    const pixel=d.width/Math.max(1,($('#drawing-viewport')?.clientWidth||800)*zoom/100), radius=3*pixel, labelSize=11*pixel;
     const path = pts => pts.map(p => `${p.x},${p.y}`).join(' ');
     const saved = current().items.filter(i => i.source?.drawingId === d.id).map(i => {
       const src = i.source, color = colors[i.system], first = src.points[0];
-      return `<g class="annotation ${selectedItem === i.id ? 'highlight' : ''}" data-item="${h(i.id)}" tabindex="0" role="button" aria-label="查看${h(i.name)}的测量记录"><title>${h(i.name)} ${h(i.spec)} · ${fmt(MEP.calculate(i).quantity)} ${unitLabel(i.unit)}</title>${src.kind === 'length' ? `<polyline points="${path(src.points)}" fill="none" stroke="${color}" stroke-width="3" vector-effect="non-scaling-stroke"/><polyline points="${path(src.points)}" fill="none" stroke="transparent" stroke-width="15" vector-effect="non-scaling-stroke"/>` : ''}${src.points.map((pt, n) => `<circle cx="${pt.x}" cy="${pt.y}" r="${radius}" fill="${src.kind === 'count' ? color : '#fff'}" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke"/>${src.kind === 'count' ? `<text x="${pt.x}" y="${pt.y + radius * .35}" font-size="${radius * 1.1}" fill="white" text-anchor="middle" pointer-events="none">${n + 1}</text>` : ''}`).join('')}<text x="${first.x + radius * 1.6}" y="${Math.max(labelSize, first.y - radius * 1.6)}" fill="${color}" font-size="${labelSize}" font-weight="600" stroke="white" stroke-width="${labelSize / 4}" paint-order="stroke" pointer-events="none">${h(i.name)}</text></g>`;
+      return `<g class="annotation ${selectedItem === i.id ? 'highlight' : ''}" data-item="${h(i.id)}" tabindex="0" role="button" aria-label="查看${h(i.name)}的测量记录"><title>${h(i.name)} ${h(i.spec)} · ${fmt(MEP.calculate(i).quantity)} ${unitLabel(i.unit)}</title>${src.kind === 'length' ? splitPaths(src.points).map(part=>`<polyline points="${path(part)}" fill="none" stroke="${color}" stroke-width="3" vector-effect="non-scaling-stroke"/><polyline points="${path(src.points)}" fill="none" stroke="transparent" stroke-width="15" vector-effect="non-scaling-stroke"/>`).join('') : ''}${src.points.map((pt, n) => `<circle cx="${pt.x}" cy="${pt.y}" r="${radius}" fill="${src.kind === 'count' ? color : '#fff'}" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke"/>${src.kind === 'count' ? `<text x="${pt.x}" y="${pt.y + radius * .35}" font-size="${radius * 1.1}" fill="white" text-anchor="middle" pointer-events="none">${n + 1}</text>` : ''}`).join('')}<text x="${first.x + radius * 1.6}" y="${Math.max(labelSize, first.y - radius * 1.6)}" fill="${color}" font-size="${labelSize}" font-weight="600" stroke="white" stroke-width="${labelSize / 4}" paint-order="stroke" pointer-events="none">${h(i.name)}</text></g>`;
     }).join('');
-    const active = `<g pointer-events="none">${points.length > 1 && tool !== 'count' ? `<polyline points="${path(points)}" fill="none" stroke="${tool === 'calibrate' ? '#ce863f' : '#1f8d68'}" stroke-width="3" stroke-dasharray="${tool === 'calibrate' ? '7 5' : '0'}" vector-effect="non-scaling-stroke"/>` : ''}${points.map((p, i) => `<circle cx="${p.x}" cy="${p.y}" r="${radius * 1.1}" fill="#fff" stroke="#1f8d68" stroke-width="2.5" vector-effect="non-scaling-stroke"/><text x="${p.x + radius * 1.5}" y="${p.y - radius}" fill="#176b57" font-size="${labelSize}" font-weight="600" stroke="white" stroke-width="3" paint-order="stroke">${i + 1}</text>`).join('')}</g>`;
+    const active = `<g pointer-events="none">${points.length > 1 && tool !== 'count' ? splitPaths(points).map(part=>`<polyline points="${path(part)}" fill="none" stroke="${tool === 'calibrate' ? '#ce863f' : '#1f8d68'}" stroke-width="3" stroke-dasharray="${tool === 'calibrate' ? '7 5' : '0'}" vector-effect="non-scaling-stroke"/>`).join('') : ''}${points.map((p, i) => `<circle cx="${p.x}" cy="${p.y}" r="${radius * 1.1}" fill="#fff" stroke="#1f8d68" stroke-width="2.5" vector-effect="non-scaling-stroke"/><text x="${p.x + radius * 1.5}" y="${p.y - radius}" fill="#176b57" font-size="${labelSize}" font-weight="600" stroke="white" stroke-width="3" paint-order="stroke">${i + 1}</text>`).join('')}</g>`;
     return `<svg class="plan ${tool !== 'select' ? 'drawing' : ''}" id="plan" viewBox="0 0 ${d.width} ${d.height}" aria-label="${h(d.name)}，使用上方工具在图纸上测量"><image href="${d.data}" width="${d.width}" height="${d.height}"/>${saved}${active}</svg>`;
   }
   function updateCanvas() {
@@ -139,19 +143,41 @@
     return `${heading('工程量清单', '实际做多少、备料要多少，分开算清楚。', btn('export-csv', '导出清单', '', 'download') + btn('manual', '录入工程量', 'primary', 'plus'))}${demoBanner()}<div class="table-tools"><div class="filters"><input id="search" type="search" placeholder="搜索材料、规格或楼层…" aria-label="搜索工程量" value="${h(filter)}"><select id="system-filter" aria-label="筛选专业"><option value="">全部专业</option>${MEP.SYSTEMS.map(s => `<option ${systemFilter === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div><div class="segmented">${btn('table-mode', '逐笔明细', tableMode === 'detail' ? 'active' : '', '', 'data-mode="detail"')}${btn('table-mode', '材料汇总', tableMode === 'summary' ? 'active' : '', '', 'data-mode="summary"')}</div></div><div id="quantity-table">${quantityTable()}</div><p class="footer-note">计算规则：实际工程量 = 基础数量 × 重复份数 + 补充数量；备料量 = 实际工程量 ×（1 + 自填损耗率）。<br>显示保留最多 3 位小数，汇总使用未截断的数量。设备按实际采购包装取整，请另行核对。</p>`;
   }
   function quantityTable() {
-    const items = filtered(), groups = MEP.summarize(items), total = items.reduce((sum, i) => sum + MEP.calculate(i).cost, 0);
+    const items = filtered(), groups = MEP.summarize(materialLines(items)), total = items.reduce((sum, i) => sum + MEP.calculate(i).cost, 0);
     if (!items.length) return `<section class="card">${empty(current().items.length ? '没有找到匹配的记录' : '还没有工程量记录', current().items.length ? '换个关键词，或选择全部专业试试。' : '从图纸测量，或把已经算好的数量录入进来。', btn('manual', '录入工程量', 'light', 'plus'), 'list')}</section>`;
     const columns = tableMode === 'detail' ? '<th>材料 / 设备</th><th>专业</th><th>位置 / 来源</th><th class="numeric">实际工程量</th><th class="numeric">备料量</th><th class="numeric">单价 / 元</th><th class="numeric">估算金额 / 元</th><th>操作</th>' : '<th>材料 / 设备</th><th>专业</th><th>记录数</th><th class="numeric">实际工程量</th><th class="numeric">备料量</th><th class="numeric">估算金额 / 元</th>';
-    const rows = tableMode === 'detail' ? items.map(i => { const c = MEP.calculate(i); return `<tr><td><strong>${h(i.name)}</strong><small>${h(i.spec || '未填规格')}</small></td><td>${tag(i.system)}</td><td>${h(i.location || '未填位置')}<small>${i.source ? btn('locate', '查看图纸来源 ↗', 'inline-link', '', `data-id="${h(i.id)}"`) : '手动录入'}</small></td><td class="numeric"><strong>${fmt(c.quantity)} ${unitLabel(i.unit)}</strong><small>${fmt(i.base)} × ${fmt(i.copies)} + ${fmt(i.extra)}</small></td><td class="numeric">${fmt(c.purchase)} ${unitLabel(i.unit)}<small>损耗 ${fmt(i.allowance)}%</small></td><td class="numeric">${i.price ? money(i.price) : '未填'}</td><td class="numeric">${i.price ? money(c.cost) : '—'}</td><td>${btn('edit-item', '', 'icon', 'edit', `data-id="${h(i.id)}" aria-label="编辑${h(i.name)}"`)}${btn('delete-item', '', 'icon danger', 'trash', `data-id="${h(i.id)}" aria-label="删除${h(i.name)}"`)}</td></tr>`; }).join('') : groups.map(g => `<tr><td><strong>${h(g.name)}</strong><small>${h(g.spec || '未填规格')}</small></td><td>${tag(g.system)}</td><td>${g.count} 笔</td><td class="numeric"><strong>${fmt(g.quantity)} ${unitLabel(g.unit)}</strong></td><td class="numeric">${fmt(g.purchase)} ${unitLabel(g.unit)}</td><td class="numeric">${money(g.cost)}</td></tr>`).join('');
+    const rows = tableMode === 'detail' ? items.map(i => { const c = MEP.calculate(i); return `<tr><td><strong>${h(i.name)}</strong><small>${h(i.spec || '未填规格')}</small>${(i.details?.materials||[]).map(a=>'<small>↳ '+h(a.name)+' '+h(a.spec)+' · '+fmt(a.quantity)+' '+h(a.unit)+'</small>').join('')}</td><td>${tag(i.system)}</td><td>${h(i.location || '未填位置')}<small>${i.source ? btn('locate', '查看图纸来源 ↗', 'inline-link', '', `data-id="${h(i.id)}"`) : '手动录入'}</small></td><td class="numeric"><strong>${fmt(c.quantity)} ${unitLabel(i.unit)}</strong><small>${fmt(i.base)} × ${fmt(i.copies)} + ${fmt(i.extra)}</small></td><td class="numeric">${fmt(c.purchase)} ${unitLabel(i.unit)}<small>损耗 ${fmt(i.allowance)}%</small></td><td class="numeric">${i.price ? money(i.price) : '未填'}</td><td class="numeric">${i.price ? money(c.cost) : '—'}</td><td>${btn('edit-item', '', 'icon', 'edit', `data-id="${h(i.id)}" aria-label="编辑${h(i.name)}"`)}${btn('delete-item', '', 'icon danger', 'trash', `data-id="${h(i.id)}" aria-label="删除${h(i.name)}"`)}</td></tr>`; }).join('') : groups.map(g => `<tr><td><strong>${h(g.name)}</strong><small>${h(g.spec || '未填规格')}</small></td><td>${tag(g.system)}</td><td>${g.count} 笔</td><td class="numeric"><strong>${fmt(g.quantity)} ${unitLabel(g.unit)}</strong></td><td class="numeric">${fmt(g.purchase)} ${unitLabel(g.unit)}</td><td class="numeric">${money(g.cost)}</td></tr>`).join('');
     return `<section class="card"><div class="table-wrap"><table><thead><tr>${columns}</tr></thead><tbody>${rows}</tbody></table></div><div class="table-note">当前筛选：${items.length} 笔记录，${groups.length} 类材料 · 备料估算 <strong>¥ ${money(total)}</strong> · ${items.filter(i => !i.price).length} 笔未填单价。${tableMode === 'summary' ? '不同单价的金额逐笔计算后相加。' : ''}</div></section>`;
   }
+
+  const materialLines=items=>items.flatMap(i=>[i,...(i.details?.materials||[]).map((a,n)=>({id:i.id+':child:'+n,name:a.name,spec:a.spec,system:i.system,unit:a.unit,base:a.quantity,copies:1,extra:0,allowance:0,price:0,location:i.location,note:'附属于 '+i.name}))]);
+  const managed=()=>{const p=current();for(const key of ['materials','movements','workers','attendance','payments'])p[key]??=[];return p;};
+  const numField=(label,name,value=0)=>field(label,name,value,'type="number" min="0" max="1000000000" step="any" required');
+  const selectField=(label,name,options,value)=>'<label class="field">'+label+'<select name="'+name+'">'+options.map(([v,t])=>'<option value="'+h(v)+'" '+(v===value?'selected':'')+'>'+h(t)+'</option>').join('')+'</select></label>';
+  const simpleTable=(heads,rows)=>'<div class="table-wrap"><table><thead><tr>'+heads.map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>'+rows.map(row=>'<tr>'+row.map(x=>'<td>'+x+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+  function materialsView(){
+    const p=managed();return heading('材料库存','确认计划量后，逐笔登记实际进场、使用和退货。使用量以现场记录为准。',btn('material-from-list','从工程量清单建立材料')+btn('new-material','新建材料','primary'))+
+    '<section class="card">'+simpleTable(['名称 / 规格','单位','计划总量','累计进场','实际使用','退供应商','剩余库存','待采购缺口','操作'],p.materials.map(m=>{const s=MEPManage.stock(m,p.movements);return [h(m.name)+'<small>'+h(m.spec)+'</small>',h(m.unit),fmt(m.plan),fmt(s.received),fmt(s.used),fmt(s.returned),fmt(s.remaining),fmt(s.gap),btn('edit-material','修改计划','','','data-id="'+h(m.id)+'"')+btn('movement','记进出','','','data-id="'+h(m.id)+'"')];}))+'</section><p>待采购缺口 = 计划总量 − 累计进场 + 退供应商。材料估算和进场本身不会自动记付款。</p><section class="card"><h3>材料流水</h3>'+simpleTable(['日期','材料','类型','数量','现场备注','操作'],p.movements.map(e=>[h(e.date),h(p.materials.find(m=>m.id===e.materialId)?.name),({in:'进场',use:'使用',return:'退供应商'})[e.type],fmt(e.quantity),h(e.note),btn('edit-movement','更正','','','data-id="'+h(e.id)+'"')]))+'</section>';
+  }
+  function materialDialog(m=null){m??={id:uid(),name:'',spec:'',system:'强电',unit:'m',plan:0};openDialog('确认材料计划量','<input type="hidden" name="id" value="'+h(m.id)+'"><div class="form-grid">'+field('材料名称','name',m.name,'required maxlength="120"')+field('规格','spec',m.spec,'maxlength="500"')+selectField('专业','system',MEP.SYSTEMS.map(x=>[x,x]),m.system)+selectField('单位','unit',MEP.UNITS.map(x=>[x,x]),m.unit)+numField('确认计划总量','plan',m.plan)+'</div>',cancel()+submit('保存材料'),'material');}
+  function movementDialog(id,entry=null){const p=managed(),m=p.materials.find(x=>x.id===id);openDialog('登记 '+h(m.name),'库存 '+fmt(MEPManage.stock(m,p.movements).remaining)+' '+h(m.unit)+'<input type="hidden" name="id" value="'+h(entry?.id||'')+'"><input type="hidden" name="materialId" value="'+h(id)+'"><div class="form-grid">'+field('日期','date',entry?.date||dateNow(),'type="date" required')+selectField('操作','type',[['in','进场'],['use','现场使用'],['return','退给供应商']],entry?.type||'in')+numField('数量','quantity',entry?.quantity||0)+field('位置 / 使用部位 / 备注','note',entry?.note||'','maxlength="500"')+'</div>',cancel()+submit('记录'),'movement');}
+  function workforcePeriods(p){const groups=new Map();for(const e of p.attendance){const key=e.date+' '+e.period;if(!groups.has(key))groups.set(key,new Set());groups.get(key).add(e.workerId);}return [...groups].sort((a,b)=>a[0].localeCompare(b[0])).map(([key,ids])=>[h(key),ids.size]);}
+  function workersView(){
+    const p=managed();return heading('工人和工资','花名册仅保存在本机。出勤确定应发工资，实际付款同步登记项目支出。',btn('new-worker','添加工人','primary'))+
+    '<section class="card">'+simpleTable(['姓名 / 工种','联系方式','工日','应发工资','已付（含借支）','未付 / 多付','操作'],p.workers.map(w=>{const s=MEPManage.wages(w.id,p.attendance,p.payments);return [h(w.name)+'<small>'+h(w.trade)+'</small>',h(w.phone),fmt(s.days),money(s.due),money(s.paid),money(s.balance),btn('edit-worker','花名册','','','data-id="'+h(w.id)+'"')+btn('attendance','记出勤','','','data-id="'+h(w.id)+'"')+btn('payment','记付款/借支','','','data-id="'+h(w.id)+'"')];}))+'</section><section class="card"><h3>各时段人数</h3>'+simpleTable(['日期 / 时段','人数'],workforcePeriods(p))+'</section><section class="card"><h3>出勤记录（每行一人，同日同一时段不可重复）</h3>'+simpleTable(['日期','时段','工人','工日','日工资','应发','备注','操作'],p.attendance.map(e=>[h(e.date),h(e.period),h(p.workers.find(w=>w.id===e.workerId)?.name),fmt(e.days),money(e.rate),money(e.days*e.rate),h(e.note),btn('edit-attendance','更正','','','data-id="'+h(e.id)+'"')]))+'</section><section class="card"><h3>实际付款</h3>'+simpleTable(['日期','工人','金额','说明','操作'],p.payments.map(e=>[h(e.date),h(p.workers.find(w=>w.id===e.workerId)?.name),money(e.amount),h(e.note),btn('edit-payment','更正','','','data-id="'+h(e.id)+'"')]))+'</section>';
+  }
+  function workerDialog(w=null){w??={id:uid()};openDialog('人员花名册','<p>身份证和银行卡仅在此编辑窗口显示；备份必须设置密码。请保管好密码。</p><input type="hidden" name="id" value="'+h(w.id)+'"><div class="form-grid">'+[['姓名','name'],['工种','trade'],['电话','phone'],['身份证号码','identity'],['身份证地址','address'],['开户行','bank'],['银行卡号','account']].map(([label,k])=>field(label,k,w[k]||'',(k==='name'?'required ':'')+'maxlength="500" autocomplete="off"')).join('')+'</div>',cancel()+submit('保存花名册'),'worker');}
+  function laborDialog(id,kind,entry=null){const w=managed().workers.find(x=>x.id===id);openDialog(h(w.name)+(kind==='attendance'?' · 出勤':' · 实际付款 / 借支'),'<input type="hidden" name="id" value="'+h(entry?.id||'')+'"><input type="hidden" name="workerId" value="'+h(id)+'"><div class="form-grid">'+field('日期','date',entry?.date||dateNow(),'type="date" required')+(kind==='attendance'?field('时段','period',entry?.period||'全天','required maxlength="120" placeholder="如上午 / 下午 / 夜班"')+numField('工日（半天填0.5）','days',entry?.days??1)+numField('本次日工资 / 元','rate',entry?.rate??0):numField('实际付出 / 元','amount',entry?.amount??0))+field('备注','note',entry?.note||'','maxlength="500"')+'</div>',cancel()+submit('保存记录'),kind);}
+  let encryptedIncoming=null;
+  function passwordDialog(restore=false){openDialog(restore?'输入备份密码':'设置本次备份密码','<p>密码不会上传或保存，忘记密码无法恢复这份文件。</p><div class="form-grid">'+field('密码（至少8位）','password','','type="password" minlength="8" required autocomplete="new-password"')+(restore?'':field('再次输入密码','confirm','','type="password" minlength="8" required autocomplete="new-password"'))+'</div>',cancel()+submit(restore?'解密并恢复':'下载加密备份'),restore?'decrypt-backup':'encrypt-backup');}
+
   function cashTotals(p) { return p.cash.reduce((s, e) => { s[e.type] = Math.round((s[e.type] + e.amount) * 100) / 100; return s; }, { income: 0, expense: 0 }); }
   function cashView() {
     const p = current(), totals = cashTotals(p);
     return `${heading('项目收支', '收到多少、花了多少，把现场的每一笔记清楚。', btn('export-cash', '导出收支', '', 'download') + btn('new-cash', '记一笔收支', 'primary', 'plus'))}${demoBanner()}<div class="stats">${stat('累计收入', money(totals.income), '元', '已登记的实际收入', 'wallet')}${stat('累计支出', money(totals.expense), '元', '已登记的实际支出', 'wallet')}${stat('收支结余', money(totals.income - totals.expense), '元', '收入减支出，不代表项目利润', 'list')}${stat('收支记录', p.cash.length, '笔', '与材料估算分开记录', 'folder')}</div><section class="card">${p.cash.length ? `<div class="table-wrap"><table><thead><tr><th>日期</th><th>收支说明</th><th>类型</th><th class="numeric">金额 / 元</th><th>操作</th></tr></thead><tbody>${[...p.cash].sort((a, b) => b.date.localeCompare(a.date)).map(e => `<tr><td>${h(e.date)}</td><td><strong>${h(e.name)}</strong></td><td><span class="tag ${e.type === 'income' ? '' : 'electric'}">${e.type === 'income' ? '收入' : '支出'}</span></td><td class="numeric ${e.type === 'income' ? 'amount-in' : 'amount-out'}">${e.type === 'income' ? '+' : '−'} ${money(e.amount)}</td><td>${btn('edit-cash', '', 'icon', 'edit', `data-id="${h(e.id)}" aria-label="编辑收支"`)}${btn('delete-cash', '', 'icon danger', 'trash', `data-id="${h(e.id)}" aria-label="删除收支"`)}</td></tr>`).join('')}</tbody></table></div>` : empty('收款、买材料、付工资，都可以记在这里', '这里只记录实际发生的收支，不会自动把工程量估算记成支出。', btn('new-cash', '记第一笔', 'light', 'plus'), 'wallet')}</section><p class="footer-note">这里只提供简易项目收支台账。工人工日、借支结算和材料库存将在后续版本逐步加入。</p>`;
   }
   function render() {
-    $('#app').innerHTML = shell(!current() ? welcome() : ({ overview, drawings: drawingsView, quantities: quantitiesView, cash: cashView })[view]());
+    $('#app').innerHTML = shell(!current() ? welcome() : ({ overview, drawings: drawingsView, quantities: quantitiesView, cash: cashView, materials: materialsView, workers: workersView })[view]());
     if(view==='drawings'&&drawing()?.cad) $('.drawing-layout')?.insertAdjacentHTML('beforebegin','<div class="banner warn">CAD 试读底图：字体、自定义对象和部分曲线可能缺失或简化。请先核对原 CAD 和尺寸标注，再练习测量；这不是完整的 CAD 还原。</div>');
   }
   function openDialog(title, body, actions, formType = '') {
@@ -172,16 +198,28 @@
     openDialog(title, `<p>${h(message)}</p>`, cancel() + btn('confirm', label, 'primary'), 'confirm');
   }
   function itemDialog(item = null, source = null) {
-    const i = item || { id: uid(), name: source?.kind === 'count' ? '插座' : '给水管', spec: '', system: source?.kind === 'count' ? '强电' : '给水', unit: source?.kind === 'length' ? 'm' : source?.kind === 'count' ? '个' : 'm', base: source ? source.kind === 'length' ? MEP.distance(source.points) * source.scale : source.points.length : '', copies: 1, extra: 0, allowance: 0, price: 0, location: '', note: '', source };
+    const i = item ? structuredClone(item) : { id: uid(), name: source?.kind === 'count' ? '插座' : measureCategory, spec: '', system: source?.kind === 'count' ? '强电' : ['给水','排水'].includes(measureCategory)?measureCategory:'强电', unit: source?.kind === 'length' ? 'm' : source?.kind === 'count' ? '个' : 'm', base: source ? source.kind === 'length' ? MEP.distance(source.points) * source.scale : source.points.length : '', copies: 1, extra: 0, allowance: 0, price: 0, location: '', note: '', source };
+    if(i.details)i.extra=i.details.manualExtra??i.extra;
     pendingSource = i.source;
     const templates = [['给水管', 'PPR DN25', '给水', 'm'], ['排水管', 'PVC-U DN110', '排水', 'm'], ['电线', 'BV 2.5 mm²', '强电', 'm'], ['线管', 'PVC Φ20', '强电', 'm'], ['插座', '五孔插座', '强电', '个'], ['灯具', 'LED 灯', '强电', '套']];
     openDialog(item ? '查看 / 编辑工程量' : '把这笔工程量记下来', `<input type="hidden" name="id" value="${h(i.id)}"><input type="hidden" name="editing" value="${item ? 'yes' : ''}"><p>${i.source ? '基础数量来自图纸测量。补充立管、预留或重复份数后再保存。' : '已经算好的数量，也可以直接录入。所有计算过程都会保留。'}</p>${!item ? `<div class="actions" style="margin-bottom:20px">${templates.filter(t => !source || source.kind === 'length' ? !source || t[3] === 'm' : t[3] !== 'm').map(t => btn('template', t[0], 'small', '', `data-template="${h(JSON.stringify(t))}"`)).join('')}</div>` : ''}<div class="form-grid">${field('材料 / 设备名称', 'name', i.name, 'required maxlength="120"')}${field('规格型号', 'spec', i.spec, 'maxlength="500" placeholder="例如：PPR DN25"')}<label class="field">所属专业<select name="system">${MEP.SYSTEMS.map(s => `<option ${i.system === s ? 'selected' : ''}>${s}</option>`).join('')}</select></label><label class="field">数量单位<select name="unit" ${i.source?.kind === 'length' ? 'disabled' : ''}>${MEP.UNITS.map(u => `<option value="${u}" ${i.unit === u ? 'selected' : ''}>${unitLabel(u)}</option>`).join('')}</select></label>${field(i.source ? '图纸测得的基础数量' : '基础数量', 'base', i.base, `type="number" step="any" min="0" max="1000000000" required ${i.source ? 'readonly' : ''}`)}${field('重复份数', 'copies', i.copies, 'type="number" step="1" min="1" max="100000" required')}<label class="field">补充数量<input type="number" name="extra" value="${i.extra}" step="any" min="0" max="1000000000" required><small>与上方单位一致，如立管 / 预留的米数。</small></label><label class="field">备料损耗率 %<input type="number" name="allowance" value="${i.allowance}" step="any" min="0" max="100" required><small>默认 0，由你按项目填写；不增加实际工程量。</small></label>${field('单价（元 / 单位，可留 0）', 'price', i.price, 'type="number" step="0.01" min="0" max="100000000" required')}${field('楼栋 / 楼层 / 回路', 'location', i.location, 'maxlength="500" placeholder="例如：1 号楼 · 3 层 · AL1"')}<label class="field wide">备注<textarea name="note" maxlength="500" placeholder="例如：另加上翻 0.6 米；待现场复核">${h(i.note)}</textarea></label></div><div id="formula-preview" class="formula-preview"></div>${i.source ? `<p style="margin:13px 0 0;font-size:11px">来源：${h(current().drawings.find(d => d.id === i.source.drawingId)?.name || '')} · ${i.source.points.length} 个点${i.source.kind === 'length' ? ' · 保留测量时的原始比例' : ''}</p>` : ''}`, cancel() + submit(item ? '保存修改' : '加入工程量清单'), 'item');
+    const known=MEP.summarize(current().items).filter(g=>!i.source||i.source.kind==='length'?g.unit==='m':g.unit!=='m');
+    const container=document.createElement('div');container.className='form-grid';container.innerHTML=selectField('使用已有材料（可选）','knownMaterial',[['','自行填写'],...known.map((g,n)=>[String(n),g.name+' / '+g.spec+' / '+g.unit])],'')+
+      selectField('算量类别','category',[['电线','电线'],['电缆','电缆'],['桥架','桥架'],['给水','给水'],['排水','排水'],['其他','其他']],i.details?.category||measureCategory)+
+      selectField('敷设方式','route',[['待确认','待确认'],['走天','走天'],['走地','走地'],['其他','其他']],i.details?.route||'待确认')+
+      '<label class="field wide">竖向 / 引下明细（每行：说明,起点高度米,终点高度米,点数,每点根数）<textarea name="vertical" rows="3" placeholder="灯具引下,3.2,2.8,6,2">'+h(i.details?.vertical||'')+'</textarea></label>'+
+      '<label class="field wide">附属材料总量（每行：材料名称,规格,数量,单位；不随主材重复份数放大）<textarea name="accessories" rows="3" placeholder="弯头,DN25,4,个">'+h(i.details?.accessories||'')+'</textarea></label>'+
+      '<p class="wide">竖向明细自动加到补充数量之外，避免重复填入补充数量。桥架/管道交叉处需现场确认标高和避让；接头数量需按实际定尺、分段和连接方式确认，本版不把“每6米一个”作为通用规则。</p>';
+    $('#formula-preview').before(container);
+    container.querySelector('[name="knownMaterial"]').onchange=e=>{const g=known[Number(e.target.value)];if(e.target.value===''||!g)return;const form=$('#dialog-form');for(const k of ['name','spec','system','unit'])form.elements[k].value=g[k];updateFormula();};
     updateFormula();
   }
+  function parseVertical(value){if(!value.trim())return [];return value.trim().split(/\r?\n/).map(line=>{const parts=line.split(/[,，]/);if(parts.length!==5||!parts[0].trim()||parts.slice(1).some(v=>!v.trim()))throw Error('竖向明细每行需填：说明,起点高度,终点高度,点数,根数');const row={label:parts[0].trim(),from:Number(parts[1]),to:Number(parts[2]),count:Number(parts[3]),wires:Number(parts[4])};MEPManage.vertical([row]);if(!Number.isInteger(row.count)||!Number.isInteger(row.wires))throw Error('引下点数和根数需为整数');return row;});}
+  function parseAccessories(value){if(!value.trim())return [];return value.trim().split(/\r?\n/).map(line=>{const parts=line.split(/[,，]/);if(parts.length!==4)throw Error('附属材料每行需填：名称,规格,数量,单位');return {name:MEP.required(parts[0],'材料名称'),spec:parts[1].trim(),quantity:MEP.number(parts[2],'附材数量'),unit:MEP.required(parts[3],'单位')};});}
   function updateFormula() {
     const form = $('#dialog-form'); if (form?.dataset.form !== 'item') return;
     try {
-      const values = Object.fromEntries(new FormData(form)), c = MEP.calculate(values);
+      const values = Object.fromEntries(new FormData(form)); const vertical=MEPManage.vertical(parseVertical(values.vertical||''));values.extra=Number(values.extra)+vertical;const c = MEP.calculate(values);
       const u = unitLabel(form.elements.unit.value);
       $('#formula-preview').innerHTML = `实际工程量：${fmt(values.base)} × ${fmt(values.copies)} + ${fmt(values.extra)} = <strong>${fmt(c.quantity)} ${u}</strong><br>备料量：${fmt(c.purchase)} ${u}（含 ${fmt(values.allowance)}% 损耗） · 估算金额：¥ ${money(c.cost)}`;
     } catch (e) { $('#formula-preview').textContent = e.message; }
@@ -199,7 +237,7 @@
   }
   function safeName(name) { return name.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').slice(0, 80); }
   function exportCSV() {
-    const p = current(), items = filtered(); if (!items.length) return toast('当前筛选下没有可导出的工程量');
+    const p = current(), items = materialLines(filtered()); if (!items.length) return toast('当前筛选下没有可导出的工程量');
     const rows = tableMode === 'summary' ? [['项目', '专业', '材料名称', '规格', '单位', '实际工程量', '备料量', '估算金额(元)', '记录数'], ...MEP.summarize(items).map(g => [p.name, g.system, g.name, g.spec, g.unit, g.quantity, g.purchase, g.cost.toFixed(2), g.count])] : [['项目', '专业', '材料名称', '规格', '位置', '单位', '基础数量', '重复份数', '补充数量', '实际工程量', '损耗率(%)', '备料量', '单价(元)', '估算金额(元)', '来源', '图纸', '记录编号', '备注'], ...items.map(i => { const c = MEP.calculate(i); return [p.name, i.system, i.name, i.spec, i.location, i.unit, i.base, i.copies, i.extra, c.quantity, i.allowance, c.purchase, i.price, c.cost.toFixed(2), i.source ? '图纸' + (i.source.kind === 'length' ? '测长度' : '点数') : '手动录入', p.drawings.find(d => d.id === i.source?.drawingId)?.name || '', i.id, i.note]; })];
     download(`${safeName(p.name)}-${tableMode === 'summary' ? '材料汇总' : '工程量明细'}-${dateNow()}.csv`, MEP.csv(rows), 'text/csv;charset=utf-8'); toast('已导出当前筛选结果，可用 Excel 打开');
   }
@@ -225,7 +263,7 @@
     try {
       let bytes=await file.arrayBuffer();
       if(/\.dwg$/i.test(file.name)) {
-        if(!/^https?:$/.test(location.protocol))throw new Error('DWG 需要在本机服务中打开小助手；离线文件版可直接导入 ASCII DXF');
+        if(!/^https?:$/.test(location.protocol)){openDialog('请从本机服务导入 DWG','<p>当前是单文件版。DWG 转换需要本机服务，请打开下面的入口。两个入口的项目数据不会自动互通，需要备份恢复。</p><p><a href="http://127.0.0.1:4173/" target="_blank" rel="noopener">打开支持 DWG 的水电小助手</a></p>',btn('close-dialog','关闭'));return;}
         toast('正在本机读取 DWG，较大的图纸可能需要约一分钟…');
         const status=await fetch('/api/cad/status').then(r=>{if(!r.ok)throw new Error('请重启新版小助手本地服务后导入 DWG');return r.json();});
         if(!status.available)throw new Error('本地 DWG 转换工具尚未配置，可先在 CAD 中另存为 ASCII DXF 再导入');
@@ -245,10 +283,12 @@
       });
     }catch(error){openDialog('这份 CAD 暂时没有导入',`<p>${h(error.message)}</p>`,btn('close-dialog','知道了','primary'));}
   }
-  async function restoreBackup(file) {
-    if (file.size > 150 * 1024 * 1024) return toast('备份超过 150 MB，暂不支持导入');
+  async function restoreBackup(file,decoded=null) {
+    if (file.size > 210 * 1024 * 1024) return toast('备份超过 210 MB，暂不支持导入');
     try {
-      const incoming = MEP.validateBackup(JSON.parse(await file.text()));
+      const raw=decoded||JSON.parse(await file.text());
+      if(raw.format==='mep-encrypted'){encryptedIncoming=raw;passwordDialog(true);return;}
+      const incoming = MEP.validateBackup(raw);incoming.projects.forEach(MEPManage.validate);
       if (!incoming.projects.length) return toast('这份备份没有项目');
       if (state.projects.length + incoming.projects.length > 200) return toast('合并后超过 200 个项目，请先整理旧项目');
       confirmDialog('恢复这份备份？', `将加入 ${incoming.projects.length} 个项目，包含图纸、工程量和收支。当前项目不会被覆盖；重名项目会作为副本加入。`, async () => {
@@ -258,7 +298,9 @@
           if (state.projects.some(x => x.name === p.name)) p.name = p.name.slice(0, 110) + '（恢复副本）';
           for (const d of p.drawings) { const old = d.id; d.id = uid(); map.set(old, d.id); }
           for (const i of p.items) { i.id = uid(); if (i.source) i.source.drawingId = map.get(i.source.drawingId); }
-          for (const e of p.cash) e.id = uid();
+          for (const e of p.cash) {const old=e.id;e.id=uid();map.set(old,e.id);}
+          for(const group of ['materials','workers'])for(const e of p[group]||[]){const old=e.id;e.id=uid();map.set(old,e.id);}
+          for(const group of ['movements','attendance','payments'])for(const e of p[group]||[]){e.id=uid();if(e.materialId)e.materialId=map.get(e.materialId);if(e.workerId)e.workerId=map.get(e.workerId);if(e.cashId)e.cashId=map.get(e.cashId);}
         }
         state.projects.push(...copies); state.currentProjectId = copies[0].id; resetDrawing(); drawingId = null; view = 'overview'; await persist(); render(); toast(`已恢复 ${copies.length} 个项目`);
       }, '恢复并加入');
@@ -299,7 +341,21 @@
           case 'help': return helpDialog();
           case 'close-dialog': $('#dialog').close(); return;
           case 'confirm': { const callback = confirmAction; confirmAction = null; $('#dialog').close(); if (callback) await callback(); return; }
-          case 'backup': download(`水电小助手-完整备份-${dateNow()}.json`, JSON.stringify({ ...state, exportedAt: new Date().toISOString() })); toast('备份包含全部项目、图纸、测量记录和收支'); return;
+          case 'backup': return passwordDialog();
+          case 'new-material': return materialDialog();
+          case 'edit-material': return materialDialog(managed().materials.find(x=>x.id===actionEl.dataset.id));
+          case 'movement': return movementDialog(actionEl.dataset.id);
+          case 'edit-movement': {const e=managed().movements.find(x=>x.id===actionEl.dataset.id);return movementDialog(e.materialId,e);}
+          case 'material-from-list': {
+            const p=managed(),groups=MEP.summarize(materialLines(p.items)),same=(a,b)=>a.name===b.name&&a.spec===b.spec&&a.unit===b.unit&&a.system===b.system;
+            const fresh=groups.filter(g=>!p.materials.some(m=>same(m,g)));
+            if(!fresh.length)return toast('清单材料已建立；计划量需在材料库存中确认修改');
+            confirmDialog('建立材料计划？','将新增 '+fresh.length+' 类材料，以当前备料量作为计划总量，已有计划不覆盖。',()=>{p.materials.push(...fresh.map(g=>({id:uid(),name:g.name,spec:g.spec,system:g.system,unit:g.unit,plan:g.purchase})));persist();render();},'确认计划');return;
+          }
+          case 'new-worker': return workerDialog();
+          case 'edit-worker': return workerDialog(managed().workers.find(x=>x.id===actionEl.dataset.id));
+          case 'edit-attendance': case 'edit-payment': {const kind=actionEl.dataset.action.slice(5),list=kind==='attendance'?'attendance':'payments',entry=managed()[list].find(x=>x.id===actionEl.dataset.id);return laborDialog(entry.workerId,kind,entry);}
+          case 'attendance': case 'payment': return laborDialog(actionEl.dataset.id,actionEl.dataset.action);
           case 'restore': $('#backup-file').click(); return;
           case 'upload-drawing': if (points.length) return toast('请先保存或取消当前测量'); $('#drawing-file').click(); return;
           case 'manual': return itemDialog();
@@ -318,6 +374,13 @@
             if (points.length) return confirmDialog('切换测量工具？', '当前未保存的测量点会被清除。', change, '切换工具');
             change(); return;
           }
+          case 'bridge-lines': {
+            const parts=splitPaths(points);if(parts.length!==2||parts.some(p=>p.length<2))return toast('先用选线段模式选择两条独立线段');
+            const bridge=MEPSnap.bridge(parts[0],parts[1]),meters=MEP.distance(bridge)*drawing().scale;
+            confirmDialog('确认补上断线？','将在两段最近端点间补画 '+fmt(meters)+' 米直线，并计入本笔工程量。请确认这处空隙确实需要连续敷设。',()=>{points.push({...bridge[0],breakBefore:true},bridge[1]);updateCanvas();},'确认补线');return;
+          }
+          case 'pick-mode': pickMode=!pickMode;render();return;
+          case 'new-branch': nextBranch=true;toast('下一点作为新支路起点，支路间不计连接长度');return;
           case 'undo-point': points.pop(); updateCanvas(); return;
           case 'cancel-points': points = []; updateCanvas(); return;
           case 'finish-measure': return finishMeasure();
@@ -325,8 +388,8 @@
           case 'table-mode': tableMode = actionEl.dataset.mode; render(); return;
           case 'export-csv': return exportCSV();
           case 'new-cash': return cashDialog();
-          case 'edit-cash': return cashDialog(p.cash.find(x => x.id === actionEl.dataset.id));
-          case 'delete-cash': return confirmDialog('删除这笔收支？', '删除后，项目的收支汇总也会相应更新。', () => { p.cash = p.cash.filter(x => x.id !== actionEl.dataset.id); persist(); render(); toast('已删除收支记录'); });
+          case 'edit-cash': if((current().payments||[]).some(x=>x.cashId===actionEl.dataset.id))return toast('这是工资付款关联记录，不能单独改金额'); return cashDialog(p.cash.find(x => x.id === actionEl.dataset.id));
+          case 'delete-cash': if((current().payments||[]).some(x=>x.cashId===actionEl.dataset.id))return toast('这是工资付款关联记录，不能单独删除'); return confirmDialog('删除这笔收支？', '删除后，项目的收支汇总也会相应更新。', () => { p.cash = p.cash.filter(x => x.id !== actionEl.dataset.id); persist(); render(); toast('已删除收支记录'); });
           case 'export-cash': if (!p.cash.length) return toast('暂时没有收支记录'); download(`${safeName(p.name)}-收支-${dateNow()}.csv`, MEP.csv([['项目', '日期', '说明', '类型', '金额(元)'], ...p.cash.map(x => [p.name, x.date, x.name, x.type === 'income' ? '收入' : '支出', x.amount.toFixed(2)])]), 'text/csv;charset=utf-8'); return;
         }
       } catch (err) { toast(err.message || '操作未完成，请重试'); }
@@ -337,29 +400,88 @@
       if (tool === 'calibrate' && points.length >= 2) return toast('两个端点已选好，请点击“输入实际长度”');
       const pt = plan.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
       const mapped = pt.matrixTransform(plan.getScreenCTM().inverse()), d = drawing();
-      const next = { x: Math.max(0, Math.min(d.width, mapped.x)), y: Math.max(0, Math.min(d.height, mapped.y)) };
+      let next = { x: Math.max(0, Math.min(d.width, mapped.x)), y: Math.max(0, Math.min(d.height, mapped.y)) };
+      const {idx,t,hit}=capture(plan,e);
+      if(tool==='length'&&pickMode){
+        if(!idx)return toast('请重新导入 CAD，取得可靠线段数据');
+        const line=MEPSnap.pick(idx,next,t);if(!line)return toast('请靠近完整可见的直线段；裁剪边界处请用端点测量');
+        const a={x:line.a[0],y:line.a[1],breakBefore:true},b={x:line.b[0],y:line.b[1]},key=MEPSnap.edgeKey(a,b);
+        if(splitPaths(points).some(path=>path.slice(1).some((p,i)=>MEPSnap.edgeKey(path[i],p)===key)))return toast('本笔已包含这条线段');
+        points.push(a,b);updateCanvas();return;
+      }
+      if(hit&&!e.altKey)next={x:hit.x,y:hit.y};
+      else if(idx&&tool==='calibrate'&&!e.altKey)return toast('尚未捕捉到端点或交点，请靠近目标点');
+      else if(e.shiftKey&&points.length&&!nextBranch){const a=points.at(-1);if(Math.abs(next.x-a.x)>Math.abs(next.y-a.y))next.y=a.y;else next.x=a.x;}
+      if(nextBranch){next.breakBefore=true;nextBranch=false;}
       if (points.length && tool !== 'count' && Math.hypot(next.x - points.at(-1).x, next.y - points.at(-1).y) < .1) return;
       points.push(next); updateCanvas();
     }
+  });
+  document.addEventListener('pointermove',e=>{
+    const plan=e.target.closest('#plan');if(!plan||!['length','calibrate','count'].includes(tool))return;
+    const {hit,t}=capture(plan,e);let marker=plan.querySelector('#snap-marker');
+    if(!marker){marker=document.createElementNS('http://www.w3.org/2000/svg','rect');marker.id='snap-marker';marker.setAttribute('fill','none');marker.setAttribute('stroke','#d100b5');marker.setAttribute('stroke-width','2');marker.setAttribute('vector-effect','non-scaling-stroke');marker.style.pointerEvents='none';plan.append(marker);}
+    const show=hit&&!e.altKey;marker.style.display=show?'':'none';
+    if(show){marker.setAttribute('x',hit.x-t/3);marker.setAttribute('y',hit.y-t/3);marker.setAttribute('width',t*2/3);marker.setAttribute('height',t*2/3);}
+    if($('#snap-status'))$('#snap-status').textContent=show?'已捕捉：'+hit.kind+' · 点击确认':snapIndex(drawing())?'靠近端点或交点；Alt 自由落点，Shift 水平/垂直辅助。':'旧 CAD 请重新导入以启用可靠捕捉；图片仅支持手动测量。';
   });
   document.addEventListener('submit', async e => {
     if (e.target.getAttribute('id') !== 'dialog-form') return; e.preventDefault();
     const form = e.target, values = Object.fromEntries(new FormData(form)), p = current();
     try {
       switch (form.dataset.form) {
+        case 'encrypt-backup': {
+          if(values.password!==values.confirm)throw Error('两次密码不一致');
+          const payload=await MEPManage.encrypt({...state,exportedAt:new Date().toISOString()},values.password);
+          download('水电小助手-加密备份-'+dateNow()+'.json',JSON.stringify(payload));dialog.close();toast('已导出密码保护的完整备份');return;
+        }
+        case 'decrypt-backup': {
+          const decoded=await MEPManage.decrypt(encryptedIncoming,values.password);encryptedIncoming=null;dialog.close();await restoreBackup({size:0},decoded);return;
+        }
+        case 'material': {
+          const p=managed(),m={id:values.id,name:MEP.required(values.name,'材料名称'),spec:values.spec.trim(),unit:values.unit,system:values.system,plan:MEP.number(values.plan,'计划量')};
+          if(p.materials.some(x=>x.id!==m.id&&x.name===m.name&&x.spec===m.spec&&x.unit===m.unit&&x.system===m.system))throw Error('已有同类材料，请使用已有材料登记');
+          const old=p.materials.findIndex(x=>x.id===m.id);if(old>=0)p.materials[old]=m;else p.materials.push(m);break;
+        }
+        case 'movement': {
+          const p=managed(),e={id:values.id||uid(),materialId:values.materialId,type:values.type,quantity:MEP.number(values.quantity,'数量',.000001),date:values.date,note:values.note};
+          const rest=p.movements.filter(x=>x.id!==e.id),m=p.materials.find(m=>m.id===e.materialId);MEPManage.validateMovement(e,m,rest);if(MEPManage.stock(m,[...rest,e]).remaining<0)throw Error('更正后库存不足，请先核对使用记录');p.movements=p.movements.map(x=>x.id===e.id?e:x);if(!p.movements.some(x=>x.id===e.id))p.movements.push(e);break;
+        }
+        case 'worker': {
+          const p=managed(),w={id:values.id};for(const k of ['name','trade','phone','identity','address','bank','account'])w[k]=values[k].trim();MEP.required(w.name,'姓名');
+          const old=p.workers.findIndex(x=>x.id===w.id);if(old>=0)p.workers[old]=w;else p.workers.push(w);break;
+        }
+        case 'attendance': {
+          const p=managed();if(p.attendance.some(x=>x.id!==values.id&&x.workerId===values.workerId&&x.date===values.date&&x.period===values.period.trim()))throw Error('该工人当天同一时段已有记录，请核对');
+          const entry={id:values.id||uid(),workerId:values.workerId,date:values.date,period:MEP.required(values.period,'时段'),days:MEP.number(values.days,'工日',.001,31),rate:MEP.number(values.rate,'日工资',0,1e6),note:values.note};const old=p.attendance.findIndex(x=>x.id===entry.id);if(old<0)p.attendance.push(entry);else p.attendance[old]=entry;break;
+        }
+        case 'payment': {
+          const p=managed(),amount=Math.round(MEP.number(values.amount,'实际支付',.01)*100)/100,old=p.payments.find(x=>x.id===values.id),cashId=old?.cashId||uid(),worker=p.workers.find(w=>w.id===values.workerId);
+          const entry={id:old?.id||uid(),workerId:worker.id,date:values.date,amount,note:values.note,cashId},cash={id:cashId,date:values.date,name:('工资/借支 · '+worker.name).slice(0,120),type:'expense',amount};if(old){p.payments[p.payments.indexOf(old)]=entry;const ci=p.cash.findIndex(x=>x.id===cashId);if(ci<0)throw Error('关联付款不存在');p.cash[ci]=cash;}else{p.payments.push(entry);p.cash.push(cash);}break;
+        }
         case 'new-project': case 'edit-project': {
           const name = MEP.required(values.name, '项目名称'), location = values.location.trim();
           if (form.dataset.form === 'edit-project') Object.assign(p, { name, location });
           else { if (state.projects.length >= 200) throw new Error('最多支持 200 个项目，请先整理旧项目'); const project = { id: uid(), name, location, demo: false, drawings: [], items: [], cash: [] }; state.projects.push(project); state.currentProjectId = project.id; view = 'overview'; drawingId = null; resetDrawing(); }
           break;
         }
-        case 'calibrate': { const d = drawing(); d.scale = MEP.calibrate(points, values.meters); points = []; tool = 'length'; toast('比例已设置，可以沿管线测长度了'); break; }
+        case 'calibrate': { const d = drawing(); d.scale = MEP.calibrate(points, values.meters); d.calibration={points:structuredClone(points),meters:Number(values.meters),at:new Date().toISOString()}; points = []; tool = 'length'; toast('比例已设置，可以沿管线测长度了'); break; }
         case 'item': {
           const old = p.items.find(i => i.id === values.id), source = old?.source || pendingSource;
           const item = { id: values.id, name: MEP.required(values.name, '名称'), spec: values.spec.trim(), system: values.system, unit: source?.kind === 'length' ? 'm' : values.unit, location: values.location.trim(), note: values.note.trim(), source };
           for (const key of ['base', 'copies', 'extra', 'allowance', 'price']) item[key] = Number(values[key]);
           if (source) item.base = source.kind === 'length' ? MEP.distance(source.points) * source.scale : source.points.length;
+          const rows=parseVertical(values.vertical||''),accessories=parseAccessories(values.accessories||'');
+          if(item.unit!=='m'&&rows.length)throw Error('竖向长度只能加入以米计量的材料');
+          item.details={category:values.category,route:values.route,vertical:values.vertical||'',accessories:values.accessories||'',manualExtra:item.extra,rows,materials:accessories};
+          item.extra+=MEPManage.vertical(rows);
           MEP.validateItem(item);
+          if(source?.kind==='length'){
+            const keys=splitPaths(source.points).flatMap(path=>path.slice(1).map((pt,j)=>MEPSnap.edgeKey(path[j],pt)));
+            if(new Set(keys).size!==keys.length||source.points.slice(1).some((pt,j)=>!pt.breakBefore&&MEPSnap.overlaps(source.points.slice(0,j+1),[source.points[j],pt])))throw Error('本笔包含重复线段，请撤回重复段后保存');
+            const clashes=p.items.filter(x=>x.id!==item.id&&x.source?.drawingId===source.drawingId&&x.source.kind==='length'&&MEPSnap.overlaps(source.points,x.source.points));
+            if(clashes.some(x=>x.name===item.name))throw Error('相同名称已有重叠线段：'+clashes.map(x=>x.name).join('、')+'。请核对，确需独立计量时另建名称');
+          }
           if (old) p.items[p.items.indexOf(old)] = item;
           else { p.items.push(item); if (source) points = []; }
           pendingSource = null; selectedItem = item.id; toast(old ? '工程量已更新' : '已加入工程量清单'); break;
@@ -375,7 +497,7 @@
     } catch (err) { $('#form-error').textContent = err.message; }
   });
   document.addEventListener('input', e => {
-    if (e.target.id === 'zoom') { zoom = Number(e.target.value); $('#paper').style.width = zoom + '%'; $('#zoom-label').textContent = zoom + '%'; }
+    if (e.target.id === 'zoom') { zoom = Number(e.target.value); $('#paper').style.width = zoom + '%'; $('#zoom-label').textContent = zoom + '%'; updateCanvas(); }
     if (e.target.id === 'search') { filter = e.target.value; $('#quantity-table').innerHTML = quantityTable(); }
     if (e.target.closest('#dialog-form')) updateFormula();
   });
@@ -393,6 +515,7 @@
       change();
     }
     if (e.target.id === 'system-filter') { systemFilter = e.target.value; $('#quantity-table').innerHTML = quantityTable(); }
+    if (e.target.id === 'measure-category') {measureCategory=e.target.value;return;}
     if (e.target.id === 'drawing-file') { const file = e.target.files[0]; e.target.value = ''; if (file) importDrawing(file); }
     if (e.target.id === 'backup-file') { const file = e.target.files[0]; e.target.value = ''; if (file) restoreBackup(file); }
   });
@@ -406,7 +529,7 @@
   });
   window.addEventListener('beforeunload', e => { if (points.length || savedCount !== saveCount || storageError) { e.preventDefault(); e.returnValue = ''; } });
   async function start() {
-    try { db = await connectDB(); const loaded = await dbRead(); if (loaded) { MEP.validateBackup(loaded); state = loaded; diskRevision = loaded.revision || 0; } }
+    try { db = await connectDB(); const loaded = await dbRead(); if (loaded) { MEP.validateBackup(loaded); loaded.projects.forEach(MEPManage.validate); state = loaded; diskRevision = loaded.revision || 0; } }
     catch { db?.close(); db = null; storageError = '无法读取本地数据，请保留已有备份。当前操作无法保存，使用后请立即导出备份。'; }
     if (!current()) state.currentProjectId = state.projects[0]?.id || null;
     render();

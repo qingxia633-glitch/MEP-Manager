@@ -58,7 +58,7 @@
       if(pts.length<3)return false;pts=pts.map(p=>point(transform,...p));const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);clipCount++;return {points:pts,bounds:[Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)]};
     }
     function add(p){if(primitives.length>=1000000){truncated=true;return;}if(!p.bounds.every(Number.isFinite))return;for(const clip of currentClips){const b=clip.bounds;if(p.bounds[2]<b[0]||p.bounds[0]>b[2]||p.bounds[3]<b[1]||p.bounds[1]>b[3])return;p.bounds=[Math.max(p.bounds[0],b[0]),Math.max(p.bounds[1],b[1]),Math.min(p.bounds[2],b[2]),Math.min(p.bounds[3],b[3])];}if(currentClips.length)p.clips=currentClips;primitives.push(p);bounds[0]=Math.min(bounds[0],p.bounds[0]);bounds[1]=Math.min(bounds[1],p.bounds[1]);bounds[2]=Math.max(bounds[2],p.bounds[2]);bounds[3]=Math.max(bounds[3],p.bounds[3]);}
-    function geometry(pts,m,layer,color,closed=false){const ps=pts.map(p=>point(m,...p));if(ps.length<2)return;let b=[Infinity,Infinity,-Infinity,-Infinity];for(const [x,y]of ps){b[0]=Math.min(b[0],x);b[1]=Math.min(b[1],y);b[2]=Math.max(b[2],x);b[3]=Math.max(b[3],y);}add({kind:'path',points:ps,layer,color,closed,bounds:b});}
+    function geometry(pts,m,layer,color,closed=false,exact=false){const ps=pts.map(p=>point(m,...p));if(ps.length<2)return;let b=[Infinity,Infinity,-Infinity,-Infinity];for(const [x,y]of ps){b[0]=Math.min(b[0],x);b[1]=Math.min(b[1],y);b[2]=Math.max(b[2],x);b[3]=Math.max(b[3],y);}add({kind:'path',points:ps,layer,color,closed,bounds:b,exact});}
     function expand(records,m=identity,parentLayer='0',parentColor=7,depth=0,chain=new Set(),clips=[]) {
       if(depth>20){skip('嵌套层级过深');return;}
       for(let index=0;index<records.length;index++) {
@@ -82,13 +82,13 @@
             const world=multiply(type==='DIMENSION'?m:ocs,local),clip=type==='INSERT'?clipping(g,world):null;if(clip===false)continue;
             expand(b.records,world,layer,color,depth+1,new Set([...chain,b.name]),clip?[...clips,clip]:clips);
           }
-        } else if(type==='LINE') geometry([[n(10),n(20)],[n(11),n(21)]],m,layer,color);
+        } else if(type==='LINE') geometry([[n(10),n(20)],[n(11),n(21)]],m,layer,color,false,true);
         else if(type==='LWPOLYLINE'||type==='POLYLINE') {
           let vertices=[];
           if(type==='LWPOLYLINE'){for(const [code,val]of g){if(code===10)vertices.push([Number(val),0,0]);else if(code===20&&vertices.length)vertices.at(-1)[1]=Number(val);else if(code===42&&vertices.length)vertices.at(-1)[2]=Number(val);}}
           else {if(n(70)&(16|64)){skip('POLYMESH');continue;}while(index+1<records.length&&records[index+1][0][1]==='VERTEX'){const v=Object.fromEntries(records[++index]);vertices.push([Number(v[10]||0),Number(v[20]||0),Number(v[42]||0)]);}}
           if(!vertices.length)continue;const closed=!!(n(70)&1),pts=[vertices[0].slice(0,2)],total=vertices.length-(closed?0:1);
-          for(let j=0;j<total;j++)pts.push(...bulgePoints(vertices[j],vertices[(j+1)%vertices.length],vertices[j][2]));geometry(pts,ocs,layer,color,closed);
+          for(let j=0;j<total;j++)pts.push(...bulgePoints(vertices[j],vertices[(j+1)%vertices.length],vertices[j][2]));geometry(pts,ocs,layer,color,closed,vertices.every(v=>Math.abs(v[2])<1e-12));
         } else if(type==='CIRCLE'||type==='ARC'||type==='ELLIPSE') {
           let start=type==='ARC'?n(50)*Math.PI/180:type==='ELLIPSE'?n(41):0,end=type==='ARC'?n(51)*Math.PI/180:type==='ELLIPSE'?n(42,Math.PI*2):Math.PI*2;
           while(end<=start)end+=Math.PI*2;const count=Math.min(512,Math.max(8,Math.ceil((end-start)/(Math.PI/32)))),pts=[];
@@ -146,8 +146,14 @@
     overlay.addEventListener('cancel',e=>{e.preventDefault();close();});
     overlay.querySelectorAll('[data-cad]').forEach(b=>b.onclick=()=>{switch(b.dataset.cad){case'close':close();break;case'fit':box=expandedBox(scene.bounds);draw();break;case'in':zoom(.6);break;case'out':zoom(1/.6);break;case'use':{
       const crop=viewBounds(),out=document.createElement('canvas'),aspect=canvas.width/canvas.height;out.width=aspect>=1?4800:Math.round(4800*aspect);out.height=aspect>=1?Math.round(4800/aspect):4800;
-      render(out.getContext('2d'),scene,crop,out.width,out.height,select.value);
-      const result={name:(chosenTitle||name.replace(/\.(dwg|dxf)$/i,''))+' · CAD选区',data:out.toDataURL('image/png'),width:out.width,height:out.height,scale:null,cad:{originalName:name,title:chosenTitle,units:scene.units,bounds:crop,layer:select.value,warnings:scene.warnings,previewOnly:true}};
+      const map=render(out.getContext('2d'),scene,crop,out.width,out.height,select.value);
+      const toPixel=q=>[(q[0]-crop[0])*map.scale+map.ox,(crop[3]-q[1])*map.scale+map.oy];
+      const frame=[[0,0],[out.width,0],[out.width,out.height],[0,out.height]],segments=[];
+      scene.primitives.forEach((p,k)=>{if(!p.exact||p.kind!=='path'||(select.value&&(select.value.startsWith('@')?!p.layer.includes(select.value.slice(1)):p.layer!==select.value)))return;
+       if(p.bounds[2]<crop[0]||p.bounds[0]>crop[2]||p.bounds[3]<crop[1]||p.bounds[1]>crop[3])return;
+       for(let j=1;j<p.points.length;j++)segments.push({id:k+':'+j,a:toPixel(p.points[j-1]),b:toPixel(p.points[j]),layer:p.layer,clips:[frame,...(p.clips||[]).map(c=>c.points.map(toPixel))]});
+      });
+      const result={name:(chosenTitle||name.replace(/\.(dwg|dxf)$/i,''))+' · CAD选区',data:out.toDataURL('image/png'),width:out.width,height:out.height,scale:null,cad:{originalName:name,title:chosenTitle,units:scene.units,bounds:crop,layer:select.value,warnings:scene.warnings,previewOnly:true,segments,geometryVersion:1}};
       close();onSelect(result);break;}}});
     canvas.addEventListener('wheel',e=>{e.preventDefault();const r=canvas.getBoundingClientRect(),x=box[0]+(e.clientX-r.left-mapping.ox)/mapping.scale,y=box[3]-(e.clientY-r.top-mapping.oy)/mapping.scale;zoom(e.deltaY>0?1.2:1/1.2,x,y);},{passive:false});
     canvas.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,box:[...box],scale:mapping.scale};canvas.setPointerCapture(e.pointerId);});

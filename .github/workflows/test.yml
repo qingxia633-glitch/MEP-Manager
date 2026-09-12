@@ -13,4 +13,6 @@ jobs:
       - run: node --check app.js
       - run: node --check cad.js
       - run: node --check cad-server.cjs
-      - run: node --test tests/core.test.cjs tests/cad.test.cjs
+      - run: node --check snap.js
+      - run: node --check management.js
+      - run: npm test

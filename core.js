@@ -5,7 +5,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
   const SYSTEMS = ['给水', '排水', '强电', '弱电', '消防', '其他'];
-  const UNITS = ['m', '个', '套', '台', '处'];
+  const UNITS = ['m', '个', '套', '台', '处', '根', '节', '只', 'kg'];
   function number(value, label, min = 0, max = 1e9) {
     if (value === '' || value === null || typeof value === 'boolean' || !Number.isFinite(Number(value))) throw new Error(label + '请填写有效数字');
     const n = Number(value);
@@ -17,7 +17,7 @@
     return value.trim();
   }
   function distance(points) {
-    return points.slice(1).reduce((sum, p, i) => sum + Math.hypot(p.x - points[i].x, p.y - points[i].y), 0);
+    return points.slice(1).reduce((sum, p, i) => sum + (p.breakBefore ? 0 : Math.hypot(p.x - points[i].x, p.y - points[i].y)), 0);
   }
   function calibrate(points, realMeters) {
     if (points.length !== 2 || distance(points) < 1) throw new Error('请选择两个不同的标定点');
@@ -63,7 +63,7 @@
   }
   function checkPoints(points, drawing, min) {
     if (!Array.isArray(points) || points.length < min || points.length > 20000) throw new Error('图纸测量点格式不正确');
-    for (const p of points) { strictNumber(p.x, '测量点横坐标', 0, drawing.width); strictNumber(p.y, '测量点纵坐标', 0, drawing.height); }
+    for (const p of points) { if(p.breakBefore!==undefined&&typeof p.breakBefore!=='boolean')throw Error('支路标记格式不正确'); strictNumber(p.x, '测量点横坐标', 0, drawing.width); strictNumber(p.y, '测量点纵坐标', 0, drawing.height); }
   }
   function strictNumber(value, label, min = 0, max = 1e9) {
     if (typeof value !== 'number') throw new Error(label + '必须为数值');
@@ -81,6 +81,7 @@
         unique(drawing.id); required(drawing.name, '图纸名称');
         strictNumber(drawing.width, '图纸宽度', 1, 16000); strictNumber(drawing.height, '图纸高度', 1, 16000);
         if (typeof drawing.data !== 'string' || drawing.data.length > 30e6 || !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(drawing.data)) throw new Error('备份包含不支持的图纸图片');
+        if(drawing.cad?.geometryVersion===1){const segs=drawing.cad.segments;if(!Array.isArray(segs)||segs.length>1000000)throw Error('CAD线段数据格式不正确');for(const s of segs){if(!s||![s.a,s.b].every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>typeof n==='number'&&Number.isFinite(n)&&Math.abs(n)<1e12))||!Array.isArray(s.clips)||s.clips.length>32||s.clips.some(c=>!Array.isArray(c)||c.length<3||c.length>10000||c.some(p=>!Array.isArray(p)||p.length!==2||p.some(n=>!Number.isFinite(n)))))throw Error('CAD线段坐标格式不正确');}}
         if (drawing.scale !== null) strictNumber(drawing.scale, '图纸比例', 1e-12, 1e6);
       }
       for (const item of project.items) {
