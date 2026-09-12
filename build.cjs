@@ -1,0 +1,12 @@
+'use strict';
+const fs = require('node:fs');
+const path = require('node:path');
+const target = path.resolve(process.argv[2] || path.join(__dirname, 'dist', '水电小助手.html'));
+const read = name => fs.readFileSync(path.join(__dirname, name), 'utf8');
+let html = read('index.html').replace('<link rel="stylesheet" href="styles.css">', () => '<style>\n' + read('styles.css') + '\n</style>');
+html = html.replace(/\s*<script defer src="(?:core|app)\.js"><\/script>/g, '');
+const script = name => '<script>\n' + read(name).replace(/<\/script/gi, '<\\/script') + '\n</script>';
+html = html.replace('</body>', () => script('core.js') + '\n' + script('app.js') + '\n</body>');
+fs.mkdirSync(path.dirname(target), { recursive: true });
+fs.writeFileSync(target, html);
+console.log(target);

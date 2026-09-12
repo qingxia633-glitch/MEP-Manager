@@ -1,0 +1,13 @@
+{
+  "name": "mep-manager",
+  "version": "0.1.0",
+  "private": true,
+  "description": "面向普通水电安装从业者的图纸辅助算量与项目管理工具",
+  "scripts": {
+    "start": "node server.cjs",
+    "build": "node build.cjs",
+    "test:ui": "node tests/ui.cjs",
+    "test": "node --test tests/core.test.cjs"
+  },
+  "engines": { "node": ">=18" }
+}
