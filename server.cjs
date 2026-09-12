@@ -3,9 +3,11 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const root = __dirname;
+const cadHandler = require('./cad-server.cjs').createHandler(root);
 const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8' };
-const files = new Set(['/index.html', '/styles.css', '/core.js', '/app.js']);
-const server = http.createServer((req, res) => {
+const files = new Set(['/index.html', '/styles.css', '/core.js', '/cad.js', '/app.js']);
+const server = http.createServer(async (req, res) => {
+  if (await cadHandler(req, res)) return;
   let name;
   try { name = decodeURIComponent(new URL(req.url, 'http://localhost').pathname); } catch { res.writeHead(400); res.end(); return; }
   if (name === '/') name = '/index.html';
