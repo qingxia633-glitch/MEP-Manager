@@ -1,0 +1,82 @@
+{
+  "projectId": "local-project",
+  "panelConfigurationId": "local-project:configuration:FC8E11D7678EDFFA06F5878155A577FC0E14EC8F932CA74AAE98ED4105C37C11:161F0",
+  "regionId": "reviewed-panel-configuration-region",
+  "localViewId": "reviewed-panel-configuration-view",
+  "source": {
+    "path": "local_test_data/system-t8t3-verified-snapshot-20260916/MEP-full-entity-report.txt",
+    "sha256": "FC8E11D7678EDFFA06F5878155A577FC0E14EC8F932CA74AAE98ED4105C37C11",
+    "dwgName": "EX-BX地下车库说明及配电箱系统_t8_t3.dwg"
+  },
+  "configurationModel": {
+    "path": "local_test_data/qwb1-panel-configuration-candidate.json",
+    "sha256": "BA1F87C217F9ED8BBB1647137CFA61A85502A37A04ADD62DDCC46421307A4FE8"
+  },
+  "tolerance": 0.00001,
+  "reviewedPackagePhrase": "厂家成套电缆设备自带",
+  "procurementClaim": "related cable may be supplied with equipment/package",
+  "sharedStatements": [
+    {
+      "handle": "161E5",
+      "expectedRawText": "设备配套"
+    },
+    {
+      "handle": "161FD",
+      "expectedRawText": "潜污泵1，潜污泵2，一用一备"
+    },
+    {
+      "handle": "161F3",
+      "expectedRawText": "Pe=1.5kW"
+    },
+    {
+      "handle": "161F4",
+      "expectedRawText": "Ijs=2.85A"
+    },
+    {
+      "handle": "16217",
+      "expectedRawText": "厂家配套,内含短路、单相接地、过负荷保护、漏电保护（作用于报警）"
+    },
+    {
+      "handle": "162E1",
+      "expectedRawText": "应设置消防明显标志"
+    }
+  ],
+  "rows": [
+    {
+      "identifierHandle": "161E9",
+      "expectedIdentifier": "WP1",
+      "geometryHandle": "161E6",
+      "targetHandle": "161EC",
+      "expectedTarget": "潜污泵1",
+      "powerHandle": "161ED",
+      "expectedPower": "1.5kW",
+      "cableHandle": "161F2",
+      "expectedCable": "厂家成套电缆设备自带  SC20 FC,WC",
+      "tailGeometryHandle": "161E8"
+    },
+    {
+      "identifierHandle": "161F9",
+      "expectedIdentifier": "WP2",
+      "geometryHandle": "161F7",
+      "targetHandle": "161FA",
+      "expectedTarget": "潜污泵2",
+      "powerHandle": "161FB",
+      "expectedPower": "1.5kW",
+      "cableHandle": "161FC",
+      "expectedCable": "厂家成套电缆设备自带  SC20 FC,WC",
+      "tailGeometryHandle": "161F8"
+    },
+    {
+      "identifierHandle": "161EA",
+      "expectedIdentifier": "K1",
+      "geometryHandle": "161E7",
+      "targetHandle": "161EE",
+      "expectedTarget": "水位信号",
+      "powerHandle": null,
+      "expectedPower": null,
+      "cableHandle": "161EB",
+      "expectedCable": "厂家成套电缆设备自带  SC20 FC,WC",
+      "tailGeometryHandle": null
+    }
+  ]
+}

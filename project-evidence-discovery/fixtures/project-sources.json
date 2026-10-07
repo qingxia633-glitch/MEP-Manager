@@ -1,0 +1,14 @@
+{
+  "snapshots": [
+    "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt",
+    "local_test_data/system-t8t3-textlayout-snapshot-20260924/MEP-full-entity-report.txt",
+    "local_test_data/fire-system-full-snapshot-20260925/MEP-full-entity-report.txt"
+  ],
+  "investigation_edges": ["13C9D", "13CC7", "13CC9", "13CF5"],
+  "negative_annotations": ["51B44", "51AA5", "518D4"],
+  "xy_tolerance": 0.001,
+  "nearby_distance": 1000,
+  "nearby_distance_meaning": "Navigation radius only in drawing units, never a binding tolerance",
+  "historical_reference": "project-evidence-gate/project-evidence/garage-golden.json",
+  "correction_evidence": "outputs/quantity-build-plan-v02/correction-evidence.json"
+}

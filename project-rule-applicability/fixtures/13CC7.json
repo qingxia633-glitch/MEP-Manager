@@ -1,0 +1,70 @@
+{
+  "context": {
+    "project_id": "current garage fire-alarm project",
+    "drawing_ref": "EX-BX地下车库火灾报警平面图_t8_t3.dwg"
+  },
+  "target_object": {
+    "id": "13CC7",
+    "kind": "edge"
+  },
+  "object_facts": [
+    {
+      "project_id": "current garage fire-alarm project",
+      "drawing_ref": "EX-BX地下车库火灾报警平面图_t8_t3.dwg",
+      "target_id": "12D29",
+      "target_kind": "device",
+      "key": "canonical_role",
+      "value": "smoke_detector",
+      "status": "supported",
+      "evidence_strength": "drawing_fact",
+      "provenance": [
+        {
+          "path": "outputs/electrical-shadow-run-v02/automatic-result.json",
+          "sha256": "118e7705020e2140bfd91437c43d26eaa295b5b2be3ae9bac502d1cfee1459d6",
+          "pointer": "/stages/device_role/output/0"
+        }
+      ]
+    },
+    {
+      "project_id": "current garage fire-alarm project",
+      "drawing_ref": "EX-BX地下车库火灾报警平面图_t8_t3.dwg",
+      "target_id": "12D2D",
+      "target_kind": "device",
+      "key": "canonical_role",
+      "value": "smoke_detector",
+      "status": "supported",
+      "evidence_strength": "drawing_fact",
+      "provenance": [
+        {
+          "path": "outputs/electrical-shadow-run-v02/automatic-result.json",
+          "sha256": "118e7705020e2140bfd91437c43d26eaa295b5b2be3ae9bac502d1cfee1459d6",
+          "pointer": "/stages/device_role/output/1"
+        }
+      ]
+    }
+  ],
+  "region_memberships": [],
+  "system_memberships": [],
+  "local_group_memberships": [],
+  "explicit_bindings": [],
+  "propagation_sources": [],
+  "exclusions": [],
+  "conflicting_evidence": [],
+  "provenance": [
+    {
+      "path": "outputs/electrical-shadow-run-v02/automatic-result.json",
+      "sha256": "118e7705020e2140bfd91437c43d26eaa295b5b2be3ae9bac502d1cfee1459d6"
+    },
+    {
+      "path": "outputs/project-rule-applicability-audit-v01/evidence.json",
+      "sha256": "bb4a54052fc55b95db31e604af359ed169419c7a74693c2e190c701555f224f3"
+    }
+  ],
+  "context_only": {
+    "geometry": "supported",
+    "endpoints": "smoke detectors",
+    "compartment_system_context": "exists",
+    "S_or_SD_edge_selection": "unresolved",
+    "note": "Context is deliberately not an edge membership witness"
+  }
+}

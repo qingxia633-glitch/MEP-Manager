@@ -1,0 +1,4 @@
+[
+ {"probe":"local_test_data/fire-alarm-smoke-block-Equip00002649-probe-20260926/block-definition-probe.txt","sha256":"F8CB6C409BEC05B748BCA00EDCBC9E1D43403645ED439D825784BD5C26373DED","boundaryRefs":["102EB","102F2","102EC","102EE"],"sample":"smoke"},
+ {"probe":"local_test_data/fire-alarm-sound-light-block-Equip00002679-probe-20260927/block-definition-probe.txt","sha256":"58DAFB6A728F48B62859F15BCB34E9D8938F2E35E2EC7A27B8D981CD3B93011D","boundaryRefs":["FD07","FD0A","FD08","FD09"],"sample":"ordinary_sound_light"}
+]

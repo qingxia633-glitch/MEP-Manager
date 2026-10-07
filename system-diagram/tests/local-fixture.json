@@ -1,0 +1,37 @@
+{
+  "localViewId": "system-local-q1-q5",
+  "projectScope": "current-garage-project",
+  "symbolCandidateRole": "switching/protection-device-like",
+  "sources": {
+    "diagram": {"path":"local_test_data/system-dynamic-snapshot-20260916/MEP-full-entity-report.txt","sha256":"0D2742F7917A539B7A9656D95FF7467D16CCB74B043DB2B92B7E02C6141104F1"},
+    "outer": {"path":"local_test_data/block-probe-20260916/block-definition-probe.txt","sha256":"BC42924C4B4FB3089DC5FC3DF371F145014165544A26E56B963526B5E136140C"},
+    "child": {"path":"local_test_data/subblock-probe-20260916/block-definition-probe.txt","sha256":"E1B381520FAF4CD3E4DD55A2292C809163FAD72257651DFC44AFE3900994F4A4"}
+  },
+  "rowInsertHandles":["B43B","B444","7EDC7","7EDD9","7EDEB"],
+  "statementHandles":["B443","B4B9","B45B","B442","B44C","B563","B451","B44B","7EDCF","7EDD7","7EDD2","7EDD4","7EDCE","7EDE1","7EDE9","7EDE4","7EDE6","7EDE0","7EDF3","7EDFB","7EDF8","7EDF2"],
+  "rowBandDrawingUnits": 600,
+  "toleranceDrawingUnits": 0.00001,
+  "probeCorrespondence": {
+    "status":"candidate",
+    "basis":"User-authorized bounded investigation of these frozen reports; block references agree. Not proof of unchanged DWG across acquisition times.",
+    "outerBlock":"*U401",
+    "symbolInsertHandle":"30204",
+    "symbolBlock":"$element$00000576"
+  },
+  "humanConfirmation": {
+    "id":"HC-symbol-r4",
+    "evidenceType":"HumanConfirmation",
+    "outerHandle":"7EDD9",
+    "claim":"当前项目此图式中，两段直线、叉号和斜线组成开关/闸门组合符号；不得拆为独立设备。",
+    "scope":"current-project/current-local-view/specified-outer-instance",
+    "origin":"user statement in this conversation",
+    "appliesToNewSnapshots":false
+  },
+  "equivalenceFixture": {
+    "outerBlock":"*U404",
+    "directHandle":"30545",
+    "childInsertHandle":"3053C",
+    "childBlock":"A$C705C5744",
+    "childLineHandle":"4C2A"
+  }
+}

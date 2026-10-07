@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "model_type": "GeometryConnectionEvidenceRuleSet",
+  "rules": [
+    {
+      "rule_id": "G01",
+      "statement": "Insertion point is not a terminal",
+      "conditions": "Insertion coincidence alone cannot support connection",
+      "scope": "project geometric evidence classification",
+      "provenance": [
+        {
+          "evidenceType": "ProjectRule",
+          "source": "current user instruction"
+        }
+      ],
+      "supporting_evidence": [
+        "outputs/fire-alarm-rule-b-final-alternative-20261005/evidence.json",
+        "outputs/module-13017-child-point-match-20261005/evidence.json"
+      ],
+      "tolerance_drawing_units": 0.001,
+      "may_generate_design_net_quantity": false
+    },
+    {
+      "rule_id": "G02",
+      "statement": "Attribute text position is not a terminal",
+      "conditions": "Text geometry cannot substitute for independent symbol connection geometry",
+      "scope": "project geometric evidence classification",
+      "provenance": [
+        {
+          "evidenceType": "ProjectRule",
+          "source": "current user instruction"
+        }
+      ],
+      "supporting_evidence": [
+        "outputs/fire-alarm-rule-b-final-alternative-20261005/evidence.json",
+        "outputs/module-13017-child-point-match-20261005/evidence.json"
+      ],
+      "tolerance_drawing_units": 0.001,
+      "may_generate_design_net_quantity": false
+    },
+    {
+      "rule_id": "G03",
+      "statement": "Nearby controlled device does not imply connection",
+      "conditions": "Proximity alone is insufficient",
+      "scope": "project geometric evidence classification",
+      "provenance": [
+        {
+          "evidenceType": "ProjectRule",
+          "source": "current user instruction"
+        }
+      ],
+      "supporting_evidence": [
+        "outputs/valve-132F7-endpoint-check-20261005/evidence.json"
+      ],
+      "tolerance_drawing_units": 0.001,
+      "may_generate_design_net_quantity": false
+    },
+    {
+      "rule_id": "G04",
+      "statement": "Direct geometric contact requires real geometry within tolerance",
+      "conditions": "POINT, open endpoint or effective visible geometry must belong to the transformed instance; confirms geometry only, not terminal electrical role",
+      "scope": "project geometric evidence classification",
+      "provenance": [
+        {
+          "evidenceType": "ProjectRule",
+          "source": "current user instruction"
+        }
+      ],
+      "supporting_evidence": [
+        "outputs/fire-alarm-rule-b-final-alternative-20261005/evidence.json",
+        "outputs/module-13017-child-point-match-20261005/evidence.json"
+      ],
+      "tolerance_drawing_units": 0.001,
+      "may_generate_design_net_quantity": false
+    },
+    {
+      "rule_id": "G05",
+      "statement": "Complete disjoint geometry permits direct-contact rejection",
+      "conditions": "All relevant nested definitions recovered, transforms verified, no unresolved proxy/visibility gap, all valid geometry beyond tolerance; account for polyline width; absent geometry is not disjoint geometry",
+      "scope": "project geometric evidence classification",
+      "provenance": [
+        {
+          "evidenceType": "ProjectRule",
+          "source": "current user instruction"
+        }
+      ],
+      "supporting_evidence": [
+        "outputs/valve-132F7-endpoint-check-20261005/evidence.json"
+      ],
+      "tolerance_drawing_units": 0.001,
+      "may_generate_design_net_quantity": false
+    },
+    {
+      "rule_id": "G06",
+      "statement": "Rejected direct contact does not reject indirect electrical relation",
+      "conditions": "Rejection scope must be explicit",
+      "scope": "project geometric evidence classification",
+      "provenance": [
+        {
+          "evidenceType": "ProjectRule",
+          "source": "current user instruction"
+        }
+      ],
+      "supporting_evidence": [
+        "outputs/valve-132F7-endpoint-check-20261005/evidence.json"
+      ],
+      "tolerance_drawing_units": 0.001,
+      "may_generate_design_net_quantity": false
+    },
+    {
+      "rule_id": "G07",
+      "statement": "Instance ATTRIB takes precedence over ATTDEF defaults",
+      "conditions": "Preserve both raw texts and record discrepancy; do not silently replace instance value",
+      "scope": "project geometric evidence classification",
+      "provenance": [
+        {
+          "evidenceType": "ProjectRule",
+          "source": "current user instruction"
+        }
+      ],
+      "supporting_evidence": [
+        "outputs/valve-132F7-endpoint-check-20261005/evidence.json"
+      ],
+      "tolerance_drawing_units": 0.001,
+      "may_generate_design_net_quantity": false
+    },
+    {
+      "rule_id": "G08",
+      "statement": "Execute full instance transforms",
+      "conditions": "Definition base point, insertion, scale including negative scale, rotation, normal/OCS and all nested INSERT transforms required",
+      "scope": "project geometric evidence classification",
+      "provenance": [
+        {
+          "evidenceType": "ProjectRule",
+          "source": "current user instruction"
+        }
+      ],
+      "supporting_evidence": [
+        "outputs/fire-alarm-rule-b-final-alternative-20261005/evidence.json",
+        "outputs/module-13017-child-point-match-20261005/evidence.json"
+      ],
+      "tolerance_drawing_units": 0.001,
+      "may_generate_design_net_quantity": false
+    },
+    {
+      "rule_id": "G09",
+      "statement": "Unresolved Z semantics cannot alone prove connection or disconnection",
+      "conditions": "Supported XY contact is not supported 3D/electrical contact",
+      "scope": "project geometric evidence classification",
+      "provenance": [
+        {
+          "evidenceType": "ProjectRule",
+          "source": "current user instruction"
+        }
+      ],
+      "supporting_evidence": [
+        "outputs/fire-alarm-rule-b-final-alternative-20261005/evidence.json",
+        "outputs/module-13017-child-point-match-20261005/evidence.json"
+      ],
+      "tolerance_drawing_units": 0.001,
+      "may_generate_design_net_quantity": false
+    }
+  ],
+  "electrical_inference_from_geometry_allowed": false,
+  "regression": "full regression not rerun"
+}

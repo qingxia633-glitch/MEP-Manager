@@ -1,0 +1,32 @@
+{
+  "sampleId":"fire-region-one",
+  "projectId":"local-project",
+  "source":{"path":"local_test_data/fire-system-full-snapshot-20260925/MEP-full-entity-report.txt","sha256":"B2AEA6FAF9999099AA525FD2552DE61092E7F0BA04294EE23D8D8E5B3E707FF0"},
+  "regionHandle":"16078",
+  "window":[450000,62300,490000,71000],
+  "tolerance":0.00001,
+  "boundaryProbes":[{"object":"15E08","path":"local_test_data/fire-terminal-box-15E08-probe-20260925/block-definition-probe.txt","sha256":"A4760127B0283D9473B0BDB3E95552BCCF6870D350E1CF52807503C285DDA7CD","boundaryHandle":"355","reviewedRole":"terminal_box"}],
+  "upstreamText":"15EAB",
+  "networks":[
+    {"system":"fire_alarm","contextRefs":["16078","15EB4","15EB7"],"bus":"15DB0",
+     "lines":["15DB0","15DB7","15E83","15DB8","15DBB","15DE9","15DE1","15EA1","15EA0","15F95","15FB2","15FD0","15FCF","15FF5","161D5","15DAF","15DB5","15DD0","15DCB"],
+     "devices":["15DF0","15E85","15DF5","15DFB","15E03","15DFF","15DF4","15E99","15E94","15F8B","15FAE","15FC4","15FC9","15FF0","161E1"],
+     "roleTextOverrides":[{"device":"15DF4","sourceRefs":["15D9C","15D9B"],"basis":"reviewed sound-light device column; no block-name inference"}],
+     "unexpandedAssociations":[["15DB7","15DF0"],["15E83","15E85"],["15DB8","15DF5"],["15DBB","15DFB"],["15DE1","15DF4"],["15EA1","15E99"],["15EA0","15E94"],["15F95","15F8B"],["15FB2","15FAE"],["15FD0","15FC4"],["15FCF","15FC9"],["15FF5","15FF0"],["161D5","161E1"]],
+     "excludedCrossings":["19CE2"],
+     "gaps":[{"a":"15DB5","aEnd":0,"b":"15DAF","bEnd":0,"object":"15E08","reason":"block_internal_representation_unread"},{"a":"15DAF","aEnd":1,"b":"15DB0","bEnd":0,"object":"15E03","reason":"interface_representation_unresolved"}]},
+    {"system":"fire_phone","contextRefs":["16078","15EB1","15EB2"],"bus":"15DEF",
+     "lines":["15DEF","15DBA","15DB9","15DBC","15DB3","15DCE","15DC9"],
+     "devices":["15DF8","15DF5"],"roleTextOverrides":[],
+     "unexpandedAssociations":[["15DBA","15DF8"],["15DB9","15DF5"]],"excludedCrossings":[],
+     "gaps":[{"a":"15DB3","aEnd":0,"b":"15DEF","bEnd":0,"object":"15E08","reason":"block_internal_representation_unread"}]},
+    {"system":"fire_broadcast","contextRefs":["16078","15DDF","15EB5","15EB8"],"bus":null,
+     "lines":["15DB1","15DEE","15DED","15DEC","15DB6","15DD1","15DCC"],
+     "devices":["15DFF","16268"],"roleTextOverrides":[],"unexpandedAssociations":[],"excludedCrossings":[],
+     "gaps":[{"a":"15DB6","aEnd":0,"b":"15DB1","bEnd":0,"object":"15E08","reason":"block_internal_representation_unread"}]}
+  ],
+  "crossSystems":[
+    {"representation":"15DF5","systems":["fire_alarm","fire_phone"],"sourceRefs":["15DF5","15D9E","15D9D","15DB8","15DB9"],"basis":"reviewed two-interface category expression; port mapping unresolved"},
+    {"representation":"15DFF","systems":["fire_alarm","fire_broadcast"],"sourceRefs":["15DFF","15DE9","15DED","15DEC"],"basis":"reviewed role admission; separate boundary expressions; no internal conduction claim"}
+  ]
+}

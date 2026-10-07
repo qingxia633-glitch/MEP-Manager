@@ -1,0 +1,22 @@
+{
+  "scopeId":"current-system-repeated-row-survey",
+  "source":{"path":"local_test_data/system-dynamic-snapshot-20260916/MEP-full-entity-report.txt","sha256":"0D2742F7917A539B7A9656D95FF7467D16CCB74B043DB2B92B7E02C6141104F1"},
+  "effectiveName":"总箱出现回路",
+  "window":{"minX":-3000,"maxX":22000,"halfY":600,"anchorXTolerance":1},
+  "roleRules":[
+    {"id":"phase-lexical","pattern":"^L[123].*N.*PE$","role":"conductor-expression","band":"phase/conductor-expression"},
+    {"id":"row-code-lexical","pattern":"^(Q|WP|WE|JL)\\d+$","role":"row_identifier","band":"row-identifier"},
+    {"id":"qwb-lexical","pattern":"^QWB\\d+$","role":"identifier/load-reference","band":"identifier/load-expression"},
+    {"id":"load-lexical","pattern":"^(?:\\d[A-Z0-9]*(?:AP|ALE)[A-Z0-9-]*|ALE\\(.+\\))$","role":"identifier/load-reference","band":"identifier/load-expression"},
+    {"id":"jlm-raw-claim","pattern":"^JLM$","role":"identifier/load-reference","band":"identifier/load-expression"},
+    {"id":"power-lexical","pattern":"^\\d+(?:\\.\\d+)?\\s*[kK][wW]$","role":"row_power_field","band":"power-expression"},
+    {"id":"reference-lexical","pattern":"(?:详见|见).*(?:系统|图)","role":"cross-view-reference","band":null}
+  ],
+  "layoutVariants":[
+    {"name":"single-QWB+kW","conditions":[{"role":"identifier/load-reference","textPattern":"^QWB\\d+$","min":1,"max":1},{"role":"row_power_field","min":1,"max":1}]},
+    {"name":"double-QWB+kW","conditions":[{"role":"identifier/load-reference","textPattern":"^QWB\\d+$","min":2,"max":2},{"role":"row_power_field","min":1,"max":1}]},
+    {"name":"WP+load/no-window-kW","conditions":[{"role":"row_identifier","textPattern":"^WP\\d+$","min":1,"max":1},{"role":"identifier/load-reference","min":1,"max":1},{"role":"row_power_field","min":0,"max":0}]},
+    {"name":"WE+load/no-window-kW","conditions":[{"role":"row_identifier","textPattern":"^WE\\d+$","min":1,"max":1},{"role":"identifier/load-reference","min":1,"max":1},{"role":"row_power_field","min":0,"max":0}]},
+    {"name":"JL+kW+hidden-attribute","conditions":[{"role":"row_identifier","textPattern":"^JL\\d+$","min":1,"max":1},{"role":"row_power_field","min":1,"max":1},{"role":"identifier/load-reference","visibility":"hidden_flag","min":1,"max":1}]}
+  ]
+}

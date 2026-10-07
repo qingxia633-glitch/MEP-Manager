@@ -1,0 +1,44 @@
+{
+  "fixtureId": "garage-legend-51",
+  "projectId": "local-project",
+  "source": {
+    "path": "local_test_data/system-t8t3-verified-snapshot-20260916/MEP-full-entity-report.txt",
+    "sha256": "FC8E11D7678EDFFA06F5878155A577FC0E14EC8F932CA74AAE98ED4105C37C11",
+    "document": "EX-BX地下车库说明及配电箱系统_t8_t3.dwg"
+  },
+  "fireSourceFixture": "model-core/tests/fire-fixture.json",
+  "region": {
+    "headerHandles": ["23EA4", "23E54"],
+    "titleHandles": ["238BF", "23873"],
+    "xColumns": [544317.789985,545517.789985,547017.789985,552092.224777,557117.789985,558317.789985,562817.789985],
+    "top": 285173.862070,
+    "bodyTop": 283673.862070,
+    "bottom": 232673.862070,
+    "rowHeight": 1000,
+    "rowCount": 51,
+    "basis": "Reviewed table boundary, horizontal grid lines, six columns and sequence numbers 1..51; fixture selection, not whole-DWG discovery"
+  },
+  "fragmentReview": {
+    "row": 19,
+    "handles": ["23899", "23900"],
+    "normalizedCandidate": "单输入输出模块（排烟阀、防火阀、送风口）",
+    "basis": "Same X and upper-to-lower reading order; second insertion point is 7.801019 drawing units below row boundary. Preserve spillover ambiguity."
+  },
+  "otherSource": {
+    "document": "电气/4号楼/EC-4#-P+TBD_t8_t3.dwg",
+    "building": "4号楼",
+    "kind": "HumanConfirmation",
+    "provenance": "User legend transcription and explicit source-scope correction; no source snapshot or screenshot Handle supplied"
+  },
+  "comparisons": [
+    {"row":23,"token":"I","meaning":"输入模块","status":"same","system":"fire_alarm"},
+    {"row":19,"token":"I/O","meaning":"单输入输出模块","status":"compatible","system":"fire_alarm"},
+    {"row":11,"token":"SI","meaning":"短路隔离器","status":"same","system":"fire_alarm"},
+    {"row":20,"token":"2I/2O","meaning":"双输入输出模块（卷帘）","status":"same","system":"fire_alarm"},
+    {"row":21,"token":"M","meaning":"模块箱","status":"same","system":"unknown"},
+    {"row":22,"token":"M1~M4","meaning":"风机专用模块","status":"compatible","system":"unknown"},
+    {"row":24,"token":"O","meaning":"输出模块","status":"same","system":"fire_alarm"},
+    {"row":25,"token":"B","meaning":"广播切换模块","status":"same","system":"fire_broadcast"}
+  ],
+  "conflictInstances": ["1851F", "18516"]
+}

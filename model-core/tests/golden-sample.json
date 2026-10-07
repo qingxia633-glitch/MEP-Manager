@@ -1,0 +1,31 @@
+{
+  "sampleId": "garage-pump-group-reviewed",
+  "projectId": "local-project",
+  "panelHandle": "3DA9",
+  "identifierHandle": "3DAC",
+  "panelIdentifier": "QWB1",
+  "panelCoordinates": [555804531.737661,553210995.441366,0],
+  "pitIdentifier": "K1-4",
+  "humanEvidenceSource": "user confirmations in current conversation; no inferred timestamp or AutoCAD session ID",
+  "representationPaths": [
+    ["ModelSpace","52","PX-B-P01(-1F)-JSK"],
+    ["ModelSpace","3380","PX-B-P01(-1F)-JSK"],
+    ["ModelSpace","531D","AX-B-P01(-1F)","69F4","PX-B-P01(-1F)-JSK"]
+  ],
+  "humanClaims": {
+    "location": "K1-4 and 3DA9/QWB1 represent the same building location: upper left 12#/lobby, upper right fire elevator anteroom, lower right fire water tank. Not a supply connection.",
+    "symbols": "Two parallel pump-like symbols visible inside K1-4 in the effective basement plan. No individual identity confirmed.",
+    "configurationRule": "Within this project only, panels with the same identifier use the same configuration. Not the same installation instance.",
+    "configuration": "The region with title 161F0 and frames 161EF/161F1 is QWB1 configuration representation."
+  },
+  "requirements": [
+    {"fact":"panel_configuration","search":["registered system configuration snapshot"]},
+    {"fact":"panel_installation_instance","search":["registered power plan snapshot"]},
+    {"fact":"drainage_pump_group_location","search":["reviewed basement architectural context"]},
+    {"fact":"group_level_association","search":["in-scope architectural confirmation and configuration"]},
+    {"fact":"individual_pump_mapping","search":["explicit terminal labels or installation wiring evidence"]},
+    {"fact":"water_level_device_binding","search":["in-scope sensor identity and control connection evidence"]},
+    {"fact":"physical_routing","search":["explicit installed route evidence; no nearest-line inference"]},
+    {"fact":"procurement_boundary","search":["project equipment/package responsibility documents"]}
+  ]
+}

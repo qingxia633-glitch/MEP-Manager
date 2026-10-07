@@ -1,0 +1,18 @@
+[
+  {
+    "sha256": "55C517929582BE098D7D2118CB970D9C1D2C6AA574E01E6CE11D5512A6F26A20",
+    "path": "outputs/compartment1-category-audit/results.json"
+  },
+  {
+    "sha256": "71F9C0FA73D2B7ED7F0C59BC5E54C751A0B929B9959641DDD85C03FCBCD2C31D",
+    "path": "outputs/compartment1-role-compatibility/results.json"
+  },
+  {
+    "sha256": "50AC94D26863B141CC264191FC0ECB86468D5362966C949F99B3ADEFE639468E",
+    "path": "outputs/sound-light-find-admission/results.json"
+  },
+  {
+    "sha256": "C5BCFDB947EADA4D0BD3F13A73D4A10EFD38E95B6F9ED1367C6C1547E446F82A",
+    "path": "outputs/fire-broadcast-zone1-mapping/results.json"
+  }
+]

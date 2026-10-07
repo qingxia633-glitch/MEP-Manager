@@ -1,0 +1,14 @@
+﻿[
+    {
+        "path":  "outputs/fire-alarm-logical-network/results.json",
+        "sha256":  "1DF4F45F10C48D2B5D85B0C1821BB66F255F9D5E0431E570093A1665DBF49222"
+    },
+    {
+        "path":  "outputs/control-routing-admission/candidate-view.json",
+        "sha256":  "875A42AC6006252A2F721ED7922C66CD1A23420B7E9846868E50DA0977793333"
+    },
+    {
+        "path":  "outputs/control-routing-admission/candidate-correspondence.json",
+        "sha256":  "22BD84C042E2E65780C8219484930C615A645304A0CC40FA75C1DBC5F8BBEEC2"
+    }
+]

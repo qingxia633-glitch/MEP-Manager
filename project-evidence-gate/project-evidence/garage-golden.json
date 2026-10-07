@@ -1,0 +1,110 @@
+{
+  "project_id": "current garage fire-alarm project",
+  "drawing_ref": "EX-BX???????????_t8_t3.dwg",
+  "sources": [
+    {
+      "source_id": "golden-bus",
+      "path": "../../outputs/golden-local-bus-20261004/evidence.json",
+      "sha256": "4a3f9da2980331edbd3a1ad626509bd9e9f62a08690ef399ca7b96ec28df09c8",
+      "assertions": [
+        {
+          "pointer": "/busSegment/status",
+          "expected": "supported"
+        },
+        {
+          "pointer": "/busSegment/localLogicalIdentity",
+          "expected": "fire_alarm_bus_segment"
+        },
+        {
+          "pointer": "/busSegment/rawEntityRef",
+          "expected": "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt:13CF5"
+        }
+      ]
+    },
+    {
+      "source_id": "formal-rules",
+      "path": "../../outputs/golden-project-measurement-rules-20261004/project-rules.json",
+      "sha256": "aa98baf971f81d8158c3962e8402c366f91cb7a16cd85dca9cda1d81111faf99",
+      "assertions": [
+        {
+          "pointer": "/humanEvidence/id",
+          "expected": "human:20261004:formalize-project-measurement-rules"
+        }
+      ]
+    },
+    {
+      "source_id": "formal-issuance",
+      "path": "../../outputs/golden-project-measurement-rules-20261004/design-net-quantities.json",
+      "sha256": "d71dd9ca8f0e297711784d777efe1a0b0406576a78bb2e77fc04314f492aad77",
+      "assertions": [
+        {
+          "pointer": "/quantities/1/status",
+          "expected": "issued_under_project_rules"
+        },
+        {
+          "pointer": "/quantities/1/objectRole",
+          "expected": "fire_alarm_two_wire_bus"
+        },
+        {
+          "pointer": "/quantities/1/scope",
+          "expected": "local segment 12D55 / 13CF5 / 12D51 only"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "golden:13CF5:formal-semantic-authorization",
+      "evidence_type": "reviewed_project_rule",
+      "evidence_strength": "project_rule_binding",
+      "status": "supported",
+      "semantic_role": "fire_alarm_bus_segment",
+      "assertion": "affirm",
+      "binding_id": "golden:13CF5",
+      "source_ids": [
+        "golden-bus",
+        "formal-rules",
+        "formal-issuance"
+      ],
+      "provenance": [
+        {
+          "evidenceType": "HumanConfirmation",
+          "source": "current user request explicitly preserves the formally issued Golden as the positive semantic gate sample"
+        },
+        {
+          "evidenceType": "ProjectRule",
+          "source": "frozen formal project rules; no quantity recomputation"
+        },
+        {
+          "evidenceType": "DerivedInference",
+          "source": "golden-bus#/busSegment; explicit supported local logical identity"
+        }
+      ]
+    }
+  ],
+  "bindings": [
+    {
+      "binding_id": "golden:13CF5",
+      "review_status": "reviewed",
+      "project_id": "current garage fire-alarm project",
+      "drawing_ref": "EX-BX???????????_t8_t3.dwg",
+      "edge_handle": "13CF5",
+      "device_handles": [
+        "12D55",
+        "12D51"
+      ],
+      "evidence_ids": [
+        "golden:13CF5:formal-semantic-authorization"
+      ],
+      "provenance": [
+        "Current user explicitly authorizes 13CF5 positive sample",
+        "golden-bus#/busSegment/rawEntityRef"
+      ]
+    }
+  ],
+  "provenance": [
+    {
+      "source": "Existing Golden formalization plus current user instruction; project adapter only; no source edits"
+    }
+  ]
+}

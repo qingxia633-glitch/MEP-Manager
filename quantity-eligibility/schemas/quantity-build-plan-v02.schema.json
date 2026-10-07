@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QuantityBuildPlan v0.2 execution contract",
+  "type": "object",
+  "required": ["model_type", "schema_version", "object_id", "quantity_type", "binding", "quantity_eligibility_status", "quantity_formula_ready", "generation_allowed", "design_net_quantity_generation_allowed", "approved_semantic_role", "base_path", "owned_adjustments", "multiplier", "specification", "formula_components", "unit_execution_contract", "deduplication", "deduplication_status", "reporting_policy", "arithmetic_policy", "assumptions", "provenance", "source_build_plan_hash", "source_decision_artifact_hash", "source_evidence_hashes", "corrections_applied", "content_hash"],
+  "properties": {
+    "model_type": {"const": "QuantityBuildPlan"},
+    "schema_version": {"const": "0.2"},
+    "quantity_eligibility_status": {"const": "eligible"},
+    "quantity_formula_ready": {"const": true},
+    "generation_allowed": {"const": true},
+    "design_net_quantity_generation_allowed": {"const": true},
+    "approved_semantic_role": {"type": "string", "minLength": 1},
+    "deduplication_status": {"const": "passed"},
+    "deduplication": {"type": "object", "required": ["evidence_status", "execution_status", "provenance"], "properties": {"evidence_status": {"const": "supported"}, "execution_status": {"const": "passed"}}},
+    "unit_execution_contract": {"type": "object", "required": ["status", "dimension", "target_unit", "components", "multiplier", "raw_geometry_conversion", "raw_geometry_conversion_usage"], "properties": {"status": {"const": "approved"}, "dimension": {"const": "length"}, "components": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["reference", "original_value", "original_unit", "normalized_value", "normalized_unit", "dimension", "conversion", "provenance"]}}}},
+    "reporting_policy": {"type": "object", "required": ["policy_id", "scope", "status", "decimal_places", "rounding_mode", "intermediate_rounding", "provenance", "content_hash"], "properties": {"decimal_places": {"type": "integer", "minimum": 0}, "rounding_mode": {"const": "ROUND_HALF_EVEN"}, "intermediate_rounding": {"const": "none"}}},
+    "arithmetic_policy": {"type": "object", "required": ["numeric_type", "precision", "intermediate_rounding", "inexact_intermediate_action", "rounded_intermediate_action"]},
+    "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

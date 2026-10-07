@@ -1,0 +1,9 @@
+{
+  "layer": "CE-安防桥架",
+  "min": [556013250, 553163040, -1],
+  "max": [556014750, 553170454, 1],
+  "endpointTolerance": 0.00001,
+  "angleToleranceDegrees": 0.01,
+  "maxEdgesPerChain": 6,
+  "windowSource": "Manually selected local region: verified bend extent expanded by approximately 500 drawing units in XY. Handles are not discovery inputs."
+}

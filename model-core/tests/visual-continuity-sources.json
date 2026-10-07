@@ -1,0 +1,14 @@
+﻿[
+    {
+        "path":  "outputs/fire-alarm-routing/results.json",
+        "sha256":  "F2B42A31F0912D18D673A1BA7D01560D65BECBC0637FC856EE840FE6D86F53B1"
+    },
+    {
+        "path":  "outputs/routing-coverage-audit/crossing-jumps.json",
+        "sha256":  "B5C5AC33080FA95D74C117539E3C1309DD8F900EAA0198665360F793D4BEBBDD"
+    },
+    {
+        "path":  "outputs/routing-coverage-audit/inventory.json",
+        "sha256":  "7AE3E85CC7E530F3FAD02EEC92C1549F6AA8A5386A1FEC541EBE1F52B2A52D78"
+    }
+]

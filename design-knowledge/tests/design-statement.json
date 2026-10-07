@@ -1,0 +1,28 @@
+{
+ "fixtureId":"garage-non-fire-protection-paragraph",
+ "projectId":"local-project",
+ "source":{"path":"local_test_data/system-t8t3-verified-snapshot-20260916/MEP-full-entity-report.txt","sha256":"FC8E11D7678EDFFA06F5878155A577FC0E14EC8F932CA74AAE98ED4105C37C11","document":"EX-BX地下车库说明及配电箱系统_t8_t3.dwg"},
+ "titleParent":"6B13B",
+ "titleAttribute":"6B143",
+ "drawingNumberAttribute":"6B13C",
+ "contextHandles":["23424","23427","23429"],
+ "sectionTitle":"23424",
+ "parentNumber":"4.11",
+ "paragraphNumber":"4.12.1",
+ "fragments":[
+  {"handle":"23428","rawText":"4.12.1 非消防负荷：较短的线路，设过载长延时和短路瞬时脱扣；对于较长的线路，设过载长延时和短路"},
+  {"handle":"23401","rawText":"瞬时（或短路短延时）脱扣，调整断路器Is1或Is2脱扣电流倍数以满足末端单相接地故障保护的灵敏度要求。短延"},
+  {"handle":"23402","rawText":"时脱扣器用以保证上下级选择性要求。"}
+ ],
+ "readingEvidence":{"basis":["numbered first line","aligned continuation lines","approximately 1000-unit line spacing","split words continue across lines","full stop before next numbered item"],"status":"candidate_not_rendered_confirmation"},
+ "subject":"非消防负荷",
+ "shortCondition":"较短的线路",
+ "longCondition":"较长的线路",
+ "requirementA":"设过载长延时和短路瞬时脱扣",
+ "requirementB":"设过载长延时和短路瞬时（或短路短延时）脱扣",
+ "settingRequirement":"调整断路器Is1或Is2脱扣电流倍数以满足末端单相接地故障保护的灵敏度要求",
+ "alternative":"短路瞬时（或短路短延时）",
+ "purposeSubject":"短延时脱扣器",
+ "purposeConnector":"用以",
+ "purposeText":"保证上下级选择性要求"
+}

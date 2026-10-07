@@ -1,0 +1,82 @@
+{
+  "context": {
+    "project_id": "current garage fire-alarm project",
+    "drawing_ref": "EX-BX???????????_t8_t3.dwg"
+  },
+  "target_object": {
+    "id": "13CF5",
+    "kind": "edge"
+  },
+  "provenance": [
+    {
+      "path": "project-evidence-gate/project-evidence/garage-golden.json",
+      "sha256": "4684e4a2230035617914dbefb6b7b440d6add853ef3276c6f16e2d1133d78034"
+    }
+  ],
+  "explicit_bindings": [
+    {
+      "project_id": "current garage fire-alarm project",
+      "drawing_ref": "EX-BX???????????_t8_t3.dwg",
+      "target_id": "13CF5",
+      "target_kind": "edge",
+      "key": "reviewed_semantic_authorization",
+      "value": "fire_alarm_bus_segment",
+      "status": "supported",
+      "evidence_strength": "project_rule_binding",
+      "provenance": [
+        {
+          "path": "project-evidence-gate/project-evidence/garage-golden.json",
+          "sha256": "4684e4a2230035617914dbefb6b7b440d6add853ef3276c6f16e2d1133d78034"
+        },
+        {
+          "binding": {
+            "binding_id": "golden:13CF5",
+            "review_status": "reviewed",
+            "project_id": "current garage fire-alarm project",
+            "drawing_ref": "EX-BX???????????_t8_t3.dwg",
+            "edge_handle": "13CF5",
+            "device_handles": [
+              "12D55",
+              "12D51"
+            ],
+            "evidence_ids": [
+              "golden:13CF5:formal-semantic-authorization"
+            ],
+            "provenance": [
+              "Current user explicitly authorizes 13CF5 positive sample",
+              "golden-bus#/busSegment/rawEntityRef"
+            ]
+          },
+          "evidence": {
+            "evidence_id": "golden:13CF5:formal-semantic-authorization",
+            "evidence_type": "reviewed_project_rule",
+            "evidence_strength": "project_rule_binding",
+            "status": "supported",
+            "semantic_role": "fire_alarm_bus_segment",
+            "assertion": "affirm",
+            "binding_id": "golden:13CF5",
+            "source_ids": [
+              "golden-bus",
+              "formal-rules",
+              "formal-issuance"
+            ],
+            "provenance": [
+              {
+                "evidenceType": "HumanConfirmation",
+                "source": "current user request explicitly preserves the formally issued Golden as the positive semantic gate sample"
+              },
+              {
+                "evidenceType": "ProjectRule",
+                "source": "frozen formal project rules; no quantity recomputation"
+              },
+              {
+                "evidenceType": "DerivedInference",
+                "source": "golden-bus#/busSegment; explicit supported local logical identity"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

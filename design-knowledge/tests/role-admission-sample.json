@@ -1,0 +1,41 @@
+{
+  "version": "1",
+  "scopeId": "garage-fire-broadcast-reviewed-local-region",
+  "requirementSource": {"path":"local_test_data/fire-document-targets-20260925.json","sha256":"D2530186662889A90FA49EE4C013C71CD12269396444B4855FFCA29747ABE25C"},
+  "sources": {
+    "legend": {"path":"local_test_data/system-t8t3-textlayout-snapshot-20260924/MEP-full-entity-report.txt","sha256":"7360ADB34A4E0BACACD2768261FBB3E19835C07C65F9F4959F94BAE5751A249F"},
+    "system": {"path":"local_test_data/fire-system-full-snapshot-20260925/MEP-full-entity-report.txt","sha256":"B2AEA6FAF9999099AA525FD2552DE61092E7F0BA04294EE23D8D8E5B3E707FF0"},
+    "legendDefinition": {"path":"local_test_data/legend-B-block-239B2-probe-20260925/block-definition-probe.txt","sha256":"8B0F71D52AC688D6C4B80D2B3AA9AB33296802BD3AF548E71D9DB78F51E476A0"},
+    "systemDefinition": {"path":"local_test_data/fire-broadcast-block-15DFF-probe-20260925/block-definition-probe.txt","sha256":"D3803EA296C98EA17C7A2315822804A6F8B04DF5F8C30626BF619F004F3F9D7D"}
+  },
+  "references": {
+    "instance":{"source":"system","handle":"15DFF"},
+    "legendSymbol":{"source":"legend","handle":"239B2"},
+    "legendName":{"source":"legend","handle":"238B3"},
+    "leftLine":{"source":"system","handle":"15DED"},
+    "upperLine":{"source":"system","handle":"15DE9"},
+    "lowerLine":{"source":"system","handle":"15DEC"},
+    "speaker":{"source":"system","handle":"16268"},
+    "bus":{"source":"system","handle":"15DB0"},
+    "legendBoundary":{"source":"legendDefinition","handle":"21D33"},
+    "legendBottom":{"source":"legendDefinition","handle":"21D34"},
+    "legendLeft":{"source":"legendDefinition","handle":"21D35"},
+    "legendTop":{"source":"legendDefinition","handle":"21D36"},
+    "legendRight":{"source":"legendDefinition","handle":"21D37"},
+    "legendHidden":{"source":"legendDefinition","handle":"21D38"},
+    "legendDefaultCode":{"source":"legendDefinition","handle":"21D39"},
+    "boundary":{"source":"systemDefinition","handle":"9A7"},
+    "bottom":{"source":"systemDefinition","handle":"9A8"},
+    "left":{"source":"systemDefinition","handle":"9A9"},
+    "top":{"source":"systemDefinition","handle":"9AA"},
+    "right":{"source":"systemDefinition","handle":"9AB"},
+    "hidden":{"source":"systemDefinition","handle":"9AC"},
+    "defaultCode":{"source":"systemDefinition","handle":"9AD"}
+  },
+  "reviewedLegendLayout": {"status":"supported","sourceRefs":["legendSymbol","legendName"],"basis":"previously reviewed legend row; not nearest-text inference"},
+  "reviewedContext": {"status":"supported","sourceRefs":["instance","legendName","leftLine","upperLine","bus"],"basis":"user-confirmed local role and cross-system expression; not a port confirmation"},
+  "requirements": [
+    {"requirementId":"req:broadcast","systemIdentity":"fire_broadcast","scopeId":"garage-fire-broadcast-reviewed-local-region","taskType":"relation_investigation"},
+    {"requirementId":"req:membership","systemIdentity":"fire_alarm","scopeId":"garage-fire-broadcast-reviewed-local-region","taskType":"membership_investigation"}
+  ]
+}

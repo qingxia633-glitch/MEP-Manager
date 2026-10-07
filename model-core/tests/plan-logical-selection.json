@@ -1,0 +1,14 @@
+﻿[
+    {
+        "kind":  "category_attachment",
+        "instanceRef":  "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt:12D29",
+        "categoryRef":  "fire-region-one:fire_alarm:B2AEA6FAF9999099AA525FD2552DE61092E7F0BA04294EE23D8D8E5B3E707FF0:15DF0",
+        "rawRoutingRef":  "719A34DE3185FB16512B79BAAF9D1786F8BC80628C61199FB27E2AC76F3317F8:13CC8"
+    },
+    {
+        "kind":  "routed_pair",
+        "instanceA":  "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt:13990",
+        "instanceB":  "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt:12FFF",
+        "rawRoutingRef":  "719A34DE3185FB16512B79BAAF9D1786F8BC80628C61199FB27E2AC76F3317F8:13D21"
+    }
+]
