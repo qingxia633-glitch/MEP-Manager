@@ -1,4 +1,4 @@
-"""Execute reviewed v0.2 contracts. No CAD, semantic or ownership inference."""
+"""Execute independently validated v0.3 contracts. No engineering inference."""
 from copy import deepcopy
 from decimal import Decimal, localcontext, Inexact, Rounded, ROUND_HALF_EVEN, DecimalException
 import hashlib
@@ -10,10 +10,11 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'.builder-deps'))
 from jsonschema import Draft202012Validator
 sys.path.insert(0,str(ROOT/'quantity-eligibility'))
-from quantity_contract import scope_identity, validate_plan_bindings
+from quantity_contract import scope_identity
+from executable_contract import validate_executable_plan_contract
 
-VERSION='0.1'
-SCHEMA=json.loads((ROOT/'quantity-eligibility/schemas/quantity-build-plan-v02.schema.json').read_text(encoding='utf-8'))
+VERSION='0.2'
+SCHEMA=json.loads((ROOT/'quantity-eligibility/schemas/quantity-build-plan-v03.schema.json').read_text(encoding='utf-8'))
 Draft202012Validator.check_schema(SCHEMA)
 VALIDATOR=Draft202012Validator(SCHEMA)
 
@@ -75,14 +76,20 @@ def execution_evidence_contract(plan):
     return {'version':'2','records':{k:deepcopy(plan.get(k)) for k in fields}}
 
 def _execute(p):
+    if isinstance(p,dict) and p.get('schema_version')=='0.2':
+        return result('blocked','legacy_incomplete: v0.2 is not the current executable admission contract')
     errors=[{'path':'/'+ '/'.join(map(str,e.absolute_path)),'message':e.message} for e in VALIDATOR.iter_errors(p)]
     if errors:
         blocked=isinstance(p,dict) and (p.get('quantity_eligibility_status') not in (None,'eligible') or
                 p.get('quantity_formula_ready') is False or p.get('generation_allowed') is False)
-        return result('blocked' if blocked else 'invalid_plan','Schema/eligibility admission failed',errors)
+        admission_fields={'semantic_gate','geometry_basis','height_evidence','height_requirement','unit_conversion_contract'}
+        admission_error=isinstance(p,dict) and (any(k not in p for k in admission_fields) or
+            any(e['path'].split('/')[1] in admission_fields for e in errors if e['path']!='/'))
+        return result('blocked' if blocked else 'contract_violation' if admission_error else 'invalid_plan',
+                      'Schema/eligibility admission failed',errors)
     try:
         verify(p)
-        validate_plan_bindings(p)
+        validate_executable_plan_contract(p)
         policy=p['reporting_policy']; verify(policy)
         if not policy.get('provenance') or policy['status']!='approved' or policy['scope']['project_id']!=p['binding']['project_id']:
             raise ValueError('Reporting policy scope/approval mismatch')

@@ -1,0 +1,637 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QuantityBuildPlan v0.3 untrusted executable admission contract",
+  "type": "object",
+  "required": [
+    "model_type",
+    "schema_version",
+    "object_id",
+    "quantity_type",
+    "binding",
+    "quantity_eligibility_status",
+    "quantity_formula_ready",
+    "generation_allowed",
+    "design_net_quantity_generation_allowed",
+    "approved_semantic_role",
+    "base_path",
+    "owned_adjustments",
+    "multiplier",
+    "specification",
+    "formula_components",
+    "unit_execution_contract",
+    "deduplication",
+    "deduplication_status",
+    "reporting_policy",
+    "arithmetic_policy",
+    "assumptions",
+    "provenance",
+    "source_build_plan_hash",
+    "source_decision_artifact_hash",
+    "source_evidence_hashes",
+    "corrections_applied",
+    "content_hash",
+    "semantic_gate",
+    "geometry_basis",
+    "height_evidence",
+    "height_requirement",
+    "unit_conversion_contract"
+  ],
+  "properties": {
+    "model_type": {
+      "const": "QuantityBuildPlan"
+    },
+    "schema_version": {
+      "const": "0.3"
+    },
+    "quantity_eligibility_status": {
+      "const": "eligible"
+    },
+    "quantity_formula_ready": {
+      "const": true
+    },
+    "generation_allowed": {
+      "const": true
+    },
+    "design_net_quantity_generation_allowed": {
+      "const": true
+    },
+    "object_id": {
+      "$ref": "#/$defs/id"
+    },
+    "quantity_type": {
+      "$ref": "#/$defs/id"
+    },
+    "binding": {
+      "$ref": "#/$defs/binding"
+    },
+    "approved_semantic_role": {
+      "$ref": "#/$defs/id",
+      "not": {
+        "enum": [
+          "unknown",
+          "unresolved",
+          "partial",
+          "conflicting",
+          "rejected",
+          "not_evaluated"
+        ]
+      }
+    },
+    "base_path": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/record"
+        },
+        {
+          "required": [
+            "value",
+            "unit",
+            "mode"
+          ],
+          "properties": {
+            "value": {
+              "$ref": "#/$defs/number"
+            },
+            "unit": {
+              "enum": [
+                "m",
+                "mm"
+              ]
+            },
+            "mode": {
+              "enum": [
+                "converted_2d",
+                "approved_3d"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "owned_adjustments": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/record"
+          },
+          {
+            "required": [
+              "adjustment_id",
+              "owner",
+              "device",
+              "transition_type",
+              "length",
+              "unit",
+              "purpose"
+            ],
+            "properties": {
+              "adjustment_id": {
+                "$ref": "#/$defs/id"
+              },
+              "owner": {
+                "$ref": "#/$defs/binding"
+              },
+              "device": {
+                "$ref": "#/$defs/id"
+              },
+              "transition_type": {
+                "$ref": "#/$defs/id"
+              },
+              "length": {
+                "$ref": "#/$defs/number"
+              },
+              "unit": {
+                "enum": [
+                  "m",
+                  "mm"
+                ]
+              },
+              "purpose": {
+                "const": "design_net"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "multiplier": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/record"
+        },
+        {
+          "required": [
+            "value",
+            "interpretation"
+          ],
+          "properties": {
+            "value": {
+              "$ref": "#/$defs/number"
+            },
+            "interpretation": {
+              "$ref": "#/$defs/id"
+            }
+          }
+        }
+      ]
+    },
+    "specification": {
+      "type": "object",
+      "required": [
+        "binding",
+        "binding_status",
+        "provenance",
+        "value",
+        "installation",
+        "evidence_type"
+      ],
+      "properties": {
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "binding_status": {
+          "const": "supported"
+        },
+        "provenance": {
+          "type": "array"
+        },
+        "value": {
+          "$ref": "#/$defs/id"
+        },
+        "installation": {
+          "$ref": "#/$defs/id"
+        },
+        "evidence_type": {
+          "enum": [
+            "direct_project_binding",
+            "reviewed_project_rule"
+          ]
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "value",
+          "scope",
+          "provenance"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "status": {
+            "const": "approved"
+          },
+          "scope": {
+            "type": "object",
+            "required": [
+              "binding"
+            ],
+            "properties": {
+              "binding": {
+                "$ref": "#/$defs/binding"
+              }
+            }
+          },
+          "provenance": {
+            "type": "array"
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "source_evidence_hashes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "sha256"
+        ],
+        "properties": {
+          "sha256": {
+            "$ref": "#/$defs/hash"
+          }
+        }
+      }
+    },
+    "source_build_plan_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "source_decision_artifact_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "corrections_applied": {
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "changed_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "deduplication_status": {
+      "const": "passed"
+    },
+    "deduplication": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/record"
+        },
+        {
+          "required": [
+            "evidence_status",
+            "execution_status",
+            "key_fields"
+          ],
+          "properties": {
+            "evidence_status": {
+              "const": "supported"
+            },
+            "execution_status": {
+              "const": "passed"
+            },
+            "key_fields": {
+              "const": [
+                "edge_handle",
+                "segment_id",
+                "device",
+                "transition_type"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "unit_execution_contract": {
+      "type": "object",
+      "required": [
+        "status",
+        "dimension",
+        "target_unit",
+        "components",
+        "multiplier",
+        "raw_geometry_conversion",
+        "raw_geometry_conversion_usage"
+      ],
+      "properties": {
+        "status": {
+          "const": "approved"
+        },
+        "dimension": {
+          "const": "length"
+        },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "reference",
+              "original_value",
+              "original_unit",
+              "normalized_value",
+              "normalized_unit",
+              "dimension",
+              "conversion",
+              "provenance"
+            ]
+          }
+        }
+      }
+    },
+    "reporting_policy": {
+      "type": "object",
+      "required": [
+        "policy_id",
+        "scope",
+        "status",
+        "decimal_places",
+        "rounding_mode",
+        "intermediate_rounding",
+        "provenance",
+        "content_hash"
+      ],
+      "properties": {
+        "decimal_places": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rounding_mode": {
+          "const": "ROUND_HALF_EVEN"
+        },
+        "intermediate_rounding": {
+          "const": "none"
+        }
+      }
+    },
+    "arithmetic_policy": {
+      "type": "object",
+      "required": [
+        "numeric_type",
+        "precision",
+        "intermediate_rounding",
+        "inexact_intermediate_action",
+        "rounded_intermediate_action"
+      ]
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "geometry_basis": {
+      "type": "object",
+      "required": [
+        "status",
+        "binding",
+        "provenance",
+        "base_length",
+        "source_entity",
+        "source_unit",
+        "engineering_unit",
+        "conversion"
+      ],
+      "properties": {
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "provenance": {
+          "type": "array",
+          "minItems": 1
+        },
+        "status": {
+          "const": "supported"
+        },
+        "conversion": {
+          "type": "object",
+          "required": [
+            "status",
+            "binding",
+            "provenance",
+            "from_unit",
+            "to_unit",
+            "factor",
+            "converted_length"
+          ]
+        }
+      }
+    },
+    "height_evidence": {
+      "type": "object",
+      "required": [
+        "status",
+        "binding",
+        "provenance"
+      ],
+      "properties": {
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "provenance": {
+          "type": "array",
+          "minItems": 1
+        }
+      }
+    },
+    "height_requirement": {
+      "enum": [
+        "required",
+        "not_applicable"
+      ]
+    },
+    "unit_conversion_contract": {
+      "type": "object",
+      "required": [
+        "contract_id",
+        "version",
+        "kind",
+        "source_unit",
+        "target_unit",
+        "factor"
+      ]
+    },
+    "semantic_gate": {
+      "type": "object",
+      "required": [
+        "project_specific_status",
+        "semantic_gate_passed",
+        "design_net_quantity_eligible",
+        "approved_semantic_role",
+        "object_identity",
+        "accepted_evidence",
+        "provenance",
+        "edge_handle"
+      ],
+      "properties": {
+        "project_specific_status": {
+          "const": "supported"
+        },
+        "semantic_gate_passed": {
+          "const": true
+        },
+        "design_net_quantity_eligible": {
+          "const": true
+        },
+        "object_identity": {
+          "$ref": "#/$defs/binding"
+        },
+        "accepted_evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "object_identity",
+              "provenance",
+              "status",
+              "semantic_role",
+              "assertion"
+            ],
+            "properties": {
+              "object_identity": {
+                "$ref": "#/$defs/binding"
+              },
+              "provenance": {
+                "type": "array",
+                "minItems": 1
+              },
+              "status": {
+                "const": "supported"
+              },
+              "assertion": {
+                "const": "affirm"
+              },
+              "semantic_role": {
+                "$ref": "#/$defs/id"
+              }
+            }
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "required": [
+            "context"
+          ],
+          "properties": {
+            "context": {
+              "$ref": "#/$defs/binding"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^\\S(?:.*\\S)?$"
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "number": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "string",
+          "pattern": "^(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?$"
+        }
+      ]
+    },
+    "binding": {
+      "type": "object",
+      "required": [
+        "project_id",
+        "drawing_ref",
+        "edge_handle",
+        "parent_path",
+        "scope_type"
+      ],
+      "properties": {
+        "project_id": {
+          "$ref": "#/$defs/id"
+        },
+        "drawing_ref": {
+          "$ref": "#/$defs/id"
+        },
+        "edge_handle": {
+          "$ref": "#/$defs/id"
+        },
+        "segment_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scope_type": {
+          "enum": [
+            "edge",
+            "segment"
+          ]
+        },
+        "parent_path": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        }
+      }
+    },
+    "record": {
+      "type": "object",
+      "required": [
+        "status",
+        "binding",
+        "provenance"
+      ],
+      "properties": {
+        "status": {
+          "const": "supported"
+        },
+        "binding": {
+          "$ref": "#/$defs/binding"
+        },
+        "provenance": {
+          "type": "array"
+        },
+        "assumption_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "assumptions_required": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
