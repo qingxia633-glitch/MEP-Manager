@@ -1,6 +1,7 @@
 import copy
 import json
 import hashlib
+import importlib.util
 import sys
 import unittest
 from pathlib import Path
@@ -13,19 +14,11 @@ def plan(kind='conduit'):
     return json.loads((ROOT / f'outputs/quantity-build-plan-v02/golden-{kind}-v02.json').read_text(encoding='utf-8'))
 
 def synthetic(multiplier=1, unit='m'):
-    p = plan()
-    p['binding']['edge_handle'] = 'synthetic'
-    p['object_id'] = 'synthetic'
-    p['corrections_applied'] = {}
-    vals = ['10', '0.2', '0.3'] if unit == 'm' else ['10000', '200', '300']
-    records = [p['base_path']] + p['owned_adjustments']
-    for i, (r, t, v) in enumerate(zip(records, p['unit_execution_contract']['components'], vals)):
-        r['value' if i == 0 else 'length'] = v
-        r['unit'] = unit
-        t.update(original_value=v, original_unit=unit, normalized_value=['10','0.2','0.3'][i])
-        t['conversion'].update(source_unit=unit, factor='1' if unit == 'm' else '0.001')
-    p['multiplier']['value'] = multiplier
-    p['unit_execution_contract']['multiplier'].update(original_value=str(multiplier), normalized_value=str(multiplier))
+    spec=importlib.util.spec_from_file_location('independent_quantity_fixture',ROOT/'safety-hardening/fixtures.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    p=module.plan(multiplier,unit)
+    p['provenance']['route']={'path':'synthetic-route.json','sha256':'d'*64}
+    p['source_evidence_hashes']['route']=copy.deepcopy(p['provenance']['route'])
     return seal(p)
 
 def frozen(kind):
@@ -43,10 +36,10 @@ def frozen(kind):
 
 class BuilderTests(unittest.TestCase):
     def test_conduit_replay(self):
-        self.assertEqual(replay_validate(plan(), frozen('conduit'))['status'], 'replay_matched')
+        self.assertEqual(replay_validate(plan(), frozen('conduit'))['status'], 'replay_value_matched_legacy_evidence_incomplete')
     def test_wire_replay(self):
         p=plan('wire'); self.assertEqual(p['multiplier']['value'],1)
-        self.assertEqual(replay_validate(p, frozen('wire'))['status'],'replay_matched')
+        self.assertEqual(replay_validate(p, frozen('wire'))['status'],'replay_value_matched_legacy_evidence_incomplete')
     def test_synthetic(self):
         self.assertEqual(build(synthetic(), [])['quantity']['computed_quantity']['exact_value'],'10.5')
     def test_multiplier(self):

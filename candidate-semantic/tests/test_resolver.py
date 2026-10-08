@@ -14,11 +14,14 @@ CONFIG = ROOT / 'candidate-semantic/project-rules/garage-fire-alarm.json'
 
 def endpoint(handle, role, role_status='supported', geometry='supported'):
     return {'geometry_connection': {'edge_handle': 'E', 'target_handle': handle,
+            'evidence_identity':{'project_id':'current garage fire-alarm project','drawing_ref':'synthetic.dwg','edge_parent_path':[],'target_parent_path':[]},
             'geometric_connection_status': geometry},
-            'device_role': {'device_handle': handle, 'canonical_role': role, 'role_status': role_status}}
+            'device_role': {'device_handle': handle, 'canonical_role': role, 'role_status': role_status,
+                'evidence_identity':{'project_id':'current garage fire-alarm project','drawing_ref':'synthetic.dwg','parent_path':[]}}}
 
 def sample(a='smoke_detector', b='input_output_module'):
     return {'edge_handle': 'E', 'scope': {'project': 'current garage fire-alarm project', 'validation_area': 'compartment 1'},
+            'evidence_identity':{'project_id':'current garage fire-alarm project','drawing_ref':'synthetic.dwg','parent_path':[]},
             'endpoint_A': endpoint('A', a), 'endpoint_B': endpoint('B', b),
             'edge_metadata': {'layer': 'WIRE-消防控制', 'specification_evidence': ['WDZN-RYJS'], 'nearby_text': ['M2']}}
 
@@ -149,7 +152,36 @@ class RealFixtures(unittest.TestCase):
         rules = load_rules(CONFIG)
         for fixture in fixtures:
             with self.subTest(edge=fixture['input']['edge_handle']):
-                result = resolve_candidate(fixture['input'], rules)
+                # Explicit legacy-input adapter: verify snapshot hashes and top-level
+                # entities before supplying missing identity, without rewriting fixtures.
+                import hashlib,re
+                item=copy.deepcopy(fixture['input']);drawing=None
+                project=item['scope']['project']
+                for key in ('endpoint_A','endpoint_B'):
+                    endpoint_item=item[key]
+                    for kind,handle in [('geometry_connection',item['edge_handle']),('device_role',endpoint_item['device_role']['device_handle'])]:
+                        record=endpoint_item[kind];matched=[]
+                        synthetic_geometry=record.get('fixture_kind')=='synthetic'
+                        sources=endpoint_item['device_role']['provenance'] if synthetic_geometry else record['provenance']
+                        for source in sources:
+                            path=Path(source['path'])
+                            if path.name!='MEP-full-entity-report.txt':continue
+                            data=path.read_bytes()
+                            self.assertEqual(hashlib.sha256(data).hexdigest(),source['sha256'])
+                            text=data.decode('utf-8-sig')
+                            if not synthetic_geometry:
+                                self.assertIsNotNone(re.search(r'(?m)^EntityHandle="?'+re.escape(handle)+r'"?\r?$',text),'Handle missing from verified snapshot: '+handle)
+                            if kind=='geometry_connection':
+                                self.assertIsNotNone(re.search(r'(?m)^EntityHandle="?'+re.escape(record['target_handle'])+r'"?\r?$',text),'Target missing from verified snapshot')
+                            matched.append(re.search(r'(?m)^DWG=(.*?)\r?$',text)[1].strip().strip('"'))
+                        self.assertTrue(matched)
+                        self.assertEqual(len(set(matched)),1)
+                        if drawing is not None:self.assertEqual(drawing,matched[0])
+                        drawing=matched[0]
+                        record['evidence_identity']={'project_id':project,'drawing_ref':drawing}
+                        record['evidence_identity'].update({'edge_parent_path':[],'target_parent_path':[]} if kind=='geometry_connection' else {'parent_path':[]})
+                item['evidence_identity']={'project_id':project,'drawing_ref':drawing,'parent_path':[]}
+                result = resolve_candidate(item, rules)
                 for key, value in fixture['expected'].items(): self.assertEqual(result[key], value)
 
 if __name__ == '__main__': unittest.main(verbosity=2)

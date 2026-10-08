@@ -41,9 +41,10 @@ class ResolverTests(unittest.TestCase):
         self.assertEqual(self.status(rule('explicit_bindings','semantic.line_code','S'),q),'unresolved')
     def propagation(self):
         r=rule();r['propagation_key']='rest';q=request();q['object_facts']=[witness()]
-        q['propagation_sources']=[witness(key='rest',source_annotation='text:1',root_target={'id':'root','kind':'edge'},
-            propagation_relation='explicit local set',bounded_set=[{'id':'edge','kind':'edge'}],
-            propagation_boundary={'region':'closed reviewed local set'},termination_condition='outside set stops')]
+        def proven(value):return dict(value=value,status='supported',provenance=['synthetic independent scope review'])
+        q['propagation_sources']=[witness(key='rest',source_annotation='text:1',root_target={'id':'root','kind':'edge','status':'supported','provenance':['synthetic root review']},
+            propagation_relation=proven('explicit local set'),bounded_set=[{'id':'edge','kind':'edge'}],
+            propagation_boundary=proven('closed reviewed local set'),termination_condition=proven('outside set stops'))]
         return r,q
     def test_bounded_rest_inside(self):
         r,q=self.propagation();self.assertEqual(self.status(r,q),'applicable')
@@ -114,7 +115,7 @@ class ResolverTests(unittest.TestCase):
         r=rule();r['conditions']*=2
         with self.assertRaises(ValueError):resolve(r,request())
     def test_propagation_conflict(self):
-        r,q=self.propagation();other=copy.deepcopy(q['propagation_sources'][0]);other['root_target']={'id':'different','kind':'edge'}
+        r,q=self.propagation();other=copy.deepcopy(q['propagation_sources'][0]);other['root_target']['id']='different'
         q['propagation_sources'].append(other);self.assertEqual(self.status(r,q),'conflicting')
     def test_system_rule_cannot_omit_membership_contract(self):
         r=rule();r['binding_scope']='system';q=request();q['object_facts']=[witness()]

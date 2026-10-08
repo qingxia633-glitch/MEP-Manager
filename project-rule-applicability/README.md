@@ -32,7 +32,9 @@ There is no executable Python/expression evaluation or inference between keys.
 For example `semantic.line_code = S` is distinct from a specification fact.
 System, region, drawing, compartment and local-group rules require corresponding
 scope membership conditions. Witnesses for a device never prove membership of an edge.
-An object rule may also constrain `target_ids`.
+An object rule may also constrain `target_ids`. It must be a nonempty list of
+unique canonical string IDs; strings, null, duplicates and whitespace aliases are
+contract errors, never substring membership tests.
 
 ## Four-valued decisions
 
@@ -56,6 +58,11 @@ The target must be in the bounded set. There is no graph traversal, global rest 
 or region-to-system inference. A supported empty set excludes all targets.
 The shared propagation witness is bound to its project/drawing and rule key; it need not
 already carry an edge-specific target id. The explicit bounded set supplies target membership.
+
+Root, relation, boundary and termination are structured witnesses with
+`status=supported` and nonempty `provenance`. Root includes `id` and `kind`;
+the other three include an explicit `value`. Nonempty dictionaries with unknown,
+unresolved, partial or conflicting status do not establish propagation.
 
 ## Source rules and real fixtures
 

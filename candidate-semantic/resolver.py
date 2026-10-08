@@ -4,6 +4,16 @@ from copy import deepcopy
 GRADES = ['unknown', 'low', 'medium', 'high']
 
 
+def _identity(record, path_key):
+    value=record.get('evidence_identity',{})
+    if not isinstance(value,dict):return None
+    project,drawing,path=value.get('project_id'),value.get('drawing_ref'),value.get(path_key)
+    if any(k in record and record[k]!=value.get(k) for k in ('project_id','drawing_ref')):return None
+    if not all(isinstance(v,str) and v.strip() and v==v.strip() for v in (project,drawing)):return None
+    if not isinstance(path,list) or not all(isinstance(v,str) and v.strip() and v==v.strip() for v in path):return None
+    return project,drawing,tuple(path)
+
+
 def resolve_candidate(item, rule_set):
     result = {'model_type': 'CandidateSemanticEvidence', 'resolver_version': '0.1',
               'edge_handle': item.get('edge_handle'), 'candidate_role': 'unknown',
@@ -33,6 +43,13 @@ def resolve_candidate(item, rule_set):
                        'canonical_role': role.get('canonical_role', 'unknown'), 'role_status': rs,
                        'role_evidence_status': rs}
         result['provenance']['endpoints'][key] = deepcopy(endpoint)
+        edge_identity=_identity(item,'parent_path')
+        if (edge_identity is None or item.get('scope',{}).get('project',edge_identity[0])!=edge_identity[0] or
+            _identity(geo,'edge_parent_path')!=edge_identity or
+            _identity(geo,'target_parent_path') is None or
+            _identity(geo,'target_parent_path')!=_identity(role,'parent_path')):
+            result['limiting_evidence'].append({'endpoint':key,'blocker':'project_drawing_or_parent_identity_missing_or_mismatched'})
+            blocked=True
         if (not item.get('edge_handle') or geo.get('edge_handle') != item['edge_handle'] or
                 not geo.get('target_handle') or geo['target_handle'] != role.get('device_handle')):
             result['limiting_evidence'].append({'endpoint': key, 'blocker': 'evidence_identity_mismatch'})

@@ -9,6 +9,9 @@
 
 `resolve_connection(edge_handle, edge_endpoint, target_insert_handle, context, connection_xy_tolerance, max_depth=16)` 返回连接证据。`edge_endpoint` 为真实线路端点 WCS XYZ；不是设备插入点。
 
+源 edge 必须可读，传入坐标必须在容差内匹配该 edge 的真实首/尾端点。输出 `endpoint_source` 保存源实体、端点索引、原始请求坐标、核验坐标及 provenance；源证据不足则为 unresolved，不能借用另一条边的端点。该源坐标核验与目标设备 Z 的物理语义判断分开。
+CLI 输出采用 exclusive create，已有文件和输入输出别名均拒绝覆盖。
+
 ```powershell
 python geometry-connection/resolve.py --snapshot <report.txt> --probe <probe.txt> --probe <child-probe.txt> --edge 14147 --endpoint-index -1 --target 13017 --tolerance 0.001 --output <new-evidence.json>
 python geometry-connection/tests/test_resolver.py

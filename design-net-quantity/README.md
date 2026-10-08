@@ -1,7 +1,7 @@
 # DesignNetQuantityBuilder v0.1
 
 Only executes QuantityBuildPlan v0.2. No CAD reads, semantic inference, ownership
-decisions, upstream changes, procurement or pricing. The frozen schema is validated
+decisions, upstream changes, procurement or pricing. The versioned schema is validated
 in full by jsonschema Draft202012Validator; additional execution checks enforce
 formula/component consistency, provenance, hashes and unit contracts.
 
@@ -16,11 +16,13 @@ Registry entries must include scope, quantity_kind, approved_semantic_role. Dupl
 keys block building. Caller must provide a complete registry and serialize concurrent
 builds; this library does not provide a database transaction or issue quantities itself.
 
-`replay_validate(plan, frozen_quantity)` evaluates without issuing; compares identity,
-specification, installation, reported value, unit and multiplier. Legacy formal objects
-need an explicit adapter: the project test adapter maps the historical object to the
-upstream-approved binding and semantic role. It does not modify the original. A matched
-replay is not byte equality between the legacy and new object schemas.
+`replay_validate(plan, frozen_quantity)` evaluates without issuing. Native objects
+require both numeric agreement and canonical semantic content/hash agreement,
+including formula components, owners, devices, assumptions and evidence references.
+The output distinguishes `numeric_match` from `evidence_contract_match`.
+Legacy adapters with only value/specification fields cannot prove full replay:
+they return `replay_value_matched_legacy_evidence_incomplete` when values agree.
+They never receive `replay_matched`. Historical objects are not modified.
 
 ```
 python design-net-quantity/resolve.py build plan.json --registry registry.json --output new-result.json
@@ -28,7 +30,8 @@ python design-net-quantity/resolve.py replay_validate plan.json --frozen normali
 ```
 
 Output files are exclusively created, never overwritten. Replay returns `issued=false`.
-The result statuses are built, replay_matched, replay_mismatch, blocked, invalid_plan,
+The result statuses are built, replay_matched, replay_mismatch,
+replay_value_matched_legacy_evidence_incomplete, blocked, invalid_plan,
 duplicate_detected and contract_violation. Schema admission is always checked before
 evaluation; explicit failed eligibility is reported blocked with validation errors.
 
@@ -42,11 +45,21 @@ all source terms must use one source unit. Mixed source-unit plans reject. Histo
 raw_geometry_conversion is audit-only and never an extra term.
 
 All input evidence, assumptions and hashes are retained. Output content_hash uses a
-canonical sorted JSON semantic projection excluding content_hash, built_at, path and
+canonical sorted JSON semantic projection excluding its own root content_hash, built_at, path and
 source_build_plan_hash/source_decision_artifact_hash locators. These audit hashes remain
-in the object. Quantity identity is scope + kind + approved role. Hashes prove integrity,
+in the object. Nested evidence content hashes remain part of semantic content so a
+correction with the same ID but different evidence cannot replay as a full match. All input hashes remain
+in the object. Quantity identity uses canonical project/drawing/edge/segment/path
+identity + kind + approved role, excluding scope comments and display metadata. Hashes prove integrity,
 not source authority. CorrectionEvidence references are retained; corrected drawing_ref
 must already be applied by upstream. Builder never rewrites historical evidence.
 
-The schema is intentionally unchanged. Additional validation is fail-closed for fields
-needed for execution. No procurement-completeness gate is introduced.
+The hardened v0.2 schema and execution checks require complete nested bindings,
+non-placeholder approved roles and provenance. Physical adjustment identities are
+checked across all formula entries, not just within a category. Current physical keys
+require owner scope, device and transition type; unrepresented identities fail closed.
+No procurement-completeness gate is introduced.
+
+The safety-hardening pass is not accepted until its regression gate passes. The two
+unchanged legacy Golden replay assertions currently require an explicit contract
+migration; the incomplete legacy status must not be disguised as a full match.

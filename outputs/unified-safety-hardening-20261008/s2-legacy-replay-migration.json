@@ -1,0 +1,33 @@
+{
+  "authorization": "User explicitly approved limited S2 migration of these two assertions",
+  "old_contract_record": "test-contract-baseline.json",
+  "records": [
+    {
+      "test_id": "BuilderTests.test_conduit_replay",
+      "old_expected": "replay_matched",
+      "new_expected": "replay_value_matched_legacy_evidence_incomplete",
+      "migration_reason": "S2 将 replay 从“数值相等即完整匹配”收紧为“数值匹配 + 完整证据契约匹配”。旧 Golden 冻结对象缺少足够字段，因此只能证明 value match，不能证明 full evidence contract match。",
+      "affected_fixtures": [
+        "outputs/quantity-build-plan-v02/golden-conduit-v02.json",
+        "outputs/golden-project-measurement-rules-20261004/design-net-quantities.json"
+      ],
+      "frozen_files_modified": false
+    },
+    {
+      "test_id": "BuilderTests.test_wire_replay",
+      "old_expected": "replay_matched",
+      "new_expected": "replay_value_matched_legacy_evidence_incomplete",
+      "migration_reason": "S2 将 replay 从“数值相等即完整匹配”收紧为“数值匹配 + 完整证据契约匹配”。旧 Golden 冻结对象缺少足够字段，因此只能证明 value match，不能证明 full evidence contract match。",
+      "affected_fixtures": [
+        "outputs/quantity-build-plan-v02/golden-wire-v02.json",
+        "outputs/golden-project-measurement-rules-20261004/design-net-quantities.json"
+      ],
+      "frozen_files_modified": false
+    }
+  ],
+  "frozen_inventory": {
+    "checked": 279,
+    "changed": []
+  },
+  "production_code_changed_for_migration": false
+}

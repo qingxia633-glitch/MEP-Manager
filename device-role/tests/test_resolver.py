@@ -108,6 +108,11 @@ class Priorities(unittest.TestCase):
         c=ctx([attr('M2')]); base=dict(source_drawing='EC-4#-P+TBD_t8_t3.dwg',source_handle='2399E',
             raw_value='模块箱',display_code='M2',target_drawing='project.dwg',target_block_name='B',
             binding_verified=True,binding_evidence_refs=['reviewed equivalence'],evidence_type='project_legend')
+        import hashlib,json
+        c.legend_policy=dict(policy_id='test-project-policy',version='1',status='approved',
+            target_drawing='project.dwg',allowed_sources=[base['source_drawing']],provenance=['test reviewed policy'])
+        c.legend_policy['content_hash']=hashlib.sha256(json.dumps(c.legend_policy,sort_keys=True,
+            ensure_ascii=False,separators=(',',':')).encode()).hexdigest()
         for change in [dict(source_drawing='other.dwg'),dict(target_block_name='OTHER'),dict(binding_verified=False)]:
             c.legends=[dict(base,**change)]
             self.assertEqual(resolve_device_role('I',c)['canonical_role'],'unknown')

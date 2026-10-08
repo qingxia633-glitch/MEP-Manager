@@ -43,3 +43,11 @@ tests/build_fixtures.py只投影指定冻结JSON字段，既有单位证据决�
 ## 技术缺口
 
 仅验证已审核结构化证据，不自动从图纸解析计量条件。来源哈希验证不等于审核真实性认证；API调用者负责完整录入所有同级冲突证据和预期transition清单。当前量纲为线性长度，单位换算要求输入精确十进制值；不处理混合计量单位、多边路径和自动单位推断。没有Quantity Builder，不处理采购/计价，也不修改任何冻结对象。
+# Export and arithmetic hardening
+
+`export_plan(..., correction=None, policy=...)` is allowed for a valid original
+drawing reference. Supplied correction evidence still requires approval, source
+hash, exact target/historical binding, corrected reference and provenance.
+No historical object is rewritten. Conversion checks use a private Decimal
+context sized from operand coefficients; rounding or inexact arithmetic blocks
+eligibility rather than depending on the caller's context.

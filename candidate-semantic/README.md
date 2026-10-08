@@ -36,3 +36,11 @@ candidate_status=candidate 仅表示候选规则已匹配，不是项目正式�
 tests/build_fixtures.py 是独立测试准备程序，调用未修改的上游 Resolver，读取已指定项目证据生成结构化输入；语义模块不调用它。9个真实边样本包括4个Golden关联、4个独立样本和14423负例。12EA0混合fixture使用真实继承角色和明确标记的合成几何；Rule B正向组合仅为合成测试，不是项目真实验证。
 
 不验证电气端子、可编址性、具体回路、线规传播或计量。只信任调用方提供的上游证据和项目scope；不提供防篡改签名或自动跨图身份认证。原始证据、项目规则、输入上下文和限制随输出保留。
+# Evidence identity hardening
+
+Inputs must include `evidence_identity.project_id` and `drawing_ref`.
+The item uses `parent_path`; Geometry evidence uses `edge_parent_path` and
+`target_parent_path`; DeviceRole evidence uses `parent_path`. Arrays contain the
+complete enclosing INSERT path (`[]` explicitly represents ModelSpace).
+Missing or mismatched identities stop composition as unresolved. Handles alone
+are not cross-drawing identities. Legacy JSON is not rewritten or implicitly trusted.

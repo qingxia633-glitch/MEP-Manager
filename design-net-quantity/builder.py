@@ -9,6 +9,8 @@ import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'.builder-deps'))
 from jsonschema import Draft202012Validator
+sys.path.insert(0,str(ROOT/'quantity-eligibility'))
+from quantity_contract import scope_identity, validate_plan_bindings
 
 VERSION='0.1'
 SCHEMA=json.loads((ROOT/'quantity-eligibility/schemas/quantity-build-plan-v02.schema.json').read_text(encoding='utf-8'))
@@ -37,14 +39,15 @@ def result(status,reason=None,errors=None,**extra):
     return {'status':status,'blocking_reasons':[reason] if reason else [],'validation_errors':errors or [],**extra}
 
 def key(q):
-    return (q['scope'],q['quantity_kind'],q['approved_semantic_role'])
+    return (scope_identity(q['scope']),q['quantity_kind'],q['approved_semantic_role'])
 
-def semantic_content(value):
+def semantic_content(value, root=True):
     # Locators are retained in output, but do not affect quantity content identity.
     if isinstance(value,dict):
-        return {k:semantic_content(v) for k,v in value.items() if k not in
-                {'content_hash','built_at','path','source_build_plan_hash','source_decision_artifact_hash'} }
-    if isinstance(value,list): return [semantic_content(v) for v in value]
+        return {k:semantic_content(v, False) for k,v in value.items() if k not in
+                {'built_at','path','source_build_plan_hash','source_decision_artifact_hash'} and
+                not (root and k=='content_hash')}
+    if isinstance(value,list): return [semantic_content(v, False) for v in value]
     return value
 
 def _execute(p):
@@ -55,8 +58,9 @@ def _execute(p):
         return result('blocked' if blocked else 'invalid_plan','Schema/eligibility admission failed',errors)
     try:
         verify(p)
+        validate_plan_bindings(p)
         policy=p['reporting_policy']; verify(policy)
-        if policy['status']!='approved' or policy['scope']['project_id']!=p['binding']['project_id']:
+        if not policy.get('provenance') or policy['status']!='approved' or policy['scope']['project_id']!=p['binding']['project_id']:
             raise ValueError('Reporting policy scope/approval mismatch')
         if not p['provenance'] or not p['source_evidence_hashes']: raise ValueError('Missing provenance')
         a=p['arithmetic_policy']
@@ -74,6 +78,8 @@ def _execute(p):
         if len({r['unit'] for r in records})!=1: raise ValueError('Mixed-unit plan unsupported in v0.1')
         if u['target_unit'] not in ('m','mm'): raise ValueError('Unsupported target length unit')
         correction=p['corrections_applied'].get('evidence')
+        if not correction and p['corrections_applied'].get('changed_paths'):
+            raise ValueError('Correction paths without correction evidence')
         if correction:
             verify(correction)
             if (correction['status']!='approved' or p['object_id'] not in correction['target_object_ids'] or
@@ -96,6 +102,7 @@ def _execute(p):
                 if value!=decimal(t['normalized_value']): raise ValueError('Normalized value mismatch')
                 values.append(value)
             m=decimal(p['multiplier']['value']); um=u['multiplier']
+            if m<=0: raise ValueError('Positive multiplier required')
             if (not p['multiplier'].get('provenance') or not um.get('provenance') or
                 um['original_unit']!='dimensionless' or um['normalized_unit']!='dimensionless' or
                 decimal(um['original_value'])!=m or decimal(um['normalized_value'])!=m): raise ValueError('Multiplier contract mismatch')
@@ -143,5 +150,16 @@ def replay_validate(plan,frozen_quantity):
                  decimal(q['computed_quantity']['reported_value'])==decimal(frozen_quantity['computed_quantity']['reported_value']) and
                  decimal(plan['multiplier']['value'])==decimal(frozen_multiplier))
     except (KeyError,TypeError,ValueError,DecimalException): matches=False
-    return result('replay_matched' if matches else 'replay_mismatch',None if matches else 'Frozen quantity comparison failed',
-                  replay_status='matched' if matches else 'mismatch',quantity=q,issued=False)
+    native='builder_version' in frozen_quantity
+    contract_match=False
+    if native:
+        required=set(q)
+        if required.issubset(frozen_quantity):
+            contract_match=(frozen_quantity.get('content_hash')==digest(semantic_content(frozen_quantity)) and
+                            semantic_content(q)==semantic_content(frozen_quantity))
+        status='replay_matched' if matches and contract_match else 'replay_mismatch'
+    else:
+        status='replay_value_matched_legacy_evidence_incomplete' if matches else 'replay_mismatch'
+    return result(status,None if status=='replay_matched' else 'Full frozen evidence contract not matched',
+                  replay_status='matched' if status=='replay_matched' else 'legacy_evidence_incomplete' if matches and not native else 'mismatch',
+                  numeric_match=matches,evidence_contract_match=contract_match,quantity=q,issued=False)

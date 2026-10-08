@@ -13,18 +13,26 @@ def seal(value):
     return value
 
 def export_plan(decision, source_hash, correction, policy):
-    for obj in (correction,policy):
-        if obj.get('content_hash')!=content_hash(obj):raise ValueError('Evidence content hash mismatch')
+    for obj in ([policy] if correction is None else [correction,policy]):
+        if not isinstance(obj,dict) or obj.get('content_hash')!=content_hash(obj):raise ValueError('Evidence content hash mismatch')
     if (decision.get('quantity_eligibility_status')!='eligible' or decision.get('quantity_formula_ready') is not True or
         decision.get('design_net_quantity_generation_allowed') is not True):raise ValueError('Eligibility contract not passed')
     old=decision['quantity_formula_plan']
     if (old.get('quantity_eligibility_status')!='eligible' or old.get('generation_allowed') is not True or
         old.get('deduplication',{}).get('status')!='supported'):raise ValueError('Plan/dedup evidence not supported')
-    if correction.get('source_artifact_sha256')!=source_hash or decision['object_id'] not in correction.get('target_object_ids',[]):
-        raise ValueError('Correction source/scope mismatch')
     binding=old.get('binding',{})
-    if binding.get('drawing_ref')!=correction['historical_value'] or binding.get('edge_handle')!=correction['edge_handle']:
-        raise ValueError('Correction target mismatch')
+    def valid_ref(value):
+        return isinstance(value,str) and bool(value.strip()) and '?' not in value and '\ufffd' not in value
+    if correction is not None:
+        if (correction.get('status')!='approved' or not correction.get('provenance') or
+            correction.get('source_artifact_sha256')!=source_hash or
+            not isinstance(correction.get('target_object_ids'),list) or decision['object_id'] not in correction['target_object_ids']):
+            raise ValueError('Correction source/scope mismatch')
+        if (binding.get('drawing_ref')!=correction.get('historical_value') or binding.get('edge_handle')!=correction.get('edge_handle') or
+            not valid_ref(correction.get('corrected_value'))):
+            raise ValueError('Correction target mismatch')
+    elif not valid_ref(binding.get('drawing_ref')):
+        raise ValueError('Invalid drawing reference requires correction evidence')
     if (policy.get('status')!='approved' or policy.get('scope',{}).get('project_id')!=binding.get('project_id') or
         policy.get('intermediate_rounding')!='none' or policy.get('rounding_mode')!='ROUND_HALF_EVEN' or
         not isinstance(policy.get('decimal_places'),int) or isinstance(policy['decimal_places'],bool) or policy['decimal_places']<0):
@@ -34,6 +42,7 @@ def export_plan(decision, source_hash, correction, policy):
         raise ValueError('Approved semantic role missing')
     p=deepcopy(old);changed=[]
     def correct(value,path=''):
+        if correction is None:return
         if isinstance(value,dict):
             for key,item in value.items():
                 at=path+'/'+key

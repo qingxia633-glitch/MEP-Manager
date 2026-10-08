@@ -60,3 +60,15 @@ pwsh -NoProfile -File model-core/tests/Run-Regressions.ps1
 - 真实13304/134D9显示码为I，隐藏属性为单输入单输出模块，均保留，不用I覆盖角色。
 
 专项测试与原51套回归分别运行；不修改历史expected、项目规则及冻结JSON。
+# Reviewed legend source policy
+
+Legend sources are supplied through `RoleContext.legend_policy` or CLI
+`--legend-policy`; the generic resolver has no project filename allowlist.
+The policy requires `policy_id`, `version`, `status=approved`, `target_drawing`,
+`allowed_sources`, `provenance`, and canonical SHA-256 `content_hash` (JSON with
+sorted keys, UTF-8, compact separators, excluding the root hash). Source identity
+matches exactly. A supplied `project_id` must match the context. Without a valid
+policy, legend evidence is not admitted; instance attributes remain usable.
+
+CLI `--project-id` supplies project identity for downstream composition. The
+output preserves drawing identity and parent path separately from device role.

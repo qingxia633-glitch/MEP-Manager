@@ -56,6 +56,14 @@ def _propagation(rule, request):
     if any(r.get('status') == 'conflicting' for r in records):
         result['status'] = 'conflicting'
         return result
+    components = ('root_target', 'propagation_relation', 'propagation_boundary', 'termination_condition')
+    if any(isinstance(r.get(f), dict) and r[f].get('status') == 'conflicting' for r in records for f in components):
+        result['status'] = 'conflicting'
+        return result
+    if any(not isinstance(r.get(f), dict) or r[f].get('status') != 'supported' or
+           not r[f].get('provenance') or (f != 'root_target' and not r[f].get('value'))
+           for r in records for f in components):
+        return result
     if any(r.get('status') != 'supported' or any(not r.get(f) for f in fields if f != 'bounded_set') or
            not isinstance(r.get('bounded_set'), list) or
            not isinstance(r.get('root_target'), dict) or
@@ -64,7 +72,9 @@ def _propagation(rule, request):
                for t in r['bounded_set']) for r in records):
         return result
     descriptions = [{f: r[f] for f in fields} for r in records]
-    if any(d != descriptions[0] for d in descriptions[1:]):
+    claims = [{f: ({k:v for k,v in r[f].items() if k not in ('status','provenance')}
+                   if f in components else r[f]) for f in fields} for r in records]
+    if any(d != claims[0] for d in claims[1:]):
         result['status'] = 'conflicting'
         return result
     target = request['target_object']
@@ -82,6 +92,11 @@ def resolve(rule, request):
     target = request['target_object']
     if not target.get('id') or target.get('kind') not in ('edge', 'device', 'group'):
         raise ValueError('typed target required')
+    if 'target_ids' in rule:
+        ids = rule['target_ids']
+        if (not isinstance(ids, list) or not ids or
+                any(not isinstance(i, str) or not i or i != i.strip() for i in ids) or len(set(ids)) != len(ids)):
+            raise ValueError('target_ids must be a nonempty unique array of canonical string IDs')
     conditions = deepcopy(rule.get('conditions', []))
     conditions += deepcopy(rule.get('scope_conditions', []))
     ids = [c.get('condition_id') for c in conditions + rule.get('exclusions', [])]
@@ -99,7 +114,7 @@ def resolve(rule, request):
                               actual=None, status='unknown', evidence=[]))
     if not conditions:
         evaluated.append(dict(condition_id='required_conditions', expected='nonempty', actual=[], status='unknown', evidence=[]))
-    if rule.get('target_ids') is not None:
+    if 'target_ids' in rule:
         evaluated.append(dict(condition_id='object_scope', expected=rule['target_ids'], actual=target['id'],
                               status='true' if target['id'] in rule['target_ids'] else 'false', evidence=deepcopy(rule['provenance'])))
     if rule.get('propagation_key'):

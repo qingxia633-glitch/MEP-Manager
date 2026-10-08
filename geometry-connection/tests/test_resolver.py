@@ -22,8 +22,9 @@ def insert(name='B', handle='I', insertion=(0, 0, 0), scale=(1, 1, 1), rotation=
                 scale=list(scale), rotation=rotation, normal=[0, 0, 1], dynamic=False)
 
 
-def context(entities, instance=None, base=(0, 0, 0)):
-    return DrawingContext({'I': instance or insert()},
+def context(entities, instance=None, base=(0, 0, 0), source_endpoint=(0,0,0)):
+    return DrawingContext({'I': instance or insert(),
+                           'E':dict(type='LINE',vertices=[list(source_endpoint),[.002,0,0]])},
                           {'B': dict(base=list(base), entities=entities, complete=True, dynamic=False)}, [])
 
 
@@ -79,7 +80,7 @@ class RealEvidence(unittest.TestCase):
 
 class SyntheticEvidence(unittest.TestCase):
     def run_case(self, entities, ep, instance=None, base=(0, 0, 0)):
-        return resolve_connection('E', ep, 'I', context(entities, instance, base), .001)
+        return resolve_connection('E', ep, 'I', context(entities, instance, base, ep), .001)
 
     def test_rotations_mirror_base_and_z(self):
         for angle in [0, math.pi/2, math.pi, 3*math.pi/2]:
@@ -118,7 +119,7 @@ class SyntheticEvidence(unittest.TestCase):
         self.assertEqual(self.run_case([], [0,0,0],i)['geometric_connection_status'],'unresolved')
 
     def test_nested_composition_and_cycle(self):
-        c=context([insert('C','N',insertion=(5,0,0),scale=(-2,3,1),rotation=math.pi/2)],insert(rotation=math.pi/2))
+        c=context([insert('C','N',insertion=(5,0,0),scale=(-2,3,1),rotation=math.pi/2)],insert(rotation=math.pi/2),source_endpoint=[2,5,0])
         c.definitions['C']=dict(base=[1,0,0],complete=True,dynamic=False,entities=[dict(type='POINT',handle='P',point=[2,0,0])])
         r=resolve_connection('E',[2,5,0],'I',c,.001)
         self.assertEqual(r['geometric_connection_status'],'supported')

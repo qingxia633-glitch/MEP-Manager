@@ -104,3 +104,11 @@ are inventoried independently; no cross-drawing bindings are inferred. Investiga
 Golden's reviewed project-rule/human authorization can be located as a reference source,
 but is not rediscovered as a TEXT→leader binding. No Golden handle is encoded in the generic
 discovery algorithm. A missing new binding never overwrites its historical approved evidence.
+# Instance-qualified evidence identity
+
+Joins use project, drawing, complete enclosing INSERT `parent_path`, and handle.
+Reference records may specify `annotation_parent_path`, `target_parent_path`,
+`root_target_parent_path`, or `owner_parent_path`; otherwise their own `parent_path`
+is used. An omitted path denotes top-level only, never a wildcard for nested instances.
+Same-handle targets in different paths get separate summary keys and retained paths.
+This module still only discovers candidates, never approves semantics.

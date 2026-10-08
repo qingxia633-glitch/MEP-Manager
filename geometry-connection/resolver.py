@@ -61,8 +61,9 @@ class DrawingContext:
     status. POLYLINE vertices from an external provider must already include all
     VERTEX subentities; the report adapter conservatively leaves POLYLINE unknown.
     """
-    def __init__(self, entities, definitions, provenance):
+    def __init__(self, entities, definitions, provenance, project_id=None, drawing_ref=None):
         self.entities, self.definitions, self.provenance = entities, definitions, provenance
+        self.project_id,self.drawing_ref=project_id,drawing_ref
 
     @classmethod
     def from_reports(cls, snapshot, probes):
@@ -89,6 +90,8 @@ class DrawingContext:
                          dynamic={':vlax-false':False, ':vlax-true':True}.get(_field(rec,'IsDynamicBlock')),
                          array=any(int(m)>1 for m in re.findall(r'BlockTransform_or_Array_DXF=\((?:70|71) \. (\d+)\)',rec)))
             e['vertices'] = [_point(p) for p in re.findall(r'^Vertex_WCS=(.*?)\r?$',rec,re.M)]
+            if typ == 'LWPOLYLINE':
+                e['closed'] = {'T':True, 'nil':False}.get(_field(rec,'Closed'))
             if typ == 'LINE' and not e['vertices']:
                 start,end = _field(rec,'Start_WCS'),_field(rec,'End_WCS')
                 if start and end:
@@ -130,7 +133,7 @@ class DrawingContext:
                              scale=[parent_number(c) for c in (41,42,43)],
                              rotation=parent_number(50),
                              normal=_point(_field(report,'ParentReferenceDXF:210')))
-        return cls(entities,definitions,provenance)
+        return cls(entities,definitions,provenance,drawing_ref=drawing)
 
 
 def _transform(p, chain):
@@ -165,6 +168,21 @@ def resolve_connection(edge_handle, edge_endpoint, target_insert_handle, context
     if len(ep)!=3 or not all(math.isfinite(v) for v in ep) or not math.isfinite(tol) or tol<=0:
         raise ValueError('Finite XYZ endpoint and positive finite tolerance required')
     anchors, surfaces, issues, chains = [], [], [], []
+    source = context.entities.get(edge_handle, {})
+    vertices = source.get('vertices', [])
+    endpoint_source = None
+    readable = (source.get('type') in ('LINE','LWPOLYLINE','POLYLINE') and
+                isinstance(vertices,list) and len(vertices)>=2 and
+                all(isinstance(p,(list,tuple)) and len(p)==3 and all(isinstance(v,(int,float)) and math.isfinite(v) for v in p) for p in vertices) and
+                source.get('closed',False) is False)
+    if readable:
+        matches = [(i,math.dist(ep,vertices[i])) for i in (0,len(vertices)-1) if math.dist(ep,vertices[i])<=tol]
+        if matches:
+            index,residual = min(matches,key=lambda m:m[1])
+            endpoint_source = dict(edge_handle=edge_handle,source_entity_type=source['type'],endpoint_index=index,
+                                   requested_wcs=list(ep),verified_endpoint_wcs=list(vertices[index]),
+                                   source_match_residual=residual,provenance=context.provenance)
+            ep=list(vertices[index])
     depth = 0
     def candidate(e,path,local,world,chain,anchor=False,halfwidth=0):
         if len(world)!=3 or not all(math.isfinite(v) for v in world):
@@ -255,11 +273,16 @@ def resolve_connection(edge_handle, edge_endpoint, target_insert_handle, context
     anchors.sort(key=lambda x:x['xy_distance']);surfaces.sort(key=lambda x:x['xy_distance'])
     hits=[a for a in anchors if a['xy_distance']<=tol]
     touch=[s for s in surfaces if s['xy_distance']<=tol+s['width_envelope_halfwidth']]
-    if hits:status,reason='supported','real_anchor_within_xy_tolerance'
+    if endpoint_source is None:
+        status,reason='unresolved','source_edge_endpoint_not_verified'
+        issues.append(reason)
+    elif hits:status,reason='supported','real_anchor_within_xy_tolerance'
     elif touch:status,reason='partial','real_geometry_or_conservative_width_envelope_contact_not_anchor'
     elif issues or not (anchors or surfaces):status,reason='unresolved','missing_or_unsupported_evidence'
     else:status,reason='rejected','complete_geometry_disjoint_in_xy; indirect_relationship_not_evaluated'
-    return dict(edge_handle=edge_handle,edge_endpoint_wcs=ep,target_handle=target_insert_handle,
+    return dict(edge_handle=edge_handle,edge_endpoint_wcs=ep,endpoint_source=endpoint_source,target_handle=target_insert_handle,
+                evidence_identity={'project_id':context.project_id,'drawing_ref':context.drawing_ref,
+                    'edge_parent_path':source.get('parent_path',[]),'target_parent_path':(target or {}).get('parent_path',[])},
                 target_block_name=target.get('block') if target else None,
                 candidate_geometry=hits or anchors,nearest_geometry=surfaces[0] if surfaces else None,
                 geometry_resolution_status='incomplete' if issues else 'complete',definition_depth=depth,

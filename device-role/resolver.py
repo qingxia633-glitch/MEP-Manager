@@ -1,9 +1,9 @@
 """DeviceRoleResolver v0.1: attribute/definition evidence only, no geometry import."""
 import hashlib
+import json
 import re
 from pathlib import Path
 
-LEGEND_SOURCE = 'EC-4#-P+TBD_t8_t3.dwg'
 DISPLAY_CODES = {'I', 'I/O', 'M1', 'M2'}
 ROLE_ALIASES = {
     'smoke_detector': {'感烟探测器','点型感烟探测器','感烟探测器（点型）'},
@@ -58,13 +58,15 @@ class RoleContext:
     Priority 5 uses independent explicit ATTRIB donors from the same drawing and
     exact definition name. No effective-name alias or geometry-based inheritance.
     """
-    def __init__(self,drawing,instances,definitions,legends=None,provenance=None,role_tags=('A',)):
+    def __init__(self,drawing,instances,definitions,legends=None,provenance=None,role_tags=('A',),legend_policy=None,project_id=None):
         self.drawing=drawing
         self.instances=instances
         self.definitions=definitions
         self.legends=legends or []
         self.provenance=provenance or []
         self.role_tags=tuple(role_tags)
+        self.legend_policy=legend_policy
+        self.project_id=project_id
 
     @classmethod
     def from_reports(cls,snapshot,probes,legends=None,role_tags=('A',)):
@@ -112,6 +114,7 @@ def resolve_device_role(device_handle,context):
     inst=context.instances.get(device_handle)
     evidence=[];ignored=[];issues=[]
     result=dict(model_type='DeviceRoleEvidence',resolver_version='0.1',device_handle=device_handle,block_name=inst.get('block_name') if inst else None,
+        evidence_identity={'project_id':context.project_id,'drawing_ref':context.drawing,'parent_path':(inst or {}).get('parent_path',[])},
         effective_block_name=inst.get('effective_block_name') if inst else None,
         canonical_role='unknown',raw_role_text=None,display_code=None,role_status='unresolved',
         properties={},evidence=evidence,selected_evidence=[],conflicting_evidence=[],
@@ -144,8 +147,19 @@ def resolve_device_role(device_handle,context):
                 for a in child.get('attributes',[]):
                     if a.get('tag')=='$TEXT$' and a.get('raw_value'):result['display_code']=a['raw_value'];break
         add(variant.get('defaults',[]),3,'block_definition_default',[device_handle,name],variant.get('source'))
+    policy=context.legend_policy
+    policy_valid=False
+    if isinstance(policy,dict):
+        digest=hashlib.sha256(json.dumps({k:v for k,v in policy.items() if k!='content_hash'},
+            sort_keys=True,ensure_ascii=False,separators=(',',':'),allow_nan=False).encode('utf-8')).hexdigest()
+        policy_valid=(policy.get('content_hash')==digest and policy.get('status')=='approved' and
+            ('project_id' not in policy or policy['project_id']==context.project_id) and
+            bool(policy.get('policy_id')) and bool(policy.get('version')) and bool(policy.get('provenance')) and
+            policy.get('target_drawing')==context.drawing and isinstance(policy.get('allowed_sources'),list) and
+            all(isinstance(s,str) and bool(s.strip()) for s in policy['allowed_sources']))
+    result['legend_policy_evidence']=dict(policy) if policy_valid else None
     for legend in context.legends:
-        allowed=(_basename(legend.get('source_drawing'))==LEGEND_SOURCE and
+        allowed=(policy_valid and legend.get('source_drawing') in policy['allowed_sources'] and
                  legend.get('target_drawing')==context.drawing and legend.get('target_block_name')==name and
                  legend.get('binding_verified') is True and bool(legend.get('binding_evidence_refs')))
         if not allowed:

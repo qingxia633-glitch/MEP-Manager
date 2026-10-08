@@ -1,6 +1,7 @@
 """Eligibility and an unevaluated build plan only; no final quantity calculation."""
 from copy import deepcopy
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, Context, localcontext, Inexact, Rounded, DecimalException
+from quantity_contract import approved_role, physical_adjustment_identity
 
 def number(value):
     try:
@@ -25,7 +26,7 @@ def resolve_eligibility(item):
         if status=='conflicting':out['conflicting_evidence'].append(reason)
         if status=='partial':out['limiting_evidence'].append(reason)
     if (gate.get('project_specific_status')!='supported' or gate.get('semantic_gate_passed') is not True or
-        gate.get('design_net_quantity_eligible') is not True or not gate.get('approved_semantic_role') or
+        gate.get('design_net_quantity_eligible') is not True or not approved_role(gate.get('approved_semantic_role')) or
         item.get('measurement_prohibited') is True):
         out['quantity_eligibility_status']='blocked';out['blocking_reasons']=['semantic_gate_not_passed_or_measurement_prohibited'];return out
     scope=item.get('measurement_scope',{});binding=scope.get('binding',{})
@@ -50,7 +51,16 @@ def resolve_eligibility(item):
     factor=number(conv.get('factor'));converted=number(conv.get('converted_length'))
     if not geometry.get('source_unit') or not geometry.get('engineering_unit') or factor is None or factor<=0 or converted is None:
         fail('unit_conversion_missing')
-    elif base is not None and base*factor!=converted:fail('unit_conversion_inconsistent','conflicting')
+    elif base is not None:
+        # Multiplication requires at most the sum of the operand coefficient lengths.
+        # Independent context: caller precision, traps and rounding cannot affect admission.
+        precision=max(28,len(base.as_tuple().digits)+len(factor.as_tuple().digits))
+        try:
+            with localcontext(Context(prec=precision)) as arithmetic:
+                arithmetic.traps[Inexact]=True;arithmetic.traps[Rounded]=True
+                if base*factor!=converted:fail('unit_conversion_inconsistent','conflicting')
+        except DecimalException:
+            fail('unit_conversion_arithmetic_not_exact','unresolved')
     if conv.get('from_unit')!=geometry.get('source_unit') or conv.get('to_unit')!=geometry.get('engineering_unit'):
         fail('conversion_unit_binding_mismatch')
     unit=geometry.get('engineering_unit')
@@ -86,7 +96,7 @@ def resolve_eligibility(item):
     if path.get('mode')=='approved_3d' and height.get('status')!='supported':fail('3d_path_height_not_supported')
     if path.get('mode')=='converted_2d' and plen!=converted:fail('converted_base_path_mismatch','conflicting')
     assumption_refs(path,'base_path')
-    adjustments=item.get('adjustments',{});owned=[];keys=[];ids=[]
+    adjustments=item.get('adjustments',{});owned=[];keys=[];ids=[];physical_keys=set()
     dedup=item.get('deduplication',{});valid(dedup,'deduplication')
     if dedup.get('key_fields')!=['edge_handle','segment_id','device','transition_type']:fail('deduplication_rule_not_explicit')
     for kind in ('transition','vertical','other'):
@@ -105,6 +115,12 @@ def resolve_eligibility(item):
             if entry.get('purpose')!='design_net':fail(kind+':non_design_adjustment_forbidden')
             if not entry.get('adjustment_id') or entry['adjustment_id'] in ids:fail('duplicate_or_missing_adjustment_id','conflicting')
             ids.append(entry.get('adjustment_id'));assumption_refs(entry,kind)
+            try:
+                physical_key=physical_adjustment_identity(entry)
+                if physical_key in physical_keys:fail('duplicate_physical_adjustment','conflicting')
+                physical_keys.add(physical_key)
+            except ValueError:
+                fail(kind+':physical_adjustment_identity_missing')
             if kind=='transition':
                 key=(entry.get('owner',{}).get('edge_handle'),entry.get('owner',{}).get('segment_id'),entry.get('device'),entry.get('transition_type'))
                 if not key[2] or not key[3]:fail('transition_device_or_type_missing')
