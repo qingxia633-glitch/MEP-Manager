@@ -70,8 +70,9 @@ def execution_evidence_contract(plan):
     fields=('binding','approved_semantic_role','specification','geometry_basis','height_evidence',
             'base_path','owned_adjustments','multiplier','deduplication','assumptions',
             'corrections_applied','source_evidence_hashes','provenance','formula_components',
-            'unit_execution_contract','reporting_policy','arithmetic_policy')
-    return {'version':'1','records':{k:deepcopy(plan.get(k)) for k in fields}}
+            'unit_execution_contract','unit_conversion_contract','reporting_policy','arithmetic_policy',
+            'semantic_gate','approved_semantic_binding','height_requirement')
+    return {'version':'2','records':{k:deepcopy(plan.get(k)) for k in fields}}
 
 def _execute(p):
     errors=[{'path':'/'+ '/'.join(map(str,e.absolute_path)),'message':e.message} for e in VALIDATOR.iter_errors(p)]

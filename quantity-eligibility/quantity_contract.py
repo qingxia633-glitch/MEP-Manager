@@ -62,7 +62,7 @@ def validate_plan_bindings(plan):
             raise ValueError('Unresolved assumption reference')
 
 
-MEASUREMENT_EVIDENCE_CONTRACT_VERSION = 'measurement-evidence/1'
+MEASUREMENT_EVIDENCE_CONTRACT_VERSION = 'measurement-evidence/2'
 
 
 def validate_measurement_evidence(plan):
@@ -72,6 +72,11 @@ def validate_measurement_evidence(plan):
         raise ValueError('Unknown measurement mode')
     # All physical adjustments require height evidence; no inferred planar exemption.
     height_required = mode == 'approved_3d' or bool(plan.get('owned_adjustments'))
+    requirement = plan.get('height_requirement')
+    if requirement not in (None, 'required', 'not_applicable'):
+        raise ValueError('Unknown height requirement')
+    if height_required and requirement == 'not_applicable':
+        raise ValueError('Height exemption conflicts with measurement mode/adjustments')
     for field in ('geometry_basis', 'height_evidence'):
         record = plan.get(field)
         if not isinstance(record, dict) or not record.get('provenance'):
@@ -79,7 +84,14 @@ def validate_measurement_evidence(plan):
         if scope_identity(record.get('binding')) != identity:
             raise ValueError(field + ': identity mismatch')
         if field == 'height_evidence' and not height_required and record.get('status') == 'not_applicable':
-            if not record.get('reason'):
-                raise ValueError('Height exemption requires explicit reason')
+            if requirement != 'not_applicable' or not record.get('reason'):
+                raise ValueError('Height exemption requires explicit requirement and reason')
+            rule = record.get('measurement_rule')
+            if (not isinstance(rule, dict) or not rule.get('rule_id') or
+                rule.get('status') not in ('supported', 'approved') or not rule.get('provenance') or
+                rule.get('measurement_mode') != mode or rule.get('height_requirement') != 'not_applicable'):
+                raise ValueError('Height exemption requires a reviewed measurement rule')
+            if scope_identity(rule.get('binding')) != identity:
+                raise ValueError('Height exemption rule identity mismatch')
         elif record.get('status') != 'supported':
             raise ValueError(field + ': required evidence not supported')

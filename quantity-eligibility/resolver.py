@@ -19,7 +19,7 @@ def resolve_eligibility(item):
          'design_net_quantity_generation_allowed':False,'quantity_generated':False,
          'blocking_reasons':[],'limiting_evidence':[],'conflicting_evidence':[],
          'provenance':deepcopy(item.get('verified_sources',{}))}
-    for key in ('measurement_scope','geometry','height','specification','multiplier','adjustments','deduplication','assumptions'):
+    for key in ('measurement_scope','geometry','height','height_requirement','specification','multiplier','adjustments','deduplication','assumptions'):
         out[key]=deepcopy(item.get(key))
     errors=[]
     def fail(reason,status='unresolved'):
@@ -161,7 +161,8 @@ def resolve_eligibility(item):
         claims[key]=value
     try:
         validate_measurement_evidence({'binding':binding,'base_path':path,'owned_adjustments':owned,
-                                      'geometry_basis':geometry,'height_evidence':height})
+                                      'geometry_basis':geometry,'height_evidence':height,
+                                      'height_requirement':item.get('height_requirement')})
     except ValueError as exc:
         fail('measurement_evidence_contract_invalid:' + str(exc))
     if errors:
@@ -172,6 +173,7 @@ def resolve_eligibility(item):
     out['quantity_formula_plan']={'model_type':'QuantityBuildPlan','object_id':item['object_id'],
         'quantity_type':item['quantity_type_candidate'],'binding':deepcopy(binding),'base_path':deepcopy(path),
         'geometry_basis':deepcopy(geometry),'height_evidence':deepcopy(height),'deduplication':deepcopy(dedup),
+        'height_requirement':item.get('height_requirement'), 'semantic_gate':deepcopy(gate),
         'owned_adjustments':owned,'multiplier':deepcopy(multiplier),'specification':deepcopy(spec),
         'formula_components':{'operator':'multiply','arguments':[{'operator':'add','references':['base_path.value']+['owned_adjustments/'+str(i)+'/length' for i in range(len(owned))]},'multiplier.value']},
         'assumptions':deepcopy(assumptions),'provenance':deepcopy(item.get('verified_sources',{})),
