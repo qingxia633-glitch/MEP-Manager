@@ -1,5 +1,9 @@
 """Candidate + reviewed object-bound evidence -> project semantic decision only."""
 from copy import deepcopy
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from evidence_identity import scope_identity, identity_record
 from evidence import DIRECT_STRENGTHS, WEAK_STRENGTHS, DIRECT_TYPES, WEAK_TYPES
 
 
@@ -21,6 +25,13 @@ def evaluate_semantics(candidate, bundle, context):
                            'All admitted direct evidence is peer evidence; no inferred source hierarchy',
                            'Rejected semantic claim does not reject geometry or indirect electrical relationships',
                            'No geometry, roles, candidate rules or quantities recomputed']}
+    try:
+        identity = scope_identity(candidate)
+        if scope_identity(context) != identity:
+            raise ValueError('Candidate/context instance identity mismatch')
+        result['object_identity'] = identity_record(candidate)
+    except ValueError as exc:
+        result['limiting_evidence'].append(str(exc));return result
     records=bundle.get('evidence',[]);bindings=bundle.get('bindings',[])
     def reject(e,reason):result['rejected_evidence'].append({'evidence':deepcopy(e),'reason':reason})
     ids=[e.get('evidence_id') for e in records];bids=[b.get('binding_id') for b in bindings]
@@ -37,10 +48,18 @@ def evaluate_semantics(candidate, bundle, context):
         if typ not in DIRECT_TYPES or strength not in DIRECT_TYPES[typ]:
             reject(e,'unrecognized evidence type or incompatible strength');continue
         b=by_id.get(e.get('binding_id'))
-        if not b or b.get('edge_handle')!=edge or b.get('segment_id')!=candidate.get('segment_id'):
-            reject(e,'no exact edge/segment binding');continue
-        if any(b.get(k)!=context[k] for k in ('project_id','drawing_ref')):
-            reject(e,'foreign project/drawing binding');continue
+        try:
+            bound_identity = scope_identity(b)
+        except ValueError:
+            reject(e,'incomplete instance identity');pending.append(e);continue
+        if bound_identity != identity:
+            reject(e,'foreign full instance/scope binding');continue
+        if 'object_identity' in e:
+            try:
+                if scope_identity(e['object_identity']) != identity:
+                    raise ValueError('Evidence identity mismatch')
+            except ValueError:
+                reject(e,'evidence instance identity inconsistent');pending.append(e);continue
         # Applicable unresolved direct evidence must not disappear behind a good claim.
         if (b.get('review_status')!='reviewed' or not b.get('provenance') or not e.get('provenance') or
                 e['evidence_id'] not in b.get('evidence_ids',[])):
@@ -49,7 +68,9 @@ def evaluate_semantics(candidate, bundle, context):
         result['binding_targets'].append(deepcopy(b))
         if e.get('status')!='supported' or e.get('assertion') not in ('affirm','deny') or e.get('semantic_role') in (None,'','unknown','unresolved'):
             pending.append(e);reject(e,'direct evidence unresolved or not supported');continue
-        direct.append(e);result['accepted_evidence'].append(deepcopy(e))
+        direct.append(e)
+        accepted=deepcopy(e);accepted['object_identity']=identity_record(b)
+        result['accepted_evidence'].append(accepted)
     positive=[e for e in direct if e['assertion']=='affirm']
     negative=[e for e in direct if e['assertion']=='deny']
     roles={e['semantic_role'] for e in positive}

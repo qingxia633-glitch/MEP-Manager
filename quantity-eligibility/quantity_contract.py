@@ -2,28 +2,14 @@
 PLACEHOLDER_ROLES = {'unknown', 'unresolved', 'partial', 'conflicting', 'rejected', 'not_evaluated'}
 
 
-def canonical_id(value):
-    if not isinstance(value, str) or not value or value != value.strip():
-        raise ValueError('Nonempty canonical string identity required')
-    return value
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from evidence_identity import canonical_id, scope_identity
 
 
 def approved_role(value):
     return isinstance(value, str) and bool(value.strip()) and value == value.strip() and value.casefold() not in PLACEHOLDER_ROLES
-
-
-def scope_identity(binding):
-    if not isinstance(binding, dict):
-        raise ValueError('Structured scope binding required')
-    project, drawing, edge = (canonical_id(binding.get(k)) for k in ('project_id', 'drawing_ref', 'edge_handle'))
-    segment = binding.get('segment_id')
-    if segment is not None: canonical_id(segment)
-    kind = binding.get('scope_type', 'segment' if segment is not None else 'edge')
-    if kind not in ('edge', 'segment') or (kind == 'segment') != (segment is not None):
-        raise ValueError('Scope kind/segment mismatch')
-    path = binding.get('parent_path', [])
-    if not isinstance(path, list): raise ValueError('Parent path must be an array')
-    return project, drawing, kind, edge, segment, tuple(canonical_id(p) for p in path)
 
 
 def physical_adjustment_identity(entry):
@@ -34,6 +20,7 @@ def physical_adjustment_identity(entry):
 
 def validate_plan_bindings(plan):
     identity = scope_identity(plan['binding'])
+    validate_measurement_evidence(plan)
     if not approved_role(plan.get('approved_semantic_role')):
         raise ValueError('Explicit approved semantic role required')
     records = [plan['base_path'], plan['multiplier'], plan['specification'], plan['deduplication']] + plan['owned_adjustments']
@@ -73,3 +60,26 @@ def validate_plan_bindings(plan):
             raise ValueError('Required assumptions missing')
         if not isinstance(refs, list) or any(r not in aids for r in refs):
             raise ValueError('Unresolved assumption reference')
+
+
+MEASUREMENT_EVIDENCE_CONTRACT_VERSION = 'measurement-evidence/1'
+
+
+def validate_measurement_evidence(plan):
+    identity = scope_identity(plan.get('binding'))
+    mode = plan.get('base_path', {}).get('mode')
+    if mode not in ('converted_2d', 'approved_3d'):
+        raise ValueError('Unknown measurement mode')
+    # All physical adjustments require height evidence; no inferred planar exemption.
+    height_required = mode == 'approved_3d' or bool(plan.get('owned_adjustments'))
+    for field in ('geometry_basis', 'height_evidence'):
+        record = plan.get(field)
+        if not isinstance(record, dict) or not record.get('provenance'):
+            raise ValueError(field + ': missing required evidence/provenance')
+        if scope_identity(record.get('binding')) != identity:
+            raise ValueError(field + ': identity mismatch')
+        if field == 'height_evidence' and not height_required and record.get('status') == 'not_applicable':
+            if not record.get('reason'):
+                raise ValueError('Height exemption requires explicit reason')
+        elif record.get('status') != 'supported':
+            raise ValueError(field + ': required evidence not supported')

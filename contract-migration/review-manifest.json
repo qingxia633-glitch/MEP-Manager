@@ -1,0 +1,174 @@
+{
+  "manifest_type": "non_sensitive_review_inventory",
+  "version": "1",
+  "source_summary": "outputs/source-backed-contract-migration-20261008/final-summary.json",
+  "source_summary_sha256": "3abd5ab302031e5375fe29a787650b96c0cad6472241632491c834837ae5676a",
+  "scope": "Code review metadata only; private fixture payloads and local source paths are not published",
+  "migrations": [
+    {
+      "migration_id": "golden-gate-v2",
+      "target_fixture": "outputs/source-backed-contract-migration-20261008/fixtures/golden-gate-v2.json",
+      "status": "contract_complete",
+      "record_hash": "70db566dd5e0b68650336fd23bd7ccc3c48a9505f340292621e69847fb72e6d6"
+    },
+    {
+      "migration_id": "golden-conduit-plan-v2",
+      "target_fixture": "outputs/source-backed-contract-migration-20261008/fixtures/golden-conduit-plan-v2.json",
+      "status": "contract_complete",
+      "record_hash": "e4a9de55dfe7478e78179e28c71138f1886a38c70529418235553f7bdf3c000e"
+    },
+    {
+      "migration_id": "golden-conduit-eligibility-v2",
+      "target_fixture": "outputs/source-backed-contract-migration-20261008/fixtures/golden-conduit-eligibility-v2.json",
+      "status": "contract_complete",
+      "record_hash": "c2c37f0063b2cbd13ff29de33715d174ef3c31c5b4d81abfb5a3fb935dfefff5"
+    },
+    {
+      "migration_id": "golden-wire-plan-v2",
+      "target_fixture": "outputs/source-backed-contract-migration-20261008/fixtures/golden-wire-plan-v2.json",
+      "status": "contract_complete",
+      "record_hash": "b6232556d50002f96d85989320827e0974396f9acf997bbb362085402d657539"
+    },
+    {
+      "migration_id": "golden-wire-eligibility-v2",
+      "target_fixture": "outputs/source-backed-contract-migration-20261008/fixtures/golden-wire-eligibility-v2.json",
+      "status": "contract_complete",
+      "record_hash": "cb5cd769e8b39529551bd7d24d02f1949be4c3b2faf80ed713b6c2ba01ae8d4e"
+    },
+    {
+      "migration_id": "synthetic-item-legacy-incomplete",
+      "target_fixture": "outputs/source-backed-contract-migration-20261008/fixtures/synthetic-item-legacy-incomplete.json",
+      "status": "legacy_incomplete",
+      "record_hash": "6fbaa61a69c5ee453bb5662d131d844d2993ebebc6d823fd5db588de4d32b06f"
+    },
+    {
+      "migration_id": "synthetic-plan-legacy-incomplete",
+      "target_fixture": "outputs/source-backed-contract-migration-20261008/fixtures/synthetic-plan-legacy-incomplete.json",
+      "status": "legacy_incomplete",
+      "record_hash": "d8d145f0574ee4739ad0a687c979abf0d73a2025494164c9437c8537eeaf1962"
+    },
+    {
+      "migration_id": "synthetic-gate-legacy-incomplete",
+      "target_fixture": "outputs/source-backed-contract-migration-20261008/fixtures/synthetic-gate-legacy-incomplete.json",
+      "status": "legacy_incomplete",
+      "record_hash": "bb20707ac164802125a55623003a268912d533f5be94f5f791b39e5176af11b5"
+    }
+  ],
+  "supplemental_migrations": [
+    {
+      "target_fixture": "outputs/source-backed-contract-migration-20261008/fixtures/synthetic-gate-callable-retained.json",
+      "record_hash": "aa41b9da11a7e79a5bef74ac23f6ee5921c4cfd02e57fe57007bb30e465ae1e9",
+      "status": "legacy_incomplete"
+    }
+  ],
+  "test_contracts": {
+    "Current Contract v2": "must pass all current-contract checks",
+    "Legacy Contract": "historical inputs and expected are preserved; incomplete inputs must be identified and blocked",
+    "Source-backed Migration": "only traceable real sources may supply missing fields; otherwise legacy_incomplete",
+    "Test 15": "51/51 local offline suites"
+  },
+  "validation": {
+    "raw_suite_results": {
+      "geometry-connection": {
+        "total": 15,
+        "passed": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "device-role": {
+        "total": 17,
+        "passed": 17,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "candidate-semantic": {
+        "total": 18,
+        "passed": 18,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "project-rule-applicability": {
+        "total": 43,
+        "passed": 42,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "project-evidence-gate": {
+        "total": 20,
+        "passed": 6,
+        "failures": 13,
+        "errors": 1,
+        "skipped": 0
+      },
+      "quantity-eligibility": {
+        "total": 38,
+        "passed": 33,
+        "failures": 3,
+        "errors": 2,
+        "skipped": 0
+      },
+      "design-net-quantity": {
+        "total": 27,
+        "passed": 12,
+        "failures": 7,
+        "errors": 8,
+        "skipped": 0
+      },
+      "project-evidence-discovery": {
+        "total": 46,
+        "passed": 46,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "safety-hardening": {
+        "total": 42,
+        "passed": 27,
+        "failures": 5,
+        "errors": 10,
+        "skipped": 0
+      }
+    },
+    "historical_contract_mismatches": {
+      "missing real source evidence": 37,
+      "legacy contract intentionally rejected": 13,
+      "genuine regression": 0,
+      "migration bug": 0
+    },
+    "migration_tests": {
+      "passed": 109,
+      "total": 109
+    },
+    "post_hardening_tests": {
+      "passed": 18,
+      "total": 18
+    },
+    "versioned_acceptance": {
+      "passed": 343,
+      "total": 343,
+      "composition": "unaffected historical passes + versioned migration tests + Post-Hardening 18; excludes raw legacy assertion failures"
+    },
+    "test15": {
+      "passed": 51,
+      "total": 51
+    },
+    "frozen_inventory": {
+      "json_hashes": {
+        "checked": 310,
+        "changed": []
+      },
+      "existing_python_hashes": {
+        "checked": 57,
+        "changed": []
+      }
+    }
+  },
+  "public_reproducibility": "Private-source migration tests and full Test 15 require excluded local evidence; local results are not a claim of GitHub CI reproduction",
+  "frozen_objects_modified": false,
+  "historical_expected_modified": false,
+  "private_fixtures_published": false
+}

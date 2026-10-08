@@ -50,6 +50,29 @@ def semantic_content(value, root=True):
     if isinstance(value,list): return [semantic_content(v, False) for v in value]
     return value
 
+
+def evidence_content(value, location=()):
+    """Only a hash-identified source's machine locator is non-semantic.
+
+    Unlike the display/content hash filter, no arbitrary nested field name is
+    dropped from the reviewed execution evidence contract.
+    """
+    if isinstance(value,dict):
+        source_record = (len(location)==3 and location[0]=='records' and
+                         location[1] in ('source_evidence_hashes','provenance'))
+        return {k:evidence_content(v, location+(k,)) for k,v in value.items()
+                if not (source_record and k=='path' and isinstance(value.get('sha256'),str) and len(value['sha256'])==64)}
+    if isinstance(value,list):return [evidence_content(v, location+(i,)) for i,v in enumerate(value)]
+    return value
+
+
+def execution_evidence_contract(plan):
+    fields=('binding','approved_semantic_role','specification','geometry_basis','height_evidence',
+            'base_path','owned_adjustments','multiplier','deduplication','assumptions',
+            'corrections_applied','source_evidence_hashes','provenance','formula_components',
+            'unit_execution_contract','reporting_policy','arithmetic_policy')
+    return {'version':'1','records':{k:deepcopy(plan.get(k)) for k in fields}}
+
 def _execute(p):
     errors=[{'path':'/'+ '/'.join(map(str,e.absolute_path)),'message':e.message} for e in VALIDATOR.iter_errors(p)]
     if errors:
@@ -121,6 +144,8 @@ def _execute(p):
            'source_build_plan_hash':p['content_hash'],'source_evidence_hashes':deepcopy(p['source_evidence_hashes']),
            'correction_evidence_refs':[{'id':correction['correction_id'],'content_hash':correction['content_hash']}] if correction else [],
            'builder_version':VERSION}
+        q['evidence_contract']=execution_evidence_contract(p)
+        q['evidence_contract_digest']=digest(evidence_content(q['evidence_contract']))
         q['quantity_id']='design-net:'+digest(key(q))
         q['content_hash']=digest(semantic_content(q))
         return result('built',quantity=q)
@@ -156,6 +181,9 @@ def replay_validate(plan,frozen_quantity):
         required=set(q)
         if required.issubset(frozen_quantity):
             contract_match=(frozen_quantity.get('content_hash')==digest(semantic_content(frozen_quantity)) and
+                            frozen_quantity.get('evidence_contract_digest')==digest(evidence_content(frozen_quantity.get('evidence_contract'))) and
+                            q['evidence_contract_digest']==frozen_quantity['evidence_contract_digest'] and
+                            evidence_content(q['evidence_contract'])==evidence_content(frozen_quantity['evidence_contract']) and
                             semantic_content(q)==semantic_content(frozen_quantity))
         status='replay_matched' if matches and contract_match else 'replay_mismatch'
     else:

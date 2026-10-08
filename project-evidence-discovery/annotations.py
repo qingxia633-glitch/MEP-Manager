@@ -30,13 +30,13 @@ def categories(text):
  if re.search(r'报警二总线|火灾报警二总线|报警总线|总线|回路|电源线|系统名称',text):out.append('system_context')
  return out,codes
 
-def load_report(path):
+def load_report(path,project_id=None):
  path=Path(path);data=path.read_bytes();raw=data.decode('utf-8-sig')
  drawing=(field(raw,'DWG') or '').replace('\\','/').split('/')[-1]
  if not drawing:raise ValueError('Missing source DWG')
  drawing,_=corrected_reference(drawing,None)
  src={'path':str(path),'sha256':hashlib.sha256(data).hexdigest()}
- c={'drawing_ref':drawing,'annotations':[],'targets':[],'leaders':[],
+ c={'project_id':project_id,'drawing_ref':drawing,'annotations':[],'targets':[],'leaders':[],
     'object_associations':[],'bounded_groups':[],'memberships':[],'provenance':[src],
     'extraction_gaps':['nested_blocks_not_expanded','xref_contents_not_expanded','layouts_not_included','proxy_semantics_not_recovered']}
  counts={}
@@ -53,7 +53,7 @@ def load_report(path):
       'geometry':{'type':typ,'vertices_wcs':vs,'closed':field(rec,'Closed') not in (None,'nil','false'),
                   'bulges':bulges,'complete':len(vs)>=2 and all(v is not None and len(v)==3 for v in vs)},'provenance':provenance})
   if typ=='INSERT':
-   c['targets'].append({'id':h,'target_type':'device','source_drawing':drawing,'provenance':provenance,
+   c['targets'].append({'id':h,'target_type':'device','source_drawing':drawing,'project_id':project_id,'parent_path':[],'provenance':provenance,
                         'note':'INSERT identity only; no electrical device role inferred'})
    for att in re.split(r'(?m)(?=^AttributeTag=)',rec)[1:]:
     value=field(att,'AttributeText_RAW')
@@ -61,7 +61,10 @@ def load_report(path):
     pos=re.search(r'\(10 ([^)]+)\)',field(att,'Attribute_DXF') or '')
     if match and value is not None:
      c['annotations'].append({'handle':match[1],'type':'ATTRIB','raw_text':value,'parent_handle':h,
-       'parent_path':[h,match[1]],'association_status':'explicit','position_wcs':point(pos[1]) if pos else None,
+       'parent_path':[h],'attribute_path':[h,match[1]],'owner_parent_path':[],
+       'source_drawing':drawing,'project_id':project_id,
+       'owner_insert_identity':{'project_id':project_id,'drawing_ref':drawing,'parent_path':[],'handle':h},
+       'association_status':'explicit','position_wcs':point(pos[1]) if pos else None,
        'provenance':[dict(src,handle=match[1],parent_handle=h)],'layer':field(att,'AttributeLayer')})
   if typ in ('TEXT','MTEXT','DIMENSION'):
    value=next((field(rec,k) for k in ('Text_RAW','TextString_RAW','Contents_RAW','DimensionText_RAW') if field(rec,k) is not None),None)

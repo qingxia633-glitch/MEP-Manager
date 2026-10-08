@@ -1,7 +1,8 @@
 """Eligibility and an unevaluated build plan only; no final quantity calculation."""
 from copy import deepcopy
 from decimal import Decimal, InvalidOperation, Context, localcontext, Inexact, Rounded, DecimalException
-from quantity_contract import approved_role, physical_adjustment_identity
+from quantity_contract import approved_role, physical_adjustment_identity, scope_identity, validate_measurement_evidence
+from unit_contract import conversion_contract
 
 def number(value):
     try:
@@ -34,6 +35,19 @@ def resolve_eligibility(item):
         not binding.get('edge_handle') or not binding.get('drawing_ref') or not binding.get('project_id') or
         not scope.get('provenance') or (scope.get('kind')=='segment' and not binding.get('segment_id'))):
         fail('measurement_scope_missing_or_unbounded');return out
+    try:
+        identity = scope_identity(binding)
+        if scope_identity(gate.get('object_identity')) != identity:
+            raise ValueError('Gate instance identity mismatch')
+        if scope_identity(gate.get('provenance',{}).get('context')) != identity:
+            raise ValueError('Gate provenance identity mismatch')
+        if not gate.get('accepted_evidence'):
+            raise ValueError('Gate accepted identity evidence missing')
+        for evidence in gate['accepted_evidence']:
+            if scope_identity(evidence.get('object_identity')) != identity:
+                raise ValueError('Gate accepted evidence identity mismatch')
+    except ValueError as exc:
+        fail('semantic_gate_full_identity_invalid:' + str(exc))
     if gate.get('edge_handle')!=binding.get('edge_handle') or gate.get('segment_id')!=binding.get('segment_id'):
         fail('scope_not_bound_to_semantic_gate')
     gate_context=gate.get('provenance',{}).get('context',{})
@@ -48,6 +62,8 @@ def resolve_eligibility(item):
     base=number(geometry.get('base_length'))
     if base is None or base<=0 or geometry.get('source_entity')!=binding.get('edge_handle'):fail('invalid_base_geometry')
     conv=geometry.get('conversion',{});valid(conv,'conversion')
+    try:out['unit_conversion_contract']=deepcopy(conversion_contract(conv,binding))
+    except (ValueError,TypeError,DecimalException):fail('unit_conversion_contract_invalid','conflicting')
     factor=number(conv.get('factor'));converted=number(conv.get('converted_length'))
     if not geometry.get('source_unit') or not geometry.get('engineering_unit') or factor is None or factor<=0 or converted is None:
         fail('unit_conversion_missing')
@@ -143,6 +159,11 @@ def resolve_eligibility(item):
         if not key or value[0] is None:fail('measurement_claim_invalid');continue
         if key in claims and claims[key]!=value:fail('contradictory_measurement_claim:'+key,'conflicting')
         claims[key]=value
+    try:
+        validate_measurement_evidence({'binding':binding,'base_path':path,'owned_adjustments':owned,
+                                      'geometry_basis':geometry,'height_evidence':height})
+    except ValueError as exc:
+        fail('measurement_evidence_contract_invalid:' + str(exc))
     if errors:
         out['quantity_eligibility_status']='conflicting' if 'conflicting' in errors else 'unresolved' if 'unresolved' in errors else 'partial'
         return out
