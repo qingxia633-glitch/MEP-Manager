@@ -178,4 +178,7 @@ def resolve_eligibility(item):
         'formula_components':{'operator':'multiply','arguments':[{'operator':'add','references':['base_path.value']+['owned_adjustments/'+str(i)+'/length' for i in range(len(owned))]},'multiplier.value']},
         'assumptions':deepcopy(assumptions),'provenance':deepcopy(item.get('verified_sources',{})),
         'generation_allowed':True,'quantity_eligibility_status':'eligible','evaluated':False}
+    if 'admission_contracts' in item:
+        # Transport only; the current exporter independently validates this profile.
+        out['quantity_formula_plan']['admission_contracts']=deepcopy(item['admission_contracts'])
     return out

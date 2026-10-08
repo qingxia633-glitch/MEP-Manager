@@ -72,7 +72,7 @@ def execution_evidence_contract(plan):
             'base_path','owned_adjustments','multiplier','deduplication','assumptions',
             'corrections_applied','source_evidence_hashes','provenance','formula_components',
             'unit_execution_contract','unit_conversion_contract','reporting_policy','arithmetic_policy',
-            'semantic_gate','approved_semantic_binding','height_requirement')
+            'semantic_gate','approved_semantic_binding','height_requirement','admission_contracts')
     return {'version':'2','records':{k:deepcopy(plan.get(k)) for k in fields}}
 
 def _execute(p):

@@ -9,6 +9,7 @@ sys.path.insert(0, str(ROOT / '.builder-deps'))
 from jsonschema import Draft202012Validator
 from quantity_contract import scope_identity, validate_plan_bindings
 from unit_contract import conversion_contract
+from evidence_contracts import validate_evidence_contracts
 
 SCHEMA = json.loads((Path(__file__).parent / 'schemas/quantity-build-plan-v03.schema.json').read_text(encoding='utf-8'))
 Draft202012Validator.check_schema(SCHEMA)
@@ -138,5 +139,6 @@ def validate_executable_plan_contract(plan):
         raise ValueError('v0.3 schema: ' + '; '.join('/' + '/'.join(map(str, e.absolute_path)) + ': ' + e.message for e in errors))
     validate_plan_bindings(plan)
     validate_gate(plan)
+    validate_evidence_contracts(plan)
     validate_geometry_conversion(plan)
     validate_assumption_registry(plan)
