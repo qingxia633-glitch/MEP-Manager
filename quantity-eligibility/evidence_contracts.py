@@ -114,18 +114,24 @@ def provenance(plan):
         elif isinstance(value, list):
             for i, v in enumerate(value): walk(v, path + '/' + str(i))
 
+    def check_root(record, path):
+        # Admission roots are mandatory once selected, independently of their keys.
+        check(record, path)
+        for key, value in record.items():
+            if key != 'provenance':
+                walk(value, path + '/' + key.replace('~','~0').replace('/','~1'))
+
     # Required roots: deleting the provenance field cannot avoid validation.
     for field in ('base_path','multiplier','specification','deduplication','geometry_basis',
                   'height_evidence','reporting_policy'):
-        check(plan[field], '/' + field)
-        walk(plan[field], '/' + field)
+        check_root(plan[field], '/' + field)
     for field in ('owned_adjustments','assumptions'):
         for i, record in enumerate(plan[field]):
-            check(record, '/' + field + '/' + str(i)); walk(record, '/' + field + '/' + str(i))
+            check_root(record, '/' + field + '/' + str(i))
     gate = plan['semantic_gate']
     for group in ('accepted_evidence','binding_targets'):
         for i, record in enumerate(gate[group]):
-            path='/semantic_gate/'+group+'/'+str(i);check(record,path);walk(record,path)
+            check_root(record, '/semantic_gate/'+group+'/'+str(i))
     check(plan['geometry_basis']['conversion'], '/geometry_basis/conversion')
     rule = plan['height_evidence'].get('measurement_rule')
     if rule is not None: check(rule, '/height_evidence/measurement_rule')
@@ -144,8 +150,9 @@ def provenance(plan):
         check(term,path);walk(term,path)
     multiplier_path='/multiplier' if execution['multiplier'].get('provenance')==plan['multiplier'].get('provenance') else '/unit_execution_contract/multiplier'
     check(execution['multiplier'],multiplier_path)
-    if plan.get('corrections_applied',{}).get('evidence'):
-        walk(plan['corrections_applied']['evidence'],'/corrections_applied/evidence')
+    correction = plan.get('corrections_applied',{}).get('evidence')
+    if correction is not None:
+        check_root(correction, '/corrections_applied/evidence')
     for sid, source in sources.items():
         if any((sid, ref) not in used for ref in source['evidence_refs']):
             raise ValueError('Source index contains unbound evidence references')
