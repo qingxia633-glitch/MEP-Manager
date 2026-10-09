@@ -1,0 +1,7 @@
+{
+  "mmPerDrawingUnit": 1.0,
+  "source": "manual_width_calibration",
+  "independent": false,
+  "annotationLengthUnit": "mm",
+  "evidence": "Existing prototype/samples.json records a drawing-specific scale inferred from the manually confirmed 200 mm design width and 200 drawing-unit spacing. It is not independent evidence for this width comparison."
+}

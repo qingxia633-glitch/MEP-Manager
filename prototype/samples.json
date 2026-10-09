@@ -1,0 +1,8 @@
+{
+  "drawingName": "EX-BX地下车库动力平面图_t8_t3.dwg",
+  "units": {"mmPerDrawingUnit": 1.0, "source": "manual_calibration", "evidence": "CE-安防桥架: design width 200 mm equals measured spacing 200 drawing units", "insunits": 0},
+  "tolerance": 0.00001,
+  "pairingSource": "user_confirmed_same_tray_sides",
+  "straight": ["528D8", "528D6"],
+  "turn": {"innerChain": ["528FE", "528FF", "52900", "52905"], "outerChain": ["52903", "52902"], "horizontalPair": ["528FE", "52903"], "verticalPair": ["52900", "52902"]}
+}

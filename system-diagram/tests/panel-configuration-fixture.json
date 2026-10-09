@@ -1,0 +1,214 @@
+{
+  "schemaVersion": "1.0",
+  "projectId": "local-project",
+  "drawingSetId": "registered-drawings",
+  "drawingSetCompleteness": "unknown",
+  "sources": {
+    "plan": {
+      "path": "local_test_data/power-full-snapshot-20260915/MEP-full-entity-report.txt",
+      "sha256": "703329CD9322F8980A1EDD11D99A523DC9D4358B6EB424F857CFCA639CCAE921",
+      "dwgName": "EX-BX地下车库动力平面图_t8_t3.dwg",
+      "documentId": "garage-power-plan",
+      "regionId": "selected-plan-panel-instance",
+      "localViewId": "selected-plan-panel-view"
+    },
+    "definition": {
+      "path": "local_test_data/system-t8t3-verified-snapshot-20260916/MEP-full-entity-report.txt",
+      "sha256": "FC8E11D7678EDFFA06F5878155A577FC0E14EC8F932CA74AAE98ED4105C37C11",
+      "dwgName": "EX-BX地下车库说明及配电箱系统_t8_t3.dwg",
+      "documentId": "garage-panel-system-t8t3",
+      "regionId": "reviewed-panel-configuration-region",
+      "localViewId": "reviewed-panel-configuration-view"
+    }
+  },
+  "plan": {
+    "insertHandle": "E1DB",
+    "identifierHandle": "E1DE",
+    "expectedIdentifier": "QWB1"
+  },
+  "definition": {
+    "titleHandle": "161F0",
+    "boundaryHandle": "161EF",
+    "deviceFrameHandle": "161F1",
+    "expectedIdentifier": "QWB1"
+  },
+  "declarations": [
+    {
+      "handle": "161F3",
+      "field": "Pe",
+      "kind": "numeric",
+      "expectedRawText": "Pe=1.5kW"
+    },
+    {
+      "handle": "161F4",
+      "field": "Ijs",
+      "kind": "numeric",
+      "expectedRawText": "Ijs=2.85A"
+    },
+    {
+      "handle": "161F6",
+      "field": "incomingReference",
+      "kind": "text",
+      "expectedRawText": "详见上级配电箱系统图"
+    },
+    {
+      "handle": "161E9",
+      "field": "outgoingRowLabel",
+      "kind": "outgoing_row",
+      "lineHandle": "161E6",
+      "expectedRawText": "WP1"
+    },
+    {
+      "handle": "161F9",
+      "field": "outgoingRowLabel",
+      "kind": "outgoing_row",
+      "lineHandle": "161F7",
+      "expectedRawText": "WP2"
+    },
+    {
+      "handle": "161EA",
+      "field": "outgoingRowLabel",
+      "kind": "outgoing_row",
+      "lineHandle": "161E7",
+      "expectedRawText": "K1"
+    },
+    {
+      "handle": "161E5",
+      "field": "devicePackageStatement",
+      "kind": "text",
+      "expectedRawText": "设备配套"
+    },
+    {
+      "handle": "161F2",
+      "field": "cablePackageStatement",
+      "kind": "excerpt",
+      "expectedRawText": "厂家成套电缆设备自带  SC20 FC,WC",
+      "excerpt": "厂家成套电缆设备自带"
+    },
+    {
+      "handle": "161FC",
+      "field": "cablePackageStatement",
+      "kind": "excerpt",
+      "expectedRawText": "厂家成套电缆设备自带  SC20 FC,WC",
+      "excerpt": "厂家成套电缆设备自带"
+    },
+    {
+      "handle": "161EB",
+      "field": "cablePackageStatement",
+      "kind": "excerpt",
+      "expectedRawText": "厂家成套电缆设备自带  SC20 FC,WC",
+      "excerpt": "厂家成套电缆设备自带"
+    },
+    {
+      "handle": "162E1",
+      "field": "note",
+      "kind": "text",
+      "expectedRawText": "应设置消防明显标志"
+    }
+  ],
+  "humanConfirmations": {
+    "definition": {
+      "id": "HC-reviewed-configuration-region",
+      "evidenceType": "HumanConfirmation",
+      "status": "confirmed",
+      "scope": {
+        "projectId": "local-project",
+        "documentId": "garage-panel-system-t8t3",
+        "snapshotSHA256": "FC8E11D7678EDFFA06F5878155A577FC0E14EC8F932CA74AAE98ED4105C37C11",
+        "regionId": "reviewed-panel-configuration-region",
+        "localViewId": "reviewed-panel-configuration-view",
+        "anchorHandles": [
+          "161F0",
+          "161EF",
+          "161F1"
+        ]
+      },
+      "claim": "当前选定区域是QWB1自身的配电箱配置/系统表达区域。",
+      "source": "User AutoCAD visual confirmation in this conversation, explicitly naming this DWG and region; recorded against the verified snapshot, no migration.",
+      "visibleTextClaims": [
+        {
+          "handle": "161F0",
+          "excerpt": "QWB1"
+        },
+        {
+          "handle": "161F3",
+          "excerpt": "Pe=1.5kW"
+        },
+        {
+          "handle": "161F4",
+          "excerpt": "Ijs=2.85A"
+        },
+        {
+          "handle": "161F6",
+          "excerpt": "详见上级配电箱系统图"
+        },
+        {
+          "handle": "161E9",
+          "excerpt": "WP1"
+        },
+        {
+          "handle": "161F9",
+          "excerpt": "WP2"
+        },
+        {
+          "handle": "161EA",
+          "excerpt": "K1"
+        },
+        {
+          "handle": "161E5",
+          "excerpt": "设备配套"
+        },
+        {
+          "handle": "161F2",
+          "excerpt": "厂家成套电缆设备自带"
+        },
+        {
+          "handle": "162E1",
+          "excerpt": "应设置消防明显标志"
+        }
+      ]
+    },
+    "plan": {
+      "id": "HC-selected-plan-panel-instance",
+      "evidenceType": "HumanConfirmation",
+      "status": "confirmed",
+      "scope": {
+        "projectId": "local-project",
+        "documentId": "garage-power-plan",
+        "snapshotSHA256": "703329CD9322F8980A1EDD11D99A523DC9D4358B6EB424F857CFCA639CCAE921",
+        "regionId": "selected-plan-panel-instance",
+        "localViewId": "selected-plan-panel-view",
+        "anchorHandles": [
+          "E1DB",
+          "E1DE"
+        ]
+      },
+      "claim": "Current instruction explicitly selects the power-plan E1DB/E1DE/QWB1 representation as the panel instance endpoint of usesConfiguration.",
+      "source": "Current user authorization naming the plan instance, combined with current report facts; no new visible-attribute claim and no migration of other old confirmations."
+    }
+  },
+  "projectRule": {
+    "id": "PR-project-same-panel-identifier",
+    "evidenceType": "ProjectRule",
+    "status": "human_confirmed",
+    "scope": {
+      "projectId": "local-project",
+      "objectType": "panel"
+    },
+    "predicate": "same_identifier_uses_same_configuration",
+    "rawStatement": "当前项目中，同名配电箱使用相同配置。",
+    "limitations": [
+      "project only",
+      "configuration reuse only, not same instance or electrical connection"
+    ],
+    "sourceEvidence": {
+      "id": "HC-project-same-panel-identifier",
+      "evidenceType": "HumanConfirmation",
+      "scope": {
+        "projectId": "local-project"
+      },
+      "claim": "当前项目中，同名配电箱使用相同配置。",
+      "source": "Earlier explicit project-scoped user confirmation; applied to the explicitly authorized instance/configuration pair only."
+    }
+  }
+}

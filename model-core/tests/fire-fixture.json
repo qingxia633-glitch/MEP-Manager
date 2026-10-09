@@ -1,0 +1,30 @@
+{
+ "sampleId":"garage-fire-local-20260923",
+ "projectId":"local-project",
+ "source":{"path":"local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt","sha256":"719A34DE3185FB16512B79BAAF9D1786F8BC80628C61199FB27E2AC76F3317F8","dwgName":"EX-BX地下车库火灾报警平面图_t8_t3.dwg"},
+ "window":{"center":[555952500,553286000],"halfSize":3000,"scopeStatus":"observation_window_not_confirmed_building_boundary"},
+ "devices":[
+  {"handle":"1849E","role":"smoke_detector_candidate","rawName":"感烟探测器（点型）"},
+  {"handle":"18548","role":"manual_call_point_with_phone_socket_candidate","rawName":"带火警电话插孔的手动报警按钮"},
+  {"handle":"18544","role":"sound_light_alarm_candidate","rawName":"火灾声光警报器"},
+  {"handle":"18532","role":"hydrant_start_button_candidate","rawName":"消火栓起泵按钮"},
+  {"handle":"18526","role":"single_io_module_candidate","rawName":"单输入单输出模块"}
+ ],
+ "lines":[{"handle":"18591","layer":"WIRE-消防","systemCandidate":"fire_alarm"},{"handle":"18593","layer":"WIRE-消防电话","systemCandidate":"fire_phone"},{"handle":"18595","layer":"WIRE-消防电话","systemCandidate":"fire_phone"},{"handle":"18575","layer":"WIRE-消防控制","systemCandidate":"unknown"},{"handle":"18592","layer":"WIRE-消防控制","systemCandidate":"unknown"}],
+ "phoneSocketHandle":"18548",
+ "contactCandidate":{"lineHandle":"18575","insertHandle":"18526","tolerance":0.000001},
+ "conflictHandles":["1851F","18516"],
+ "ioSupportingHandles":["18526","141AB"],
+ "legendScope":{"projectId":"local-project","documentDescription":"4号楼电气图例","building":"4号楼","documentId":"电气/4号楼/EC-4#-P+TBD_t8_t3.dwg","drawingSnapshotId":null,"applicability":"building_4_document_only"},
+ "legendEntries":[
+  {"token":"SI","meaning":"短路隔离器","garageApplicability":"unresolved"},
+  {"token":"I/O","meaning":"单输入输出模块","garageApplicability":"cross_supported_for_reviewed_io_representations"},
+  {"token":"2I/2O","meaning":"双输入输出模块（卷帘）","garageApplicability":"unresolved"},
+  {"token":"M","meaning":"模块箱","garageApplicability":"unresolved"},
+  {"token":"M1~M4","meaning":"风机专用模块","garageApplicability":"unresolved"},
+  {"token":"I","meaning":"输入模块","garageApplicability":"conflicting_for_selected_instances"},
+  {"token":"O","meaning":"输出模块","garageApplicability":"unresolved"},
+  {"token":"B","meaning":"广播切换模块","garageApplicability":"unresolved"}
+ ],
+ "rule":{"path":"reference/rules/MEP_Manager_安装算量完整规则库_v1.0.pdf","sha256":"53DE2C47DDCDFE132C3E1077153D7D1BD13E6355805F61688FCDCAD6CB2F1A5D","ruleId":"R072","version":"1.0","page":14,"rawText":"综合布线、监控、门禁、消防报警独立建网，禁止跨系统寻路。"}
+}

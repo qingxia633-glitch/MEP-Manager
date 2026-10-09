@@ -1,0 +1,52 @@
+[
+    {
+        "key":  "pit",
+        "path":  "local_test_data/k1-4-drainage-pit-instance-candidate.json",
+        "sha256":  "2A274C700452611E13FB3697216819E7CB84AAA6B70DF222E678B40691A5EBA2"
+    },
+    {
+        "key":  "configuration",
+        "path":  "local_test_data/qwb1-panel-configuration-candidate.json",
+        "sha256":  "BA1F87C217F9ED8BBB1647137CFA61A85502A37A04ADD62DDCC46421307A4FE8"
+    },
+    {
+        "key":  "rows",
+        "path":  "local_test_data/qwb1-outgoing-row-candidates.json",
+        "sha256":  "AE1A6C1795B906208656441705BA8B3395DC70C24B670451214275569C1B2EF8"
+    },
+    {
+        "key":  "power",
+        "path":  "local_test_data/power-full-snapshot-20260915/MEP-full-entity-report.txt",
+        "sha256":  "703329CD9322F8980A1EDD11D99A523DC9D4358B6EB424F857CFCA639CCAE921"
+    },
+    {
+        "key":  "plumbing",
+        "path":  "local_test_data/plumbing-basement-full-snapshot-20260916/MEP-full-entity-report.txt",
+        "sha256":  "4A130D99B8F007CD62740FF3632CA5740952CB519AE90AC7E869A35A6A0371D6"
+    },
+    {
+        "key":  "system",
+        "path":  "local_test_data/system-t8t3-verified-snapshot-20260916/MEP-full-entity-report.txt",
+        "sha256":  "FC8E11D7678EDFFA06F5878155A577FC0E14EC8F932CA74AAE98ED4105C37C11"
+    },
+    {
+        "key":  "index",
+        "path":  "local_test_data/plumbing-block-text-index-20260917/block-text-index.txt",
+        "sha256":  "90954BB823B53B8CD338A4B016BD993D1C39E3875CD6B49A14DE341CB30C59D5"
+    },
+    {
+        "key":  "local",
+        "path":  "local_test_data/plumbing-local-probe-K1-4-20260919/block-local-geometry-probe.txt",
+        "sha256":  "EEE9CAFA773B22A2967A5234E32D299D3B6F5E1C7FAB85B1C43D29047312DA38"
+    },
+    {
+        "key":  "onelevel",
+        "path":  "local_test_data/plumbing-onelevel-probe-K1-4-835-20260920/block-definition-probe.txt",
+        "sha256":  "E320C7F48EF2F7ECB95C31EFFD21FCE2DFB58E3724DE1CB04D219DB2A974E6F8"
+    },
+    {
+        "key":  "ax",
+        "path":  "local_test_data/plumbing-onelevel-probe-AX-20260920/block-definition-probe.txt",
+        "sha256":  "2E73F78E2E92B395E78B2E56FB3A6C31976BF3D540618844CCF4DEFC5AAEFCDC"
+    }
+]

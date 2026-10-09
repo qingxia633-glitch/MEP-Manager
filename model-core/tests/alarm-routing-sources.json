@@ -1,0 +1,5 @@
+[
+ {"path":"outputs/fire-broadcast-zone1-mapping/results.json","sha256":"C5BCFDB947EADA4D0BD3F13A73D4A10EFD38E95B6F9ED1367C6C1547E446F82A"},
+ {"path":"outputs/fire-alarm-logical-network/results.json","sha256":"1DF4F45F10C48D2B5D85B0C1821BB66F255F9D5E0431E570093A1665DBF49222"},
+ {"path":"model-core/tests/fire-fixture.json","sha256":"8D0410381E3E024EB5CAA1959C70F8E319B8B46EBEF3B9821D58B98478DA15E9"}
+]

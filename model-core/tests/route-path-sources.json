@@ -1,0 +1,18 @@
+﻿[
+    {
+        "path":  "outputs/control-routing-admission/candidate-view.json",
+        "sha256":  "875A42AC6006252A2F721ED7922C66CD1A23420B7E9846868E50DA0977793333"
+    },
+    {
+        "path":  "outputs/control-routing-admission/candidate-correspondence.json",
+        "sha256":  "22BD84C042E2E65780C8219484930C615A645304A0CC40FA75C1DBC5F8BBEEC2"
+    },
+    {
+        "path":  "outputs/control-routing-admission/candidate-continuity-view.json",
+        "sha256":  "5CAD9A76D685E5C7A5F4472EBDC711106E5D7A3E6FF6062BA44282065F4DC718"
+    },
+    {
+        "path":  "outputs/plan-logical-relation/results.json",
+        "sha256":  "70FD3ED0C52C0A1B4381D5EFFA6B435494A829C190BA739AEBAFE48DF8A06E60"
+    }
+]

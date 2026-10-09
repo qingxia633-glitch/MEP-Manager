@@ -1,0 +1,17 @@
+{
+    "name":  "MEP-Manager安装算量完整规则库 v1.0",
+    "version":  "1.0",
+    "availability":  "available",
+    "path":  "reference/rules/MEP_Manager_安装算量完整规则库_v1.0.pdf",
+    "sha256":  "53DE2C47DDCDFE132C3E1077153D7D1BD13E6355805F61688FCDCAD6CB2F1A5D",
+    "execution":  "not_enabled",
+    "verifiedReferenceIds":  [
+                                 "R072"
+                             ],
+    "ruleReferences":  [
+
+                       ],
+    "missingEvidence":  [
+
+                        ]
+}

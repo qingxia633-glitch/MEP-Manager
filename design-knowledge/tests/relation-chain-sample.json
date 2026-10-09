@@ -1,0 +1,8 @@
+{
+  "source": {"path":"local_test_data/fire-broadcast-speaker-16268-probe-20260925/block-definition-probe.txt","sha256":"A880106A58E6AB2F69CF7ED2D2738767489FF3767E0C3D9E4265014FDFE88DFB"},
+  "references": {"speakerBoundary":"E14E","speakerName":"E15B","speakerTop":"E157"},
+  "endpointA":"instance",
+  "pathRepresentation":"lowerLine",
+  "endpointB":"speaker",
+  "reviewedContext":{"systemScopeCandidate":"fire_broadcast","status":"supported","sourceRefs":["instance","legendName","leftLine","speaker","speakerName"],"basis":"reviewed endpoint roles and local broadcast context; raw path layer is not a system assignment"}
+}

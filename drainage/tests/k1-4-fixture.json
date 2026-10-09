@@ -1,0 +1,84 @@
+﻿{
+    "auxiliary":  [
+                      "680"
+                  ],
+    "carrierHandle":  "835",
+    "dwgName":  "PC-B-P01(-1F)-地下室给排水平面图_t3.dwg",
+    "inner":  [
+                  "67F"
+              ],
+    "definition":  "PX-B-P01(-1F)-JSK$0$ERFER",
+    "identifierHandle":  "836",
+    "categoryTexts":  [
+                          "K1-*",
+                          "JYWQ50-15-15-1200-1.5（一用一备）",
+                          "参数：Q=15m3/h，H=15m，N=1.5Kw"
+                      ],
+    "pumps":  [
+                  [
+                      "685",
+                      "688",
+                      "689",
+                      "68B",
+                      "68A"
+                  ],
+                  [
+                      "68C",
+                      "68D",
+                      "68E",
+                      "690",
+                      "68F"
+                  ]
+              ],
+    "placements":  [
+                       {
+                           "nested":  [
+
+                                      ],
+                           "top":  "52"
+                       },
+                       {
+                           "nested":  [
+
+                                      ],
+                           "top":  "3380"
+                       },
+                       {
+                           "nested":  [
+                                          "69F4"
+                                      ],
+                           "top":  "531D"
+                       }
+                   ],
+    "sources":  {
+                    "local":  {
+                                  "sha256":  "EEE9CAFA773B22A2967A5234E32D299D3B6F5E1C7FAB85B1C43D29047312DA38",
+                                  "path":  "local_test_data/plumbing-local-probe-K1-4-20260919/block-local-geometry-probe.txt"
+                              },
+                    "probe":  {
+                                  "sha256":  "E320C7F48EF2F7ECB95C31EFFD21FCE2DFB58E3724DE1CB04D219DB2A974E6F8",
+                                  "path":  "local_test_data/plumbing-onelevel-probe-K1-4-835-20260920/block-definition-probe.txt"
+                              },
+                    "plan":  {
+                                 "sha256":  "4A130D99B8F007CD62740FF3632CA5740952CB519AE90AC7E869A35A6A0371D6",
+                                 "path":  "local_test_data/plumbing-basement-full-snapshot-20260916/MEP-full-entity-report.txt"
+                             },
+                    "index":  {
+                                  "sha256":  "90954BB823B53B8CD338A4B016BD993D1C39E3875CD6B49A14DE341CB30C59D5",
+                                  "path":  "local_test_data/plumbing-block-text-index-20260917/block-text-index.txt"
+                              }
+                },
+    "outer":  [
+                  "681",
+                  "682",
+                  "683",
+                  "684"
+              ],
+    "categoryHandles":  [
+                            "B74",
+                            "B9E",
+                            "B9F"
+                        ],
+    "parentDefinition":  "PX-B-P01(-1F)-JSK",
+    "identifier":  "K1-4"
+}

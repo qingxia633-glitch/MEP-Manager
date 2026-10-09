@@ -1,0 +1,170 @@
+{
+  "schema_version": "1.0",
+  "model_type": "ProjectCandidateSemanticRuleSet",
+  "status": "candidate_only",
+  "rules": [
+    {
+      "rule_id": "Rule A",
+      "candidate_role": "alarm_or_linkage_bus",
+      "validation_status": "partial_pattern_support",
+      "supporting_samples": [
+        "13CD5",
+        "13D0F",
+        "13D15"
+      ],
+      "condition": "bus-type device <-> bus-type device",
+      "conflicting_or_missing_evidence": [
+        "No edge-specific electrical designation",
+        "Some smoke roles inherited_candidate; addressability cannot be established by geometry"
+      ],
+      "scope": {
+        "project": "current garage fire-alarm project",
+        "validation_area": "compartment 1",
+        "applicability": "candidate classification only; not global layer mapping",
+        "electrical_confirmation_allowed": false
+      },
+      "provenance": [
+        {
+          "evidenceType": "ProjectRule",
+          "source": "current user instruction"
+        },
+        {
+          "evidenceType": "DerivedInference",
+          "source": "outputs/fire-alarm-semantic-pattern-validation-20261005/evidence.json"
+        }
+      ],
+      "assumptions": [
+        "Only candidate semantics; no electrical port function assigned",
+        "Verified geometry and device roles remain separate evidence gates",
+        "M2 is not classified as an ordinary controlled device"
+      ],
+      "may_generate_design_net_quantity": false
+    },
+    {
+      "rule_id": "Rule B",
+      "candidate_role": "control_or_feedback",
+      "validation_status": "insufficient_project_local_evidence",
+      "supporting_samples": [],
+      "condition": "I/O module <-> controlled device",
+      "conflicting_or_missing_evidence": [
+        "14423 direct contact to 132F7 rejected; not a positive sample",
+        "1411F unresolved at both ends; missing definitions"
+      ],
+      "scope": {
+        "project": "current garage fire-alarm project",
+        "validation_area": "compartment 1",
+        "applicability": "candidate classification only; not global layer mapping",
+        "electrical_confirmation_allowed": false
+      },
+      "provenance": [
+        {
+          "evidenceType": "ProjectRule",
+          "source": "current user instruction"
+        },
+        {
+          "evidenceType": "DerivedInference",
+          "source": "outputs/fire-alarm-rule-b-final-alternative-20261005/evidence.json"
+        }
+      ],
+      "assumptions": [
+        "Only candidate semantics; no electrical port function assigned",
+        "Verified geometry and device roles remain separate evidence gates",
+        "M2 is not classified as an ordinary controlled device"
+      ],
+      "may_generate_design_net_quantity": false
+    },
+    {
+      "rule_id": "Rule C",
+      "candidate_role": "bus_or_module_box_feed",
+      "validation_status": "partial_pattern_support",
+      "supporting_samples": [
+        "13CFD"
+      ],
+      "condition": "I/O module <-> M2 module box",
+      "conflicting_or_missing_evidence": [
+        "Module-box internal electrical function unresolved"
+      ],
+      "scope": {
+        "project": "current garage fire-alarm project",
+        "validation_area": "compartment 1",
+        "applicability": "candidate classification only; not global layer mapping",
+        "electrical_confirmation_allowed": false
+      },
+      "provenance": [
+        {
+          "evidenceType": "ProjectRule",
+          "source": "current user instruction"
+        },
+        {
+          "evidenceType": "DerivedInference",
+          "source": "outputs/fire-alarm-semantic-pattern-validation-20261005/evidence.json"
+        }
+      ],
+      "assumptions": [
+        "Only candidate semantics; no electrical port function assigned",
+        "Verified geometry and device roles remain separate evidence gates",
+        "M2 is not classified as an ordinary controlled device"
+      ],
+      "may_generate_design_net_quantity": false
+    },
+    {
+      "rule_id": "Rule D",
+      "candidate_role": "unresolved",
+      "validation_status": "supported_project_specification_nonuniqueness",
+      "supporting_samples": [],
+      "condition": "RYJS / WDZN-RYJS / WIRE-control alone cannot identify electrical function",
+      "conflicting_or_missing_evidence": [
+        "Layer nonuniqueness not established by confirmed local Rule B sample; non-sufficiency retained as evidence safeguard"
+      ],
+      "scope": {
+        "project": "current garage fire-alarm project",
+        "validation_area": "compartment 1",
+        "applicability": "candidate classification only; not global layer mapping",
+        "electrical_confirmation_allowed": false
+      },
+      "provenance": [
+        {
+          "evidenceType": "ProjectRule",
+          "source": "current user instruction"
+        },
+        {
+          "evidenceType": "DerivedInference",
+          "source": "outputs/fire-alarm-semantic-pattern-validation-20261005/evidence.json"
+        },
+        {
+          "evidenceType": "DrawingFact",
+          "source": "project specification table",
+          "handles": [
+            "23C48",
+            "23C9A",
+            "23D5F",
+            "23D61",
+            "23D63",
+            "23D6F"
+          ]
+        }
+      ],
+      "assumptions": [
+        "Only candidate semantics; no electrical port function assigned",
+        "Verified geometry and device roles remain separate evidence gates",
+        "M2 is not classified as an ordinary controlled device"
+      ],
+      "may_generate_design_net_quantity": false
+    }
+  ],
+  "frozen_sources": {
+    "outputs/golden-project-measurement-rules-20261004/design-net-quantities.json": "d71dd9ca8f0e297711784d777efe1a0b0406576a78bb2e77fc04314f492aad77",
+    "outputs/golden-project-measurement-rules-20261004/project-rules.json": "aa98baf971f81d8158c3962e8402c366f91cb7a16cd85dca9cda1d81111faf99",
+    "outputs/golden-circuit-topology-20261004/evidence.json": "758a89f1cf2765996652281cc95731c5c95274e8047c227c193ad43ccc317396",
+    "outputs/golden-circuit-semantics-20261004/semantic-topology-evidence.json": "85e7b033be64dd6356802f3203f26562a3bd8ee4ef65cc56fa25b024f6f696f9"
+  },
+  "source_hashes": {
+    "outputs/fire-alarm-semantic-pattern-validation-20261005/evidence.json": "bb944d566c84415940852295670cf3ea2df429c2059705a1d575ec6a043fd42d",
+    "outputs/fire-alarm-rule-b-final-alternative-20261005/evidence.json": "19cea3e4d34eddd05c4051f6f1bd007adab3217a1e9b9868f2a8133d56a5fdf2",
+    "outputs/valve-132F7-endpoint-check-20261005/evidence.json": "0aa5565e557fa63eb32045db28f0ac7321a3d9cba268ea022a1d20782d150d03",
+    "outputs/module-four-edge-electrical-semantics-20261005/evidence.json": "774badc5c1232465725616270b55a2398f48e8c1e4ac569a78cfdc1037a933d9",
+    "outputs/module-13017-child-point-match-20261005/evidence.json": "b25064c9df3df3527cc805b42d04e450d7598798ca5e9dd3296f976f3a917d2a"
+  },
+  "generic_algorithm_changed": false,
+  "regression": "full regression not rerun"
+}

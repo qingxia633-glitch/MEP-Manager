@@ -1,0 +1,68 @@
+﻿{
+    "source_rule_set":  "../../outputs/fire-alarm-project-candidate-rules-20261005/fire-alarm-candidate-semantic-rules.json",
+    "source_sha256":  "86d9ddcdf8e4f99216c08f28fd1f485c6ead5d7d001b555ccc1e684b9cf29b57",
+    "scope_keys":  [
+                       "project",
+                       "validation_area"
+                   ],
+    "confidence_policy":  {
+                              "partial_pattern_support":  "medium",
+                              "insufficient_project_local_evidence":  "low",
+                              "validated":  "high",
+                              "supported":  "high"
+                          },
+    "bindings":  {
+                     "Rule A":  {
+                                    "roles_B":  [
+                                                    "smoke_detector",
+                                                    "heat_detector",
+                                                    "manual_call_point",
+                                                    "input_module",
+                                                    "input_output_module"
+                                                ],
+                                    "roles_A":  [
+                                                    "smoke_detector",
+                                                    "heat_detector",
+                                                    "manual_call_point",
+                                                    "input_module",
+                                                    "input_output_module"
+                                                ],
+                                    "directional":  false,
+                                    "kind":  "role_pair"
+                                },
+                     "Rule B":  {
+                                    "roles_B":  [
+                                                    "fire_damper",
+                                                    "smoke_exhaust_outlet"
+                                                ],
+                                    "roles_A":  [
+                                                    "input_output_module"
+                                                ],
+                                    "directional":  false,
+                                    "kind":  "role_pair"
+                                },
+                     "Rule C":  {
+                                    "roles_B":  [
+                                                    "module_box"
+                                                ],
+                                    "roles_A":  [
+                                                    "input_output_module"
+                                                ],
+                                    "directional":  false,
+                                    "kind":  "role_pair"
+                                },
+                     "Rule D":  {
+                                    "kind":  "context_restriction",
+                                    "forbidden_as_sole_evidence":  [
+                                                                       "RYJS",
+                                                                       "WDZN-RYJS",
+                                                                       "WIRE-消防控制"
+                                                                   ]
+                                }
+                 },
+    "assumptions":  [
+                        "Role-set bindings transcribed from current user instruction; original rule set remains immutable",
+                        "partial_pattern_support is not fully validated; maximum medium before inherited-role downgrade",
+                        "Scope must be explicitly supplied; no spatial compartment inference"
+                    ]
+}
