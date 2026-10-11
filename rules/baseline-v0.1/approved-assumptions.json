@@ -1,0 +1,278 @@
+{
+  "baseline_version": "0.1",
+  "dataset_type": "approved_assumptions",
+  "description": "Project-approved calculation policies or assumptions. They are not universal engineering rules.",
+  "assumptions": [
+    {
+      "id": "PA-FIRE-GOLDEN-13CF5-TRANSITION-001",
+      "status": "approved",
+      "statement": "Under the approved h=300 mm slab, representative conduit-center position 150 mm below slab top and 150 mm above slab bottom, and slab-bottom box vertical-entry model, 13CF5 owns two endpoint transitions: 0.150 m to 12D55 and 0.150 m to 12D51, totaling 0.300 m. The adjacent 13CEF:12D55 transition is excluded.",
+      "applicability": {
+        "discipline": "fire_alarm",
+        "project": "BX地下车库",
+        "drawing": "EX-BX地下车库火灾报警平面图_t8_t3.dwg",
+        "system": "fire_alarm_bus",
+        "zone": null,
+        "object_selector": {
+          "edge_handle": "13CF5",
+          "device_handles": [
+            "12D55",
+            "12D51"
+          ],
+          "parent_path": []
+        },
+        "snapshot": {
+          "logical_path": "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt",
+          "sha256": "719a34de3185fb16512b79baaf9d1786f8bc80628c61199fb27e2ac76f3317f8"
+        },
+        "effective_revision": null,
+        "scope_limit": "Only the identified objects in this snapshot; no adjacent-edge or global propagation.",
+        "conditions": {
+          "slab_thickness_mm": 300,
+          "installation": "slab_embedded",
+          "box_at_slab_bottom": true,
+          "transition_model": "vertical at each route endpoint"
+        }
+      },
+      "sources": [
+        {
+          "source_type": "project_approved_calculation_assumption",
+          "logical_path": "outputs/golden-project-measurement-rules-20261004/project-rules.json",
+          "sha256": "aa98baf971f81d8158c3962e8402c366f91cb7a16cd85dca9cda1d81111faf99",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/humanEvidence",
+            "/rules/0",
+            "/rules/2"
+          ]
+        },
+        {
+          "source_type": "historical_project_review_record",
+          "logical_path": "outputs/golden-project-measurement-rules-20261004/design-net-quantities.json",
+          "sha256": "d71dd9ca8f0e297711784d777efe1a0b0406576a78bb2e77fc04314f492aad77",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/quantities/0/assumptions",
+            "/quantities/0/transitionOwnership",
+            "/quantities/1/transitionOwnership"
+          ]
+        },
+        {
+          "source_type": "approved_project_calculation_model",
+          "logical_path": "outputs/golden-3d-route-20261004/evidence.json",
+          "sha256": "03695fee0d44e57759fe6ba1283c9a171580182d550828fab32f9a6fb106d5ea",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/supportQualification",
+            "/assumptions",
+            "/endpointTransitions",
+            "/endpointTransitionTotalMeters"
+          ]
+        },
+        {
+          "source_type": "historical_project_review_record",
+          "logical_path": "outputs/golden-local-design-net-quantity-20261004/evidence.json",
+          "sha256": "ce56c21191b669ea7429c3bf601d3b8fcea267314b1860c75464c4b3458624ad",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/humanConfirmation/transitionOwnership",
+            "/transitionOwnership",
+            "/adjacentTransitionNotCounted"
+          ]
+        }
+      ],
+      "created_from": "approved_read_only_inventory_materialization_2026-10-11",
+      "supersedes": [],
+      "superseded_by": [],
+      "project_specific": true,
+      "reusable_engineering_rule": false,
+      "provenance_gaps": [
+        "Referenced private source payload is not present in this checkout; integrity is tracked by logical path and SHA-256.",
+        "Original human-confirmation message ID and full verbatim text are not preserved in the current portable source set.",
+        "Historical confirmation identity has not been independently re-authenticated."
+      ],
+      "notes": [
+        "Existing seed source and applicability clarified.",
+        "Project-approved calculation assumption, not a universal code allowance or surveyed/as-built geometry.",
+        "Representative-position dependency: PA-FIRE-GOLDEN-13CF5-REPRESENTATIVE-POSITION-001.",
+        "No symbol offset, reserve or loss is included in these endpoint transitions."
+      ],
+      "calculation_policy": {
+        "adjustment_type": "endpoint_transition",
+        "representative_center_below_slab_top_m": "0.150",
+        "representative_center_above_slab_bottom_m": "0.150",
+        "count": 2,
+        "each_value_m": "0.150",
+        "total_addition_m": "0.300",
+        "ownership_required": true,
+        "owned_transitions": [
+          {
+            "route_edge": "13CF5",
+            "device": "12D55",
+            "value_m": "0.150"
+          },
+          {
+            "route_edge": "13CF5",
+            "device": "12D51",
+            "value_m": "0.150"
+          }
+        ],
+        "excluded_transition": "13CEF:12D55",
+        "is_drawing_fact": false
+      }
+    },
+    {
+      "id": "PA-FIRE-GOLDEN-13CF5-REPRESENTATIVE-POSITION-001",
+      "status": "approved",
+      "statement": "For the reviewed Golden fire-alarm slab-embedded conduit under h=300 mm, adopt a representative conduit-center position 150 mm below slab top and 150 mm above slab bottom. Other slab thicknesses remain unresolved; do not extrapolate.",
+      "applicability": {
+        "discipline": "fire_alarm",
+        "project": "BX地下车库",
+        "drawing": "EX-BX地下车库火灾报警平面图_t8_t3.dwg",
+        "system": "fire_alarm_bus",
+        "zone": null,
+        "object_selector": {
+          "edge_handle": "13CF5",
+          "device_handles": [
+            "12D55",
+            "12D51"
+          ],
+          "parent_path": []
+        },
+        "snapshot": {
+          "logical_path": "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt",
+          "sha256": "719a34de3185fb16512b79baaf9d1786f8bc80628c61199fb27e2ac76f3317f8"
+        },
+        "effective_revision": null,
+        "scope_limit": "Only the identified objects in this snapshot; no adjacent-edge or global propagation.",
+        "conditions": {
+          "slab_thickness_mm": 300,
+          "installation": "slab_embedded"
+        }
+      },
+      "sources": [
+        {
+          "source_type": "project_approved_calculation_assumption",
+          "logical_path": "outputs/golden-project-measurement-rules-20261004/project-rules.json",
+          "sha256": "aa98baf971f81d8158c3962e8402c366f91cb7a16cd85dca9cda1d81111faf99",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/humanEvidence",
+            "/rules/0"
+          ]
+        },
+        {
+          "source_type": "approved_project_calculation_model",
+          "logical_path": "outputs/golden-3d-route-20261004/evidence.json",
+          "sha256": "03695fee0d44e57759fe6ba1283c9a171580182d550828fab32f9a6fb106d5ea",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/assumptions/0",
+            "/supportQualification"
+          ]
+        }
+      ],
+      "created_from": "approved_read_only_inventory_materialization_2026-10-11",
+      "supersedes": [],
+      "superseded_by": [],
+      "project_specific": true,
+      "reusable_engineering_rule": false,
+      "provenance_gaps": [
+        "Referenced private source payload is not present in this checkout; integrity is tracked by logical path and SHA-256.",
+        "Original human-confirmation message ID and full verbatim text are not preserved in the current portable source set.",
+        "Historical confirmation identity has not been independently re-authenticated."
+      ],
+      "notes": [
+        "isDrawingFact=false; representative calculation position, not a measured or code-mandated centerline.",
+        "Baseline applicability is limited to the reviewed Golden local segment.",
+        "This position alone does not prove box location or endpoint transition geometry."
+      ],
+      "calculation_policy": {
+        "center_offset_from_top_mm": 150,
+        "center_offset_from_bottom_mm": 150,
+        "is_drawing_fact": false,
+        "other_slab_thickness_behavior": "unresolved / do not extrapolate"
+      }
+    },
+    {
+      "id": "PA-FIRE-GOLDEN-13CF5-GROUPED-BUS-MEASUREMENT-001",
+      "status": "approved",
+      "statement": "For WDZN-RYJS-2x1.5 in the reviewed Golden local bus, measure one installed grouped bus route with multiplier=1. Do not multiply by 2 because of 2x1.5, and do not infer additional power conductors.",
+      "applicability": {
+        "discipline": "fire_alarm",
+        "project": "BX地下车库",
+        "drawing": "EX-BX地下车库火灾报警平面图_t8_t3.dwg",
+        "system": "fire_alarm_bus",
+        "zone": null,
+        "object_selector": {
+          "edge_handle": "13CF5",
+          "device_handles": [
+            "12D55",
+            "12D51"
+          ],
+          "parent_path": []
+        },
+        "snapshot": {
+          "logical_path": "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt",
+          "sha256": "719a34de3185fb16512b79baaf9d1786f8bc80628c61199fb27e2ac76f3317f8"
+        },
+        "effective_revision": null,
+        "scope_limit": "Only the identified objects in this snapshot; no adjacent-edge or global propagation."
+      },
+      "sources": [
+        {
+          "source_type": "project_approved_measurement_policy",
+          "logical_path": "outputs/golden-project-measurement-rules-20261004/project-rules.json",
+          "sha256": "aa98baf971f81d8158c3962e8402c366f91cb7a16cd85dca9cda1d81111faf99",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/humanEvidence",
+            "/rules/1"
+          ]
+        },
+        {
+          "source_type": "recorded_human_confirmation",
+          "logical_path": "outputs/golden-local-design-net-quantity-20261004/evidence.json",
+          "sha256": "ce56c21191b669ea7429c3bf601d3b8fcea267314b1860c75464c4b3458624ad",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/humanConfirmation/wireBasis",
+            "/candidates/1/measurementBasis",
+            "/candidates/1/conductorMultiplier"
+          ]
+        },
+        {
+          "source_type": "historical_project_review_record",
+          "logical_path": "outputs/golden-project-measurement-rules-20261004/design-net-quantities.json",
+          "sha256": "d71dd9ca8f0e297711784d777efe1a0b0406576a78bb2e77fc04314f492aad77",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/quantities/1/spec",
+            "/quantities/1/countMultiplier",
+            "/quantities/1/scope"
+          ]
+        }
+      ],
+      "created_from": "approved_read_only_inventory_materialization_2026-10-11",
+      "supersedes": [],
+      "superseded_by": [],
+      "project_specific": true,
+      "reusable_engineering_rule": false,
+      "provenance_gaps": [
+        "Referenced private source payload is not present in this checkout; integrity is tracked by logical path and SHA-256.",
+        "Original human-confirmation message ID and full verbatim text are not preserved in the current portable source set.",
+        "Historical confirmation identity has not been independently re-authenticated."
+      ],
+      "notes": [
+        "Measurement policy separated from PE-FIRE-GOLDEN-13CF5-SPEC-001.",
+        "Do not generalize this approved project policy to all cables or projects."
+      ],
+      "calculation_policy": {
+        "wire_specification": "WDZN-RYJS-2x1.5",
+        "measurement_basis": "one installed grouped bus route length",
+        "multiplier": 1,
+        "single_conductor_accumulation": false
+      }
+    }
+  ]
+}

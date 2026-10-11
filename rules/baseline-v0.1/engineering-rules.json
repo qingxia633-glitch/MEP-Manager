@@ -1,0 +1,8 @@
+{
+    "baseline_version":  "0.1",
+    "dataset_type":  "engineering_rules",
+    "description":  "Only confirmed reusable engineering rules. Project-specific facts must not be stored here.",
+    "rules":  [
+
+              ]
+}
