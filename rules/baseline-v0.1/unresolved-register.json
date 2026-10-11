@@ -1,0 +1,365 @@
+{
+  "baseline_version": "0.1",
+  "dataset_type": "unresolved_register",
+  "description": "Unknown, unresolved, conflicting, rejected, deprecated and superseded engineering conclusions.",
+  "items": [
+    {
+      "id": "UR-FIRE-GOLDEN-13CF5-JDG25-001",
+      "status": "rejected",
+      "statement": "Retain the historical human-confirmed exclusion: the JDG25,余同 annotations 51B44 and 51AA5 must not be applied as fire-alarm wiring specifications to Golden 13CF5 or used to override its JDG20 specification. This exclusion does not identify any other system to which the annotations belong.",
+      "applicability": {
+        "discipline": "fire_alarm",
+        "project": "BX地下车库",
+        "drawing": "EX-BX地下车库火灾报警平面图_t8_t3.dwg",
+        "system": "fire_alarm",
+        "zone": null,
+        "object_selector": {
+          "edge_handle": "13CF5",
+          "annotation_handles": [
+            "51B44",
+            "51AA5"
+          ],
+          "parent_path": []
+        },
+        "snapshot": {
+          "logical_path": "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt",
+          "sha256": "719a34de3185fb16512b79baaf9d1786f8bc80628c61199fb27e2ac76f3317f8"
+        },
+        "effective_revision": null,
+        "scope_limit": "Only the identified objects in this snapshot; no adjacent-edge or global propagation."
+      },
+      "sources": [
+        {
+          "source_type": "project_drawing_evidence",
+          "logical_path": "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt",
+          "sha256": "719a34de3185fb16512b79baaf9d1786f8bc80628c61199fb27e2ac76f3317f8",
+          "source_relationship": "direct",
+          "handles": [
+            "51B44",
+            "51AA5"
+          ],
+          "observed_content": "JDG25,余同",
+          "relationship_scope": "Proves annotation existence only; does not prove the exclusion or identify another system."
+        },
+        {
+          "source_type": "recorded_human_confirmation",
+          "logical_path": "outputs/golden-local-design-net-quantity-20261004/evidence.json",
+          "sha256": "ce56c21191b669ea7429c3bf601d3b8fcea267314b1860c75464c4b3458624ad",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/humanConfirmation/jdg25ScopeExcludesGolden"
+          ]
+        },
+        {
+          "source_type": "recorded_annotation_exclusion",
+          "logical_path": "outputs/electrical-shadow-run-v03/design-context.json",
+          "sha256": "54069eaa34d4caaa07e65a83c0765fd4f700c1f9402c277c24df1b19874d71ed",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/annotation_exclusions/0"
+          ]
+        },
+        {
+          "source_type": "project_discovery_negative_evidence",
+          "logical_path": "outputs/project-evidence-discovery-v01/final-v1.2/negative-fixtures.json",
+          "sha256": "cb4d85ccdb55943f1d68f0fd4f133fdf13197a7309de439c644c2c62849366c0",
+          "source_relationship": "contextual",
+          "json_pointers": [
+            "/0",
+            "/1"
+          ],
+          "handles": [
+            "51B44",
+            "51AA5"
+          ],
+          "relationship_scope": "No established binding or propagation root in the inspected discovery result; corroboration, not the source of human rejection."
+        }
+      ],
+      "created_from": "approved_read_only_inventory_materialization_2026-10-11",
+      "supersedes": [],
+      "superseded_by": [],
+      "project_specific": true,
+      "reusable_engineering_rule": false,
+      "provenance_gaps": [
+        "Referenced private source payload is not present in this checkout; integrity is tracked by logical path and SHA-256.",
+        "Original human-confirmation message ID and full verbatim text are not preserved in the current portable source set.",
+        "Historical confirmation identity has not been independently re-authenticated."
+      ],
+      "notes": [
+        "Retain the rejected conclusion and the original seed ID.",
+        "Discovery root_status=unresolved does not overturn the historical exclusion.",
+        "Do not assign another system from layer names, proximity or this rejection."
+      ]
+    },
+    {
+      "id": "UR-FIRE-SD-518D4-BINDING-001",
+      "status": "unresolved",
+      "statement": "Annotation 518D4 contains S+D, but the inspected project evidence does not establish a bounded target. Nearby/context evidence is not object binding.",
+      "applicability": {
+        "discipline": "fire_alarm",
+        "project": "BX地下车库",
+        "drawing": "EX-BX地下车库火灾报警平面图_t8_t3.dwg",
+        "system": "fire_alarm",
+        "zone": null,
+        "object_selector": {
+          "annotation_handle": "518D4",
+          "target": null,
+          "parent_path": []
+        },
+        "snapshot": {
+          "logical_path": "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt",
+          "sha256": "719a34de3185fb16512b79baaf9d1786f8bc80628c61199fb27e2ac76f3317f8"
+        },
+        "effective_revision": null,
+        "scope_limit": "Only the identified objects in this snapshot; no adjacent-edge or global propagation."
+      },
+      "sources": [
+        {
+          "source_type": "project_drawing_evidence",
+          "logical_path": "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt",
+          "sha256": "719a34de3185fb16512b79baaf9d1786f8bc80628c61199fb27e2ac76f3317f8",
+          "source_relationship": "direct",
+          "handles": [
+            "518D4"
+          ],
+          "observed_content": "S+D",
+          "relationship_scope": "Direct evidence of text existence, not target binding."
+        },
+        {
+          "source_type": "project_discovery_result",
+          "logical_path": "outputs/project-evidence-discovery-v01/final-v1.2/negative-fixtures.json",
+          "sha256": "cb4d85ccdb55943f1d68f0fd4f133fdf13197a7309de439c644c2c62849366c0",
+          "source_relationship": "contextual",
+          "json_pointers": [
+            "/2"
+          ],
+          "handles": [
+            "518D4"
+          ],
+          "relationship_scope": "binding_status=unresolved; nearby_context; leader_geometry_unavailable."
+        }
+      ],
+      "created_from": "approved_read_only_inventory_materialization_2026-10-11",
+      "supersedes": [],
+      "superseded_by": [],
+      "project_specific": true,
+      "reusable_engineering_rule": false,
+      "provenance_gaps": [
+        "Referenced private source payload is not present in this checkout; integrity is tracked by logical path and SHA-256."
+      ],
+      "notes": [
+        "Retain the existing unresolved seed.",
+        "No bounded target is currently established.",
+        "This does not mean the original DWG has no leader.",
+        "This does not mean S+D can never be bound."
+      ]
+    },
+    {
+      "id": "UR-FIRE-GOLDEN-13CF5-GLOBAL-IDENTITY-001",
+      "status": "unresolved",
+      "statement": "The local fire-alarm bus is supported, but the specific circuit number, address, global start/end, signal direction, controller membership and attribute B semantics remain unresolved. Local supported status does not establish global identity.",
+      "applicability": {
+        "discipline": "fire_alarm",
+        "project": "BX地下车库",
+        "drawing": "EX-BX地下车库火灾报警平面图_t8_t3.dwg",
+        "system": "fire_alarm_bus",
+        "zone": null,
+        "object_selector": {
+          "edge_handle": "13CF5",
+          "device_handles": [
+            "12D55",
+            "12D51"
+          ],
+          "parent_path": []
+        },
+        "snapshot": {
+          "logical_path": "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt",
+          "sha256": "719a34de3185fb16512b79baaf9d1786f8bc80628c61199fb27e2ac76f3317f8"
+        },
+        "effective_revision": null,
+        "scope_limit": "Only the identified objects in this snapshot; no adjacent-edge or global propagation."
+      },
+      "sources": [
+        {
+          "source_type": "project_review_unresolved_record",
+          "logical_path": "outputs/golden-local-bus-20261004/evidence.json",
+          "sha256": "4a3f9da2980331edbd3a1ad626509bd9e9f62a08690ef399ca7b96ec28df09c8",
+          "source_relationship": "direct",
+          "json_pointers": [
+            "/busSegment",
+            "/localEndpoint/globalCircuitTerminal",
+            "/reviewItems"
+          ],
+          "relationship_scope": "Explicit object-specific unresolved findings in the saved project record."
+        },
+        {
+          "source_type": "project_review_unresolved_record",
+          "logical_path": "outputs/golden-3d-route-20261004/evidence.json",
+          "sha256": "03695fee0d44e57759fe6ba1283c9a171580182d550828fab32f9a6fb106d5ea",
+          "source_relationship": "direct",
+          "json_pointers": [
+            "/specificCircuitNumber",
+            "/addressNumber",
+            "/globalControllerMembership"
+          ]
+        }
+      ],
+      "created_from": "approved_read_only_inventory_materialization_2026-10-11",
+      "supersedes": [],
+      "superseded_by": [],
+      "project_specific": true,
+      "reusable_engineering_rule": false,
+      "provenance_gaps": [
+        "Referenced private source payload is not present in this checkout; integrity is tracked by logical path and SHA-256."
+      ],
+      "notes": [
+        "Do not infer a complete circuit or global controller relationship from the local Golden.",
+        "No missing identity is supplied by this baseline."
+      ]
+    },
+    {
+      "id": "UR-FIRE-GOLDEN-13CF5-CONDUIT-MATERIAL-001",
+      "status": "unresolved",
+      "statement": "JDG20 is recorded as the Golden nominal conduit specification, but the final basement-concealed procurement material selection, selected-product wall thickness, compliance/product mapping and pricing mapping remain unresolved. Design-note material requirements are not completed procurement selection.",
+      "applicability": {
+        "discipline": "fire_alarm",
+        "project": "BX地下车库",
+        "drawing": "EX-BX地下车库火灾报警平面图_t8_t3.dwg",
+        "system": "fire_alarm_bus",
+        "zone": null,
+        "object_selector": {
+          "edge_handle": "13CF5",
+          "device_handles": [
+            "12D55",
+            "12D51"
+          ],
+          "parent_path": []
+        },
+        "snapshot": {
+          "logical_path": "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt",
+          "sha256": "719a34de3185fb16512b79baaf9d1786f8bc80628c61199fb27e2ac76f3317f8"
+        },
+        "effective_revision": null,
+        "scope_limit": "Only the identified objects in this snapshot; no adjacent-edge or global propagation.",
+        "conditions": {
+          "installation": "basement_concealed"
+        }
+      },
+      "sources": [
+        {
+          "source_type": "project_material_review_record",
+          "logical_path": "outputs/golden-project-measurement-rules-20261004/design-net-quantities.json",
+          "sha256": "d71dd9ca8f0e297711784d777efe1a0b0406576a78bb2e77fc04314f492aad77",
+          "source_relationship": "direct",
+          "json_pointers": [
+            "/quantities/0/spec",
+            "/quantities/0/ConduitMaterialRequirement"
+          ],
+          "relationship_scope": "Recorded nominal specification and incomplete procurement/pricing status."
+        },
+        {
+          "source_type": "project_material_review_record",
+          "logical_path": "outputs/golden-local-design-net-quantity-20261004/evidence.json",
+          "sha256": "ce56c21191b669ea7429c3bf601d3b8fcea267314b1860c75464c4b3458624ad",
+          "source_relationship": "direct",
+          "json_pointers": [
+            "/ConduitMaterialRequirement"
+          ]
+        },
+        {
+          "source_type": "project_design_note",
+          "logical_path": "local_test_data/system-t8t3-textlayout-snapshot-20260924/MEP-full-entity-report.txt",
+          "sha256": "7360adb34a4e0bacacd2768261fbb3e19835c07c65f9f4959f94bae5751a249f",
+          "source_relationship": "direct",
+          "handles": [
+            "2370B",
+            "2370C",
+            "2370D"
+          ],
+          "relationship_scope": "Direct design-note text; contextual for selecting a product for 13CF5. Only the opening of 2370D completes the basement requirement; later provisions are outside this record."
+        }
+      ],
+      "created_from": "approved_read_only_inventory_materialization_2026-10-11",
+      "supersedes": [],
+      "superseded_by": [],
+      "project_specific": true,
+      "reusable_engineering_rule": false,
+      "provenance_gaps": [
+        "Referenced private source payload is not present in this checkout; integrity is tracked by logical path and SHA-256."
+      ],
+      "notes": [
+        "The note requires wall thickness >=2.0 mm hot-dip galvanized steel conduit OR heavy waterproof flexible metal conduit for the stated basement-concealed condition.",
+        "The requirement is known; the actual selected product and its wall thickness/compliance have not been established.",
+        "Do not declare a JDG20 conflict or choose a substitute product without further project evidence.",
+        "Historical ConduitMaterialRequirement remains partial; no procurement or pricing conclusion is issued."
+      ]
+    },
+    {
+      "id": "UR-FIRE-LEADER-PROJECT-BINDING-001",
+      "status": "unresolved",
+      "statement": "The inspected project evidence has no direct or bounded binding for 13C9D / 13CC7 / 13CC9. Independent Leader validation demonstrates software acquisition capability only; synthetic 279 -> 277 -> 276 is not BX project evidence. Missing exported leaders does not prove the original DWG has no leaders.",
+      "applicability": {
+        "discipline": "fire_alarm",
+        "project": "BX地下车库",
+        "drawing": "EX-BX地下车库火灾报警平面图_t8_t3.dwg",
+        "system": "fire_alarm",
+        "zone": null,
+        "object_selector": {
+          "edge_handles": [
+            "13C9D",
+            "13CC7",
+            "13CC9"
+          ],
+          "parent_path": []
+        },
+        "snapshot": {
+          "logical_path": "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt",
+          "sha256": "719a34de3185fb16512b79baaf9d1786f8bc80628c61199fb27e2ac76f3317f8"
+        },
+        "effective_revision": null,
+        "scope_limit": "Only the identified objects in this snapshot; no adjacent-edge or global propagation."
+      },
+      "sources": [
+        {
+          "source_type": "project_discovery_result",
+          "logical_path": "outputs/project-evidence-discovery-v01/final-v1.2/edge-results.json",
+          "sha256": "472b467595236bc011b0b43fd2e18bc89de324e5539a8ea44a0db6e475ffa431",
+          "source_relationship": "direct",
+          "json_pointers": [
+            "/13C9D",
+            "/13CC7",
+            "/13CC9"
+          ],
+          "relationship_scope": "Direct record of unresolved discovery results, not proof that no physical drawing expression exists."
+        },
+        {
+          "source_type": "independent_cad_validation",
+          "logical_path": "outputs/leader-evidence-v01-20261009/real-validation-result.json",
+          "sha256": "678082c5e0cbf01bcd914da87067fe7f44a9b683e31e3da137925db6d81a41fa",
+          "source_relationship": "synthetic validation",
+          "json_pointers": [
+            "/project_support",
+            "/object_support",
+            "/classic_handle",
+            "/annotation_handle",
+            "/binding/0/target_id"
+          ],
+          "relationship_scope": "Independent validation drawing only; not a BX object binding or project approval."
+        }
+      ],
+      "created_from": "approved_read_only_inventory_materialization_2026-10-11",
+      "supersedes": [],
+      "superseded_by": [],
+      "project_specific": true,
+      "reusable_engineering_rule": false,
+      "provenance_gaps": [
+        "Referenced private source payload is not present in this checkout; integrity is tracked by logical path and SHA-256."
+      ],
+      "notes": [
+        "Only the three listed project objects are covered; 518D4 remains separately recorded.",
+        "No Leader parser, WCS, encoding or manifest execution contract is introduced here.",
+        "Independent validation results do not establish implementation parity with the current checkout."
+      ]
+    }
+  ]
+}

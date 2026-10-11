@@ -1,0 +1,195 @@
+{
+  "baseline_version": "0.1",
+  "dataset_type": "project_evidence",
+  "description": "Project-, drawing-, system-, region-, or object-specific evidence.",
+  "evidence": [
+    {
+      "id": "PE-FIRE-GOLDEN-13CF5-SPEC-001",
+      "status": "supported",
+      "statement": "Historical project review adopted JDG20 conduit and WDZN-RYJS-2x1.5mm2 bus wire with CC installation for local segment 12D55 / 13CF5 / 12D51. The legend text is retained verbatim and does not mean that this local segment simultaneously adopts CC and WC.",
+      "applicability": {
+        "discipline": "fire_alarm",
+        "project": "BX地下车库",
+        "drawing": "EX-BX地下车库火灾报警平面图_t8_t3.dwg",
+        "system": "fire_alarm_bus",
+        "zone": null,
+        "object_selector": {
+          "edge_handle": "13CF5",
+          "device_handles": [
+            "12D55",
+            "12D51"
+          ],
+          "parent_path": []
+        },
+        "snapshot": {
+          "logical_path": "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt",
+          "sha256": "719a34de3185fb16512b79baaf9d1786f8bc80628c61199fb27e2ac76f3317f8"
+        },
+        "effective_revision": null,
+        "scope_limit": "Only the identified objects in this snapshot; no adjacent-edge or global propagation."
+      },
+      "sources": [
+        {
+          "source_type": "project_drawing_evidence",
+          "logical_path": "local_test_data/system-t8t3-textlayout-snapshot-20260924/MEP-full-entity-report.txt",
+          "sha256": "7360adb34a4e0bacacd2768261fbb3e19835c07c65f9f4959f94bae5751a249f",
+          "source_relationship": "direct",
+          "handles": [
+            "23C4B",
+            "23C48",
+            "23C9A"
+          ],
+          "observed_content": [
+            {
+              "handle": "23C4B",
+              "raw_text": "S"
+            },
+            {
+              "handle": "23C48",
+              "raw_text": "火灾报警二总线"
+            },
+            {
+              "handle": "23C9A",
+              "raw_text": "WDZN-RYJS-2x1.5 JDG20 CC WC"
+            }
+          ],
+          "relationship_scope": "Direct evidence of the text; contextual only for applicability to 13CF5."
+        },
+        {
+          "source_type": "reviewed_project_evidence",
+          "logical_path": "outputs/golden-local-bus-20261004/evidence.json",
+          "sha256": "4a3f9da2980331edbd3a1ad626509bd9e9f62a08690ef399ca7b96ec28df09c8",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/humanEvidence",
+            "/busSegment"
+          ],
+          "relationship_scope": "Historical local bus identity; not an automatic cross-drawing legend binding."
+        },
+        {
+          "source_type": "historical_project_review_record",
+          "logical_path": "outputs/golden-project-measurement-rules-20261004/design-net-quantities.json",
+          "sha256": "d71dd9ca8f0e297711784d777efe1a0b0406576a78bb2e77fc04314f492aad77",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/quantities/0/spec",
+            "/quantities/0/installation",
+            "/quantities/0/scope",
+            "/quantities/1/spec",
+            "/quantities/1/installation",
+            "/quantities/1/scope",
+            "/quantities/1/provenance/humanConfirmationRef"
+          ]
+        },
+        {
+          "source_type": "historical_project_review_record",
+          "logical_path": "outputs/golden-local-design-net-quantity-20261004/evidence.json",
+          "sha256": "ce56c21191b669ea7429c3bf601d3b8fcea267314b1860c75464c4b3458624ad",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/candidates/0",
+            "/candidates/1",
+            "/humanConfirmation",
+            "/rawSpecificationEvidence"
+          ]
+        }
+      ],
+      "created_from": "approved_read_only_inventory_materialization_2026-10-11",
+      "supersedes": [],
+      "superseded_by": [],
+      "project_specific": true,
+      "reusable_engineering_rule": false,
+      "provenance_gaps": [
+        "Referenced private source payload is not present in this checkout; integrity is tracked by logical path and SHA-256.",
+        "Original human-confirmation message ID and full verbatim text are not preserved in the current portable source set.",
+        "Historical confirmation identity has not been independently re-authenticated."
+      ],
+      "notes": [
+        "Existing seed corrected without changing its identity.",
+        "Legend text alone does not bind a plan edge. Local applicability comes from the recorded project review.",
+        "Grouped-bus measurement policy is recorded separately in PA-FIRE-GOLDEN-13CF5-GROUPED-BUS-MEASUREMENT-001.",
+        "The rejected JDG25 interpretation is retained in UR-FIRE-GOLDEN-13CF5-JDG25-001."
+      ],
+      "adopted_local_values": {
+        "conduit_specification": "JDG20",
+        "wire_specification": "WDZN-RYJS-2x1.5mm2",
+        "installation": "CC"
+      }
+    },
+    {
+      "id": "PE-FIRE-GOLDEN-13CF5-LOCAL-BUS-001",
+      "status": "supported",
+      "statement": "Historical project review supports 12D55 / 13CF5 / 12D51 as a local fire_alarm_bus_segment. This does not authorize adjacent edges, a complete circuit or the global network.",
+      "applicability": {
+        "discipline": "fire_alarm",
+        "project": "BX地下车库",
+        "drawing": "EX-BX地下车库火灾报警平面图_t8_t3.dwg",
+        "system": "fire_alarm_bus",
+        "zone": null,
+        "object_selector": {
+          "edge_handle": "13CF5",
+          "device_handles": [
+            "12D55",
+            "12D51"
+          ],
+          "parent_path": []
+        },
+        "snapshot": {
+          "logical_path": "local_test_data/fire-alarm-full-snapshot-20260923/MEP-full-entity-report.txt",
+          "sha256": "719a34de3185fb16512b79baaf9d1786f8bc80628c61199fb27e2ac76f3317f8"
+        },
+        "effective_revision": null,
+        "scope_limit": "Only the identified objects in this snapshot; no adjacent-edge or global propagation."
+      },
+      "sources": [
+        {
+          "source_type": "reviewed_project_evidence",
+          "logical_path": "outputs/golden-local-bus-20261004/evidence.json",
+          "sha256": "4a3f9da2980331edbd3a1ad626509bd9e9f62a08690ef399ca7b96ec28df09c8",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/humanEvidence",
+            "/continuation",
+            "/localEndpoint",
+            "/busSegment"
+          ]
+        },
+        {
+          "source_type": "historical_project_review_record",
+          "logical_path": "outputs/golden-project-measurement-rules-20261004/design-net-quantities.json",
+          "sha256": "d71dd9ca8f0e297711784d777efe1a0b0406576a78bb2e77fc04314f492aad77",
+          "source_relationship": "human-confirmed",
+          "json_pointers": [
+            "/quantities/1/objectRole",
+            "/quantities/1/scope"
+          ]
+        },
+        {
+          "source_type": "project_discovery_result",
+          "logical_path": "outputs/project-evidence-discovery-v01/final-v1.2/edge-results.json",
+          "sha256": "472b467595236bc011b0b43fd2e18bc89de324e5539a8ea44a0db6e475ffa431",
+          "source_relationship": "contextual",
+          "json_pointers": [
+            "/13CF5"
+          ],
+          "relationship_scope": "No direct annotation binding was rediscovered; this separate evidence path does not revoke historical project review."
+        }
+      ],
+      "created_from": "approved_read_only_inventory_materialization_2026-10-11",
+      "supersedes": [],
+      "superseded_by": [],
+      "project_specific": true,
+      "reusable_engineering_rule": false,
+      "provenance_gaps": [
+        "Referenced private source payload is not present in this checkout; integrity is tracked by logical path and SHA-256.",
+        "Original human-confirmation message ID and full verbatim text are not preserved in the current portable source set.",
+        "Historical confirmation identity has not been independently re-authenticated."
+      ],
+      "notes": [
+        "Local semantic identity is distinct from specification and global circuit identity.",
+        "No automatic TEXT-to-leader binding is asserted.",
+        "Global unknowns are retained in UR-FIRE-GOLDEN-13CF5-GLOBAL-IDENTITY-001."
+      ]
+    }
+  ]
+}

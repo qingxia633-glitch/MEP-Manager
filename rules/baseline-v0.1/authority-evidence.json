@@ -1,0 +1,8 @@
+{
+    "baseline_version":  "0.1",
+    "dataset_type":  "authority_evidence",
+    "description":  "Formal project authority evidence such as design replies, drawing review minutes, RFIs, technical confirmations and design changes.",
+    "authority_evidence":  [
+
+                           ]
+}
