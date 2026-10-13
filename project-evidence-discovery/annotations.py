@@ -1,6 +1,9 @@
 """Unicode-safe top-level MEP report adapter. Missing associations stay missing."""
-import hashlib,json,re,unicodedata
+import hashlib,json,re,unicodedata,math
 from pathlib import Path
+from leader_contract import TOP_LEVEL,validate_leader_evidence_record
+from report_manifest import report_identity,verify_manifest
+from report_text import serialized_field,text_record
 
 def field(text,key):
  m=re.search(r'^'+re.escape(key)+r'=(.*?)\r?$',text,re.M)
@@ -30,16 +33,22 @@ def categories(text):
  if re.search(r'报警二总线|火灾报警二总线|报警总线|总线|回路|电源线|系统名称',text):out.append('system_context')
  return out,codes
 
-def load_report(path,project_id=None):
- path=Path(path);data=path.read_bytes();raw=data.decode('utf-8-sig')
+def load_report(path,project_id=None,encoding='utf-8-sig',manifest=None):
+ path=Path(path);data=path.read_bytes();raw=data.decode(encoding)
+ verified=verify_manifest(data,path,encoding,manifest) if manifest is not None else None
  drawing=(field(raw,'DWG') or '').replace('\\','/').split('/')[-1]
  if not drawing:raise ValueError('Missing source DWG')
  drawing,_=corrected_reference(drawing,None)
  header=raw.split('EntityHandle=',1)[0]
  top_level=(field(header,'AcquisitionMode')=='ModelSpaceTopLevelAllLayers' and
             field(header,'ModelSpaceTopLevel')=='included' and field(header,'NestedBlocks')=='not expanded')
- src={'path':str(path),'sha256':hashlib.sha256(data).hexdigest()}
+ measured_hash=hashlib.sha256(data).hexdigest()
+ src={'path':str(path),'sha256':measured_hash,'hash_status':'verified' if verified else 'computed_only',
+      'encoding':encoding,'report_identity':report_identity(raw),
+      'report_integrity':'verified' if verified else 'unavailable/legacy','snapshot_id':measured_hash}
+ if verified:src['verified_report_sha256']=verified['report_sha256']
  c={'project_id':project_id,'drawing_ref':drawing,'annotations':[],'unresolved_attributes':[],'targets':[],'leaders':[],
+    'report_identity':src['report_identity'],'report_integrity':src['report_integrity'],'snapshot_id':measured_hash,
     'object_associations':[],'bounded_groups':[],'memberships':[],'provenance':[src],
     'extraction_gaps':['nested_blocks_not_expanded','xref_contents_not_expanded','layouts_not_included','proxy_semantics_not_recovered']}
  counts={}
@@ -77,10 +86,37 @@ def load_report(path,project_id=None):
   if typ in ('TEXT','MTEXT','DIMENSION'):
    value=next((field(rec,k) for k in ('Text_RAW','TextString_RAW','Contents_RAW','DimensionText_RAW') if field(rec,k) is not None),None)
    if value is not None:
+    key=next(k for k in ('Text_RAW','TextString_RAW','Contents_RAW','DimensionText_RAW') if field(rec,k) is not None)
     c['annotations'].append({'handle':h,'type':typ,'raw_text':value,'layer':layer,
+        'parent_path':[] if top_level else None,'source_drawing':drawing,'project_id':project_id,
+        **text_record(serialized_field(rec,key)),
         'position_wcs':point(field(rec,'Insertion_WCS')),'bounds':None,'provenance':provenance})
    elif typ=='DIMENSION':c['extraction_gaps'].append('dimension_text_unavailable:'+h)
   if typ in ('LEADER','MLEADER','MULTILEADER'):
+   if field(rec,'LeaderEvidenceVersion') is not None:
+    version=field(rec,'LeaderEvidenceVersion')
+    vs=[point(v) for v in re.findall(r'^LeaderVertex_WCS=(.*?)\r?$',rec,re.M)]
+    arrow=point(field(rec,'Arrow_WCS'))
+    scope_established=top_level and field(rec,'LeaderScope')==TOP_LEVEL and field(rec,'LeaderParentPath')=='[]'
+    count=field(rec,'LeaderVertexCount')
+    c['leaders'].append({'handle':h,'type':typ,'evidence_version':version,'parent_path':[] if scope_established else None,
+      'reported_parent_path':field(rec,'LeaderParentPath'),'reported_scope':field(rec,'LeaderScope'),
+      'acquisition_scope':TOP_LEVEL if top_level else None,'source_drawing':drawing,'project_id':project_id,
+      'coordinate_system':field(rec,'LeaderCoordinateSystem'),'geometry_status':field(rec,'LeaderGeometryStatus'),
+      'vertex_count':int(count) if count and count.isdecimal() else None,'arrow_status':field(rec,'LeaderArrowStatus'),
+      'annotation_status':field(rec,'LeaderAnnotationStatus'),'annotation_type':field(rec,'AnnotationType'),
+      'annotation_handle':field(rec,'AnnotationHandle'),'vertices_wcs':vs,'arrow_wcs':arrow,
+      'association_status':'unresolved','capability_status':field(rec,'MLeaderCapabilityStatus') or 'not_applicable',
+      'raw_record':rec,'provenance':provenance})
+    if scope_established and typ in ('MLEADER','MULTILEADER') and field(rec,'MLeaderTextString_Status')=='read':
+     value=field(rec,'MLeaderTextString')
+     if value is not None:
+      content_type=field(rec,'MLeaderContentType')
+      c['annotations'].append({'handle':h,'type':'MLEADER_MTEXT' if content_type=='2' else 'MLEADER_CONTENT_UNRESOLVED',
+        'content_id':'text_string','reported_content_type':content_type,'owner_entity_handle':h,
+        'parent_path':[],'raw_text':value,**text_record(serialized_field(rec,'MLeaderTextString')),
+        'position_wcs':None,'layer':layer,'provenance':provenance})
+    continue
    # Only explicit exported associations. Runtime object pointers are NOT handles.
    annotation=field(rec,'AnnotationHandle') or field(rec,'TextHandle')
    arrow=point(field(rec,'Arrow_WCS'))
@@ -94,6 +130,11 @@ def load_report(path,project_id=None):
     arrow_flag=re.search(r'^Raw_DXF=\(71 \. 1\)\r?$',rec,re.M)
     if arrow is None and arrow_flag and vs:arrow=vs[0]
    c['leaders'].append({'handle':h,'type':typ,'annotation_handle':annotation,'arrow_wcs':arrow,
-        'vertices_wcs':vs,'association_status':'explicit' if annotation else 'unresolved','provenance':provenance})
+        'evidence_version':None,'parent_path':[] if top_level else None,
+        'reported_parent_path':'[]' if top_level else None,'reported_scope':TOP_LEVEL if top_level else None,
+        'acquisition_scope':TOP_LEVEL if top_level else None,'source_drawing':drawing,'project_id':project_id,
+        'vertices_wcs':vs,'association_status':'unresolved','provenance':provenance})
+ for leader in c['leaders']:
+  leader.update(validate_leader_evidence_record(leader,c['annotations'],c))
  c['entity_counts']=counts
  return c

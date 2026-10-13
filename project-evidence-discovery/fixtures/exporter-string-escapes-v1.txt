@@ -1,0 +1,2 @@
+Text_RAW="S\\P中文 \"引线\" C:\\cad"
+Controls="a\nb\rc\td"

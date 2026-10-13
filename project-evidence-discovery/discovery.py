@@ -4,6 +4,8 @@ import math
 from annotations import categories,normalize_text,corrected_reference
 from bindings import nearest,valid_point
 from model import identity,EXPORTER_FIELDS
+from leader_contract import validate_leader_evidence_record, finite_point, annotation_identity
+from binding_content import canonical_content, consolidate_bindings
 
 def discover(context,xy_tolerance=.001,nearby_distance=1000):
  if not math.isfinite(xy_tolerance) or xy_tolerance<=0 or not math.isfinite(nearby_distance) or nearby_distance<0:
@@ -19,16 +21,39 @@ def discover(context,xy_tolerance=.001,nearby_distance=1000):
  def entity_key(record,handle_key='handle',path_key='parent_path'):
   return record.get('project_id',project),record.get('source_drawing',drawing),path(record,path_key),record.get(handle_key)
  def annotation_matches(record,annotation):
+  if record.get('parent_path',[]) is None or annotation.get('parent_path',[]) is None:return False
   return local(record) and entity_key(record,'annotation_handle','annotation_parent_path')==entity_key(annotation)
  def target_key(record):return entity_key(record,'id')
  def reference_key(record,handle_key='target_id',path_key='target_parent_path'):
   return entity_key(record,handle_key,path_key)
  targets=[t for t in context.get('targets',[]) if local(t)]
+ leaders_checked=[]
+ for source in context.get('leaders',[]):
+  leader=deepcopy(source)
+  leader.update(validate_leader_evidence_record(source,context.get('annotations',[]),context,xy_tolerance))
+  distances=[n['distance'] for t in targets if t['target_type']=='edge'
+             for n in [nearest(leader.get('arrow_wcs'),t)] if n] if finite_point(leader.get('arrow_wcs')) else []
+  leader.update(arrow_present=finite_point(leader.get('arrow_wcs')),
+                arrow_to_nearest_edge_distance=min(distances) if distances else None,
+                target_match_count=sum(d<=xy_tolerance for d in distances))
+  leaders_checked.append(leader)
+ # One actual leader identity cannot carry different geometry/annotation claims.
+ leader_groups={}
+ for leader in leaders_checked:
+  if leader.get('type')=='LEADER' and leader.get('parent_path') is not None:
+   leader_groups.setdefault(entity_key(leader),[]).append(leader)
+ for group in leader_groups.values():
+  contents=[{**{k:l.get(k) for k in ('type','vertices_wcs','arrow_wcs','coordinate_system',
+             'annotation_handle','annotation_type')},
+             'annotation_parent_path':l.get('annotation_parent_path',l.get('parent_path'))} for l in group]
+  if any(c!=contents[0] for c in contents):
+   for l in group:l['binding_conflict']=True
  byid={target_key(t):t for t in targets}
  evidence=[];bindings=[];roots=[];members=[];seen={}
  for a in context.get('annotations',[]):
   if not local(a):continue
-  raw=a.get('raw_text','');normalized=normalize_text(raw);cats,codes=categories(normalized)
+  if a.get('parent_path',[]) is None:continue
+  raw=a.get('raw_text','');normalized=normalize_text(a.get('decoded_text') if a.get('decoded_text') is not None else raw);cats,codes=categories(normalized)
   if not cats:continue
   key=entity_key(a)
   if key in seen:
@@ -47,6 +72,8 @@ def discover(context,xy_tolerance=.001,nearby_distance=1000):
      'assumptions':['XY contact does not establish electrical function','Nearby text is not binding',
                     'No specification-to-S inference; no unbounded propagation'],
      'discovery_gaps':[],'discovery_status':'unresolved'}
+  for field in ('raw_serialized_text','decoded_text','text_decode_status'):
+   if field in a:e[field]=a[field]
   seen[key]=e;evidence.append(e)
   near=[]
   for t in targets:
@@ -63,28 +90,51 @@ def discover(context,xy_tolerance=.001,nearby_distance=1000):
   for assoc in context.get('object_associations',[]):
    if (annotation_matches(assoc,a) and assoc.get('status')=='supported' and assoc.get('provenance') and reference_key(assoc) in byid):
     hits.append((byid[reference_key(assoc)],None,'direct_object_binding',deepcopy(assoc)))
-  leaders=[l for l in context.get('leaders',[]) if annotation_matches(l,a)]
+  leaders=[l for l in leaders_checked if
+           l.get('validated_annotation_identity')==annotation_identity(a) or
+           (l.get('association_status')!='explicit' and annotation_matches(l,a))]
   e['leader_geometry']=deepcopy(leaders)
+  if any('annotation_conflict' in l.get('failure_reasons',[]) for l in leaders):
+   e['binding_status']='conflicting';e['discovery_gaps'].append('annotation_conflict')
   for l in leaders:
-   vertices=l.get('vertices_wcs',[])
-   if (l.get('association_status')!='explicit' or not l.get('provenance') or not valid_point(l.get('arrow_wcs')) or
-       not vertices or not all(valid_point(v) for v in vertices) or
-       not any(math.dist(l['arrow_wcs'],v)<=xy_tolerance for v in vertices)):
+   if l.get('association_status')!='explicit' or a.get('text_decode_status')=='unresolved':
     e['discovery_gaps'].append('leader_geometry_unavailable');continue
    for t in targets:
     n=nearest(l['arrow_wcs'],t)
-    if n and n['distance']<=xy_tolerance:hits.append((t,n,'leader_binding',{'leader':l['handle'],'leader_parent_path':list(path(l)),'arrow_wcs':l['arrow_wcs']}))
-  unique={ (target_key(t),method,str(basis)): (t,n,method,basis) for t,n,method,basis in hits }
-  hits=list(unique.values());hit_ids={target_key(t) for t,_,_,_ in hits}
+    if n and n['distance']<=xy_tolerance:
+     basis={'leader':l['handle'],'leader_handle':l['handle'],'leader_parent_path':list(path(l)),'arrow_wcs':l['arrow_wcs'],
+            'annotation_identity':deepcopy(l['validated_annotation_identity']),
+            'vertices_wcs':deepcopy(l['vertices_wcs']),
+            'leader_evidence_version':l['evidence_version'],'snapshot_id':context.get('snapshot_id'),
+            'report_integrity':context.get('report_integrity','unavailable/legacy'),
+            'report_identity':deepcopy(context.get('report_identity')),'source_provenance':deepcopy(l['provenance'])}
+     if context.get('report_integrity')=='verified':
+      for source in context.get('provenance',[]):
+       if source.get('verified_report_sha256'):basis['verified_report_sha256']=source['verified_report_sha256']
+     if l.get('binding_conflict'):basis['binding_conflict']=True
+     hits.append((t,n,'leader_binding',basis))
+  hit_ids={target_key(t) for t,_,_,_ in hits}
   for t,n,method,basis in hits:
    status='supported' if len(hit_ids)==1 else 'partial'
-   b={'object_type':'EvidenceBindingCandidate','binding_id':identity(eid,target_key(t),method,basis),
+   stable_basis=({'annotation_identity':basis['annotation_identity']}
+                 if method=='leader_binding' else {'owner':basis.get('attribute_owner'),
+                   'owner_parent_path':basis.get('owner_parent_path'),
+                   'annotation_identity':entity_key(a),'target_identity':target_key(t)})
+   # Relation identity excludes report bytes, local paths and verification provenance.
+   if method=='leader_binding':
+    stable_basis['leader_identity']=(project,drawing,tuple(basis['leader_parent_path']),basis['leader_handle'])
+   b={'object_type':'EvidenceBindingCandidate','binding_id':identity(eid,target_key(t),method,stable_basis),
       'evidence_id':eid,'source_drawing':drawing,'annotation_handle':a['handle'],
       'project_id':project,'annotation_parent_path':list(path(a)),'target_parent_path':list(path(t)),
       'target_id':t['id'],'target_type':t['target_type'],'binding_method':method,'binding_status':status,
       'relation':'leader_points_to_edge' if method=='leader_binding' else 'text_attached_to_object',
       'distance':n['distance'] if n else None,'geometric_basis':n or basis,'line_codes':codes,
       'z_semantics':'unresolved','xy_tolerance':xy_tolerance,'provenance':deepcopy(e['provenance'])+[basis]}
+   b['canonical_content']={'evidence_identity':eid,'binding_identity':stable_basis,
+       'target_identity':target_key(t),'method':method,'annotation_identity':annotation_identity(a),
+       'relation':canonical_content(basis),'nearest_geometry':canonical_content(n),
+       'target_geometry':canonical_content(t.get('geometry'))}
+   if basis.get('binding_conflict'):b.update(binding_status='conflicting',diagnostics=['binding_conflict'])
    bindings.append(b);e['target_candidates'].append(deepcopy(b));e['anchor_geometry'].append(basis)
   if hits:
    e.update(binding_method=hits[0][2],binding_status='supported' if len(hit_ids)==1 else 'partial',
@@ -125,6 +175,19 @@ def discover(context,xy_tolerance=.001,nearby_distance=1000):
      'project_id':project,'source_drawing':drawing,'annotation_parent_path':list(path(a)),'target_parent_path':list(path(m,'target_parent_path')),
      'relation':'system_membership_candidate' if m.get('membership_kind')=='system' else kind+'_in_region',
      'region_id':m.get('region_id'),'geometric_basis':deepcopy(m['geometric_basis']),'provenance':deepcopy(m['provenance'])})
+ bindings=consolidate_bindings(bindings)
+ by_binding_id={b['binding_id']:b for b in bindings}
+ for e in evidence:
+  if any(b['evidence_id']==e['evidence_id'] and b['binding_status']=='conflicting' for b in bindings):
+   e['binding_status']='conflicting';e['discovery_gaps'].append('binding_conflict')
+  seen_bindings=set();canonical_candidates=[]
+  for candidate in e['target_candidates']:
+   bid=candidate.get('binding_id')
+   if bid:
+    if bid in seen_bindings:continue
+    seen_bindings.add(bid);candidate=deepcopy(by_binding_id[bid])
+   canonical_candidates.append(candidate)
+  e['target_candidates']=canonical_candidates
  # Conflicting source annotations cannot leave earlier positive bindings behind.
  conflicts={e['evidence_id'] for e in evidence if e['binding_status']=='conflicting'}
  for b in bindings:
@@ -155,10 +218,12 @@ def discover(context,xy_tolerance=.001,nearby_distance=1000):
      'unresolved_binding_count':sum(e['binding_status']!='supported' for e in related),
      'specification_binding_candidate':any('specification' in e['evidence_category'] and any(b['evidence_id']==e['evidence_id'] for b in strong) for e in evidence),
      'system_binding_candidate':any('system_context' in e['evidence_category'] and any(b['evidence_id']==e['evidence_id'] for b in strong) for e in evidence),
-     'selection_status':'conflicting' if len(codes)>1 else ('candidate' if codes and strong else 'unresolved'),
+     'selection_status':'conflicting' if len(codes)>1 or any(b['binding_status']=='conflicting' for b in bs) else ('candidate' if codes and strong else 'unresolved'),
      'line_code_candidates':sorted(codes),'nearby_evidence_ids':[e['evidence_id'] for e in related]}
  return {'object_type':'ProjectEvidenceDiscoveryResult','version':'0.1','source_drawing':drawing,
     'evidence':evidence,'bindings':bindings,'propagation_roots':roots,'membership_candidates':members,
+    'leader_diagnostics':leaders_checked,
+    'unresolved_annotations':[deepcopy(a) for a in context.get('annotations',[]) if a.get('parent_path',[]) is None],
     'edge_summaries':summaries,'xy_tolerance':xy_tolerance,'nearby_distance':nearby_distance,
     'exporter_fields_needed':EXPORTER_FIELDS,'extraction_gaps':context.get('extraction_gaps',[]),
     'unsupported_curved_target_ids':[t['id'] for t in targets if any(t.get('geometry',{}).get('bulges',[]))],
