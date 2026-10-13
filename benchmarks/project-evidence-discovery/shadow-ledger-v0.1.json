@@ -1,0 +1,119 @@
+{
+  "object_type": "ShadowBenchmarkLedger",
+  "version": "0.1",
+  "benchmark": "post-Leader non-Golden ProjectEvidenceDiscovery",
+  "pass_rule": "PASS only for matching pairs: unresolved/true_unresolved, supported/true_supported, conflicting/correctly_conflicting; false_supported and false_unresolved are FAIL.",
+  "cases": [
+    {
+      "case_id": "SHADOW-001",
+      "project_id": "BX地下车库",
+      "drawing": "EX-BX地下车库火灾报警平面图_t8_t3.dwg",
+      "target_identity": {
+        "project_id": "BX地下车库",
+        "drawing": "EX-BX地下车库火灾报警平面图_t8_t3.dwg",
+        "snapshot_id": "d63df63630468cbde7a89bdfff684767c0f782797cc9177fb18eb1592cbd91c0",
+        "handle": "13C9D",
+        "parent_path": [],
+        "entity_type": "LWPOLYLINE"
+      },
+      "evidence_type": "no_direct_binding_discovered",
+      "acquisition_scope": {
+        "mode": "ModelSpaceTopLevelAllLayers",
+        "model_space_top_level": "included",
+        "nested_blocks": "not expanded",
+        "xref_contents": "not expanded",
+        "layouts": "not included"
+      },
+      "report_path": "local_test_data/fire-alarm-leader-shadow-13c9d-20261014/MEP-full-entity-report.txt",
+      "report_sha256": "d63df63630468cbde7a89bdfff684767c0f782797cc9177fb18eb1592cbd91c0",
+      "manifest_path": "local_test_data/fire-alarm-leader-shadow-13c9d-20261014/report-manifest-v2.json",
+      "manifest_version": "2",
+      "manifest_sha256": "9042dee091edef7b6f1bccb916ddcae96ce460a7a169235f6a60dd1a3a8321c2",
+      "blind_result": {
+        "status": "unresolved",
+        "path": "outputs/shadow-13c9d-20261014/blind-discovery-result.json"
+      },
+      "blind_result_sha256": "9a7949f71cf47e2b8d4d117eef6ae7b7247fab18c97637022a8da0d72a3847de",
+      "adjudication_class": "true_unresolved",
+      "adjudication_path": "outputs/shadow-13c9d-20261014/post-blind-adjudication.json",
+      "adjudication_sha256": "52e1d38b87e4c9b137bbe02f4cf81bd1573c33f79cdf06f710019649934abdad",
+      "pass_fail": "PASS",
+      "false_positive": false,
+      "false_negative": false,
+      "conflict_detected": false,
+      "semantic_boundary_preserved": true,
+      "notes": {
+        "evaluation_scope": "Discovery binding only; error flags mean observed within adjudicated scope, not exhaustive DWG ground truth.",
+        "scope_limitations": [
+          "No new CAD inspection or recursive block/Xref/Layout acquisition",
+          "No assertion that the complete drawing set lacks stronger evidence",
+          "Top-level nearby scan uses insertion-point radius, not text extents or nested geometry"
+        ],
+        "boundary": "No device/system/circuit semantics, project approval or quantity eligibility inferred.",
+        "agreement": true
+      }
+    },
+    {
+      "case_id": "SHADOW-002",
+      "project_id": "BX地下车库",
+      "drawing": "EX-BX地下车库说明及配电箱系统_t8_t3.dwg",
+      "target_identity": {
+        "project_id": "BX地下车库",
+        "drawing": "EX-BX地下车库说明及配电箱系统_t8_t3.dwg",
+        "snapshot_id": "af67328b4000b7d01cc81911fc4f2ff169d582e08d958a2dcf6b57b14adf6c6c",
+        "handle": "239D0",
+        "parent_path": [],
+        "entity_type": "INSERT",
+        "child": {
+          "handle": "239D2",
+          "entity_type": "ATTRIB",
+          "parent_path": [
+            "239D0"
+          ]
+        }
+      },
+      "evidence_type": "direct_object_binding",
+      "acquisition_scope": {
+        "mode": "ModelSpaceTopLevelAllLayers",
+        "model_space_top_level": "included",
+        "nested_blocks": "not expanded",
+        "xref_contents": "not expanded",
+        "layouts": "not included"
+      },
+      "report_path": "local_test_data/system-leader-shadow-239d0-20261014/MEP-full-entity-report.txt",
+      "report_sha256": "af67328b4000b7d01cc81911fc4f2ff169d582e08d958a2dcf6b57b14adf6c6c",
+      "manifest_path": "local_test_data/system-leader-shadow-239d0-20261014/report-manifest-v2.json",
+      "manifest_version": "2",
+      "manifest_sha256": "c60dc1d6a6a0c18707d6a1988c854bc4f1569409a0987a6bee24f0e02e432070",
+      "blind_result": {
+        "status": "supported",
+        "path": "outputs/shadow-239d0-20261014/blind-discovery-result.json"
+      },
+      "blind_result_sha256": "0aa08477931193984de3a823f7a6bbd1eee9906f3843bca77b6596ddb3653f6e",
+      "adjudication_class": "true_supported",
+      "adjudication_path": "outputs/shadow-239d0-20261014/post-blind-adjudication.json",
+      "adjudication_sha256": "ccdd39b8aa917f0b2eaa80a4e4df4fb7d7f3b179e36f0c9aa38eb5ef21387795",
+      "pass_fail": "PASS",
+      "false_positive": false,
+      "false_negative": false,
+      "conflict_detected": false,
+      "semantic_boundary_preserved": true,
+      "notes": {
+        "evaluation_scope": "Discovery binding only; error flags mean observed within adjudicated scope, not exhaustive DWG ground truth.",
+        "scope_limitations": [
+          "Independent adjudication of raw records and exporter contract, not a new live CAD/DXF database interrogation.",
+          "Historical and current acquisitions agree on this ownership; both belong to the same exporter family and are not independent exporter implementations.",
+          "Uniqueness and absence of collision established within acquired report scope; nested definitions, Xref contents and Layout are not exhaustively acquired."
+        ],
+        "boundary": "No device/system/circuit semantics, project approval or quantity eligibility inferred.",
+        "agreement": true
+      }
+    }
+  ],
+  "summary": {
+    "case_count": 2,
+    "pass_count": 2,
+    "false_positive_count": 0,
+    "false_negative_count": 0
+  }
+}
