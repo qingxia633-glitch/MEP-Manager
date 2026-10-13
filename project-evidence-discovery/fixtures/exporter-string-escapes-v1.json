@@ -1,0 +1,9 @@
+{
+  "purpose": "independent synthetic exporter serialization, not project evidence",
+  "encoding": "cp936",
+  "source": "AutoCAD 2021 Core Console mep2:val / mep2:format / vl-prin1-to-string",
+  "report_sha256": "725acc933fdb0d8992a92d2f2e6d0057b4557510e60d43d6d85a9621c0c1f9b0",
+  "report_bytes": 61,
+  "formatter_sha256": "f08b4d011bf0cabca80b9369a4019e2138ad10f66f6deb05ff7dd52c6aa2ac8b",
+  "process_exit": "timeout after output file was explicitly closed; not a clean process exit"
+}

@@ -3,6 +3,10 @@
 Offline discovery of annotation, binding and propagation-root **candidates**. No project
 semantic approval, new project rules, circuit inference, or quantity generation.
 
+First-round LEADER/MLEADER acquisition contract and runtime limitations:
+[Leader evidence v1](LEADER-V1.md). Versioned records are scope/status checked;
+MLEADER raw capability results do not imply a supported annotation binding.
+
 ## Entry points
 
 ```powershell
@@ -109,6 +113,21 @@ discovery algorithm. A missing new binding never overwrites its historical appro
 Joins use project, drawing, complete enclosing INSERT `parent_path`, and handle.
 Reference records may specify `annotation_parent_path`, `target_parent_path`,
 `root_target_parent_path`, or `owner_parent_path`; otherwise their own `parent_path`
-is used. An omitted path denotes top-level only, never a wildcard for nested instances.
+is used. For Leader v1 an omitted path is unknown, never top-level or a wildcard;
+the report acquisition scope must explicitly prove `parent_path=[]`.
 Same-handle targets in different paths get separate summary keys and retained paths.
 This module still only discovers candidates, never approves semantics.
+
+## Leader external-review hardening
+
+See [LEADER-HARDENING.md](LEADER-HARDENING.md) and [LEADER-V1.md](LEADER-V1.md).
+Adapter and direct Discovery share a pure version/type-aware validator. Unknown
+legacy leader scope/version is readable but cannot bind; current MLEADER remains
+unresolved. Historical positive expectations for incomplete leader contexts are
+retained and reported separately, not rewritten to hide this contract boundary.
+Optional sidecar v2 validation adds verified byte provenance, not semantic approval.
+# Verified Leader Shadow entry
+
+See [Shadow readiness contract](SHADOW-READINESS.md). Use `resolve.py --shadow
+--snapshot REPORT --manifest MANIFEST --project-id PROJECT --xy-tolerance 0.001` for the verified
+bytes path. Generic `discover(context)` does not authenticate caller JSON.

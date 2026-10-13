@@ -1,0 +1,94 @@
+{
+  "version": "1",
+  "classification_counts": {
+    "A": 2,
+    "B": 11,
+    "C": 1
+  },
+  "failures": [
+    {
+      "test_id": "test_discovery.DiscoveryTests.test_bounded_rest",
+      "category": "B",
+      "reason": "Old fixture lacks current version/scope/identity/decode fields.",
+      "historical_test_modified": false
+    },
+    {
+      "test_id": "test_discovery.DiscoveryTests.test_competing_codes",
+      "category": "B",
+      "reason": "Old fixture lacks current version/scope/identity/decode fields.",
+      "historical_test_modified": false
+    },
+    {
+      "test_id": "test_discovery.DiscoveryTests.test_duplicate_dedup",
+      "category": "B",
+      "reason": "Old fixture lacks current version/scope/identity/decode fields.",
+      "historical_test_modified": false
+    },
+    {
+      "test_id": "test_discovery.DiscoveryTests.test_root_known_scope_unknown",
+      "category": "B",
+      "reason": "Old fixture lacks current version/scope/identity/decode fields.",
+      "historical_test_modified": false
+    },
+    {
+      "test_id": "test_adapter.AdapterTests.test_conflicting_duplicates_cannot_keep_positive",
+      "category": "C",
+      "reason": "Historical diagnostic regression. Current test_L3_conflict_diagnostic remediates explicit diagnostics; old bindings[0] assertion still fails because no binding is generated.",
+      "historical_test_modified": false
+    },
+    {
+      "test_id": "test_adapter.AdapterTests.test_mleader_explicit_exported_chain",
+      "category": "A",
+      "reason": "Legacy native/explicit MLEADER chain is not current classic v1 evidence.",
+      "historical_test_modified": false
+    },
+    {
+      "test_id": "test_adapter.AdapterTests.test_native_leader_stable_handle",
+      "category": "A",
+      "reason": "Legacy native/explicit MLEADER chain is not current classic v1 evidence.",
+      "historical_test_modified": false
+    },
+    {
+      "test_id": "test_adapter.AdapterTests.test_z_not_physical_disconnection",
+      "category": "B",
+      "reason": "Old fixture lacks current version/scope/identity/decode fields.",
+      "historical_test_modified": false
+    },
+    {
+      "test_id": "test_discovery.DiscoveryTests.test_chinese_adjacent_s_label",
+      "category": "B",
+      "reason": "Old fixture lacks current version/scope/identity/decode fields.",
+      "historical_test_modified": false
+    },
+    {
+      "test_id": "test_discovery.DiscoveryTests.test_leader_binding",
+      "category": "B",
+      "reason": "Old fixture lacks current version/scope/identity/decode fields.",
+      "historical_test_modified": false
+    },
+    {
+      "test_id": "test_discovery.DiscoveryTests.test_s_selection",
+      "category": "B",
+      "reason": "Old fixture lacks current version/scope/identity/decode fields.",
+      "historical_test_modified": false
+    },
+    {
+      "test_id": "test_discovery.DiscoveryTests.test_sd_selection",
+      "category": "B",
+      "reason": "Old fixture lacks current version/scope/identity/decode fields.",
+      "historical_test_modified": false
+    },
+    {
+      "test_id": "test_discovery.DiscoveryTests.test_spec_not_s",
+      "category": "B",
+      "reason": "Old fixture lacks current version/scope/identity/decode fields.",
+      "historical_test_modified": false
+    },
+    {
+      "test_id": "test_discovery.DiscoveryTests.test_unknown_z_kept",
+      "category": "B",
+      "reason": "Old fixture lacks current version/scope/identity/decode fields.",
+      "historical_test_modified": false
+    }
+  ]
+}
