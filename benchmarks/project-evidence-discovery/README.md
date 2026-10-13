@@ -15,3 +15,7 @@ Discovery semantic boundary only; full CandidateSemantic / ProjectRule / Gate pi
 - Acceptance: validate required fields, types, unique case IDs, source hashes, status pairing and summary counts. No conflict candidate found is not a case; conflict handling remains unbenchmarked here.
 
 Only ledger/document validation applies. Discovery and downstream stages were not rerun; full regression not rerun. No commit or push.
+
+## Regression runner
+
+[Batch Shadow Benchmark Runner v0.1](RUNNER.md) replays the frozen benchmark with runtime private input paths. Prediction is isolated from scoring labels; this is regression replay, not a new blind trial.
