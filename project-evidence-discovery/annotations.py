@@ -4,6 +4,7 @@ from pathlib import Path
 from leader_contract import TOP_LEVEL,validate_leader_evidence_record
 from report_manifest import report_identity,verify_manifest
 from report_text import serialized_field,text_record
+from line_style import style_evidence
 
 def field(text,key):
  m=re.search(r'^'+re.escape(key)+r'=(.*?)\r?$',text,re.M)
@@ -49,7 +50,7 @@ def load_report(path,project_id=None,encoding='utf-8-sig',manifest=None):
  if verified:src['verified_report_sha256']=verified['report_sha256']
  c={'project_id':project_id,'drawing_ref':drawing,'annotations':[],'unresolved_attributes':[],'targets':[],'leaders':[],
     'report_identity':src['report_identity'],'report_integrity':src['report_integrity'],'snapshot_id':measured_hash,
-    'object_associations':[],'bounded_groups':[],'memberships':[],'provenance':[src],
+    'object_associations':[],'bounded_groups':[],'memberships':[],'provenance':[src],'style_evidence':[],
     'extraction_gaps':['nested_blocks_not_expanded','xref_contents_not_expanded','layouts_not_included','proxy_semantics_not_recovered']}
  counts={}
  for rec in re.split(r'(?m)(?=^EntityHandle=)',raw):
@@ -57,6 +58,8 @@ def load_report(path,project_id=None,encoding='utf-8-sig',manifest=None):
   if not h:continue
   counts[typ]=counts.get(typ,0)+1
   provenance=[dict(src,handle=h)];layer=field(rec,'Layer')
+  c['style_evidence'].append(style_evidence(rec,header,{'project_id':project_id,'drawing':drawing,
+      'snapshot_id':measured_hash,'handle':h,'parent_path':[] if top_level else None},provenance))
   if typ in ('LINE','LWPOLYLINE'):
    vs=[point(x) for x in re.findall(r'^Vertex_WCS=(.*?)\r?$',rec,re.M)]
    if typ=='LINE':vs=[point(field(rec,k)) for k in ('Start_WCS','End_WCS')]

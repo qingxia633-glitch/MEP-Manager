@@ -7,6 +7,10 @@ First-round LEADER/MLEADER acquisition contract and runtime limitations:
 [Leader evidence v1](LEADER-V1.md). Versioned records are scope/status checked;
 MLEADER raw capability results do not imply a supported annotation binding.
 
+Raw style acquisition and compatibility: [Line Style Evidence v0.1](LINE-STYLE.md).
+Exporter 2.5 adds a separate raw evidence collection; Discovery binding admission
+continues to ignore style. Existing verified 2.4 benchmark inputs remain unchanged.
+
 ## Entry points
 
 ```powershell
