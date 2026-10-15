@@ -6,6 +6,7 @@ from bindings import nearest,valid_point
 from model import identity,EXPORTER_FIELDS
 from leader_contract import validate_leader_evidence_record, finite_point, annotation_identity
 from binding_content import canonical_content, consolidate_bindings
+from text_layout import LAYOUT_KEYS
 
 def discover(context,xy_tolerance=.001,nearby_distance=1000):
  if not math.isfinite(xy_tolerance) or xy_tolerance<=0 or not math.isfinite(nearby_distance) or nearby_distance<0:
@@ -74,6 +75,8 @@ def discover(context,xy_tolerance=.001,nearby_distance=1000):
      'discovery_gaps':[],'discovery_status':'unresolved'}
   for field in ('raw_serialized_text','decoded_text','text_decode_status'):
    if field in a:e[field]=a[field]
+  for field in LAYOUT_KEYS:
+   if field in a:e[field]=deepcopy(a[field])
   seen[key]=e;evidence.append(e)
   near=[]
   for t in targets:
