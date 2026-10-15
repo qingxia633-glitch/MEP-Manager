@@ -1,5 +1,8 @@
 # ProjectEvidenceDiscovery v0.1
 
+MTEXT ordered paragraph evidence is additive and separate from binding admission.
+See [MTEXT-STRUCTURE.md](MTEXT-STRUCTURE.md); formatting is preserved, not rendered.
+
 TEXT/MTEXT/ATTRIB layout metadata is preserved without changing binding admission.
 See [TEXT-LAYOUT.md](TEXT-LAYOUT.md) for WCS, legacy OCS, bbox and status contracts.
 
