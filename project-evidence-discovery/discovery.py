@@ -224,6 +224,7 @@ def discover(context,xy_tolerance=.001,nearby_distance=1000):
      'selection_status':'conflicting' if len(codes)>1 or any(b['binding_status']=='conflicting' for b in bs) else ('candidate' if codes and strong else 'unresolved'),
      'line_code_candidates':sorted(codes),'nearby_evidence_ids':[e['evidence_id'] for e in related]}
  return {'object_type':'ProjectEvidenceDiscoveryResult','version':'0.1','source_drawing':drawing,
+    'table_evidence':deepcopy(context.get('table_evidence',[])),
     'mtext_structures':[deepcopy(a['mtext_structure']) for a in context.get('annotations',[])
                         if local(a) and a.get('type')=='MTEXT' and 'mtext_structure' in a],
     'evidence':evidence,'bindings':bindings,'propagation_roots':roots,'membership_candidates':members,

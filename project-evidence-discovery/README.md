@@ -1,5 +1,8 @@
 # ProjectEvidenceDiscovery v0.1
 
+TABLE observations use a separate collection, never annotation admission.
+See [TABLE-EVIDENCE.md](TABLE-EVIDENCE.md) for v2.6 acquisition and unresolved gaps.
+
 MTEXT ordered paragraph evidence is additive and separate from binding admission.
 See [MTEXT-STRUCTURE.md](MTEXT-STRUCTURE.md); formatting is preserved, not rendered.
 
