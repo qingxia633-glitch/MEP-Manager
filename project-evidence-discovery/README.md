@@ -1,5 +1,8 @@
 # ProjectEvidenceDiscovery v0.1
 
+TEXT/MTEXT/ATTRIB layout metadata is preserved without changing binding admission.
+See [TEXT-LAYOUT.md](TEXT-LAYOUT.md) for WCS, legacy OCS, bbox and status contracts.
+
 Offline discovery of annotation, binding and propagation-root **candidates**. No project
 semantic approval, new project rules, circuit inference, or quantity generation.
 

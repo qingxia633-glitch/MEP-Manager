@@ -5,6 +5,7 @@ from leader_contract import TOP_LEVEL,validate_leader_evidence_record
 from report_manifest import report_identity,verify_manifest
 from report_text import serialized_field,text_record
 from line_style import style_evidence
+from text_layout import layout_record
 
 def field(text,key):
  m=re.search(r'^'+re.escape(key)+r'=(.*?)\r?$',text,re.M)
@@ -75,7 +76,6 @@ def load_report(path,project_id=None,encoding='utf-8-sig',manifest=None):
    for att in re.split(r'(?m)(?=^AttributeTag=)',rec)[1:]:
     value=field(att,'AttributeText_RAW')
     match=re.search(r'\(5 \. "([^"]+)"\)',field(att,'Attribute_DXF') or '')
-    pos=re.search(r'\(10 ([^)]+)\)',field(att,'Attribute_DXF') or '')
     if match and value is not None:
      a={'handle':match[1],'attribute_handle':match[1],'type':'ATTRIB','raw_text':value,'parent_handle':h,
        'parent_path':[h] if top_level else None,'attribute_path':[h,match[1]] if top_level else None,
@@ -83,8 +83,11 @@ def load_report(path,project_id=None,encoding='utf-8-sig',manifest=None):
        'owner_parent_path':[] if top_level else None,
        'source_drawing':drawing,'project_id':project_id,
        'owner_insert_identity':{'project_id':project_id,'drawing_ref':drawing,'parent_path':[] if top_level else None,'handle':h},
-       'association_status':'explicit' if top_level else 'unresolved','position_wcs':point(pos[1]) if pos else None,
+       'association_status':'explicit' if top_level else 'unresolved',
        'provenance':[dict(src,handle=match[1],parent_handle=h)],'layer':field(att,'AttributeLayer')}
+     a.update(text_record(serialized_field(att,'AttributeText_RAW')))
+     a.update(layout_record(att,'ATTRIB'))
+     a['tag']=text_record(serialized_field(att,'AttributeTag')).get('decoded_text')
      c['annotations' if top_level else 'unresolved_attributes'].append(a)
   if typ in ('TEXT','MTEXT','DIMENSION'):
    value=next((field(rec,k) for k in ('Text_RAW','TextString_RAW','Contents_RAW','DimensionText_RAW') if field(rec,k) is not None),None)
@@ -94,6 +97,7 @@ def load_report(path,project_id=None,encoding='utf-8-sig',manifest=None):
         'parent_path':[] if top_level else None,'source_drawing':drawing,'project_id':project_id,
         **text_record(serialized_field(rec,key)),
         'position_wcs':point(field(rec,'Insertion_WCS')),'bounds':None,'provenance':provenance})
+    if typ in ('TEXT','MTEXT'):c['annotations'][-1].update(layout_record(rec,typ))
    elif typ=='DIMENSION':c['extraction_gaps'].append('dimension_text_unavailable:'+h)
   if typ in ('LEADER','MLEADER','MULTILEADER'):
    if field(rec,'LeaderEvidenceVersion') is not None:
