@@ -7,6 +7,7 @@ from report_text import serialized_field,text_record
 from line_style import style_evidence
 from text_layout import layout_record
 from mtext_structure import structure_record
+from table_evidence import table_record,consolidate_tables
 
 def field(text,key):
  m=re.search(r'^'+re.escape(key)+r'=(.*?)\r?$',text,re.M)
@@ -52,7 +53,7 @@ def load_report(path,project_id=None,encoding='utf-8-sig',manifest=None):
  if verified:src['verified_report_sha256']=verified['report_sha256']
  c={'project_id':project_id,'drawing_ref':drawing,'annotations':[],'unresolved_attributes':[],'targets':[],'leaders':[],
     'report_identity':src['report_identity'],'report_integrity':src['report_integrity'],'snapshot_id':measured_hash,
-    'object_associations':[],'bounded_groups':[],'memberships':[],'provenance':[src],'style_evidence':[],
+    'object_associations':[],'bounded_groups':[],'memberships':[],'provenance':[src],'style_evidence':[],'table_evidence':[],
     'extraction_gaps':['nested_blocks_not_expanded','xref_contents_not_expanded','layouts_not_included','proxy_semantics_not_recovered']}
  counts={}
  for rec in re.split(r'(?m)(?=^EntityHandle=)',raw):
@@ -60,6 +61,10 @@ def load_report(path,project_id=None,encoding='utf-8-sig',manifest=None):
   if not h:continue
   counts[typ]=counts.get(typ,0)+1
   provenance=[dict(src,handle=h)];layer=field(rec,'Layer')
+  if typ in ('ACAD_TABLE','TABLE'):
+   c['table_evidence'].append(table_record(rec,{'project_id':project_id,'drawing_ref':drawing,
+       'snapshot_id':measured_hash,'parent_path':[] if top_level else None,'table_handle':h,
+       'space':'ModelSpace' if top_level else None},provenance,field(header,'ExtractorVersion')))
   c['style_evidence'].append(style_evidence(rec,header,{'project_id':project_id,'drawing':drawing,
       'snapshot_id':measured_hash,'handle':h,'parent_path':[] if top_level else None},provenance))
   if typ in ('LINE','LWPOLYLINE'):
@@ -146,4 +151,5 @@ def load_report(path,project_id=None,encoding='utf-8-sig',manifest=None):
  for leader in c['leaders']:
   leader.update(validate_leader_evidence_record(leader,c['annotations'],c))
  c['entity_counts']=counts
+ c['table_evidence']=consolidate_tables(c['table_evidence'])
  return c

@@ -98,7 +98,7 @@ def polyline(rec,typ):
 
 def style_evidence(rec,header,identity,provenance):
     version=one(rec,'StyleEvidenceVersion');exporter=one(header,'ExtractorVersion')
-    supported=version=='1' and exporter==EXPORTER
+    supported=version=='1' and exporter in (EXPORTER,'2.6-table-cell-evidence-v1')
     status='unsupported' if version is not None else 'missing'
     entity={k:read_field(rec,k) if supported else item(status) for k in ENTITY}
     layer={k:read_field(rec,k) if supported else item(status) for k in LAYER}
