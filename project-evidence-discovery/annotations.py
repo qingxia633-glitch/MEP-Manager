@@ -6,6 +6,7 @@ from report_manifest import report_identity,verify_manifest
 from report_text import serialized_field,text_record
 from line_style import style_evidence
 from text_layout import layout_record
+from mtext_structure import structure_record
 
 def field(text,key):
  m=re.search(r'^'+re.escape(key)+r'=(.*?)\r?$',text,re.M)
@@ -98,6 +99,7 @@ def load_report(path,project_id=None,encoding='utf-8-sig',manifest=None):
         **text_record(serialized_field(rec,key)),
         'position_wcs':point(field(rec,'Insertion_WCS')),'bounds':None,'provenance':provenance})
     if typ in ('TEXT','MTEXT'):c['annotations'][-1].update(layout_record(rec,typ))
+    if typ=='MTEXT':c['annotations'][-1]['mtext_structure']=structure_record(c['annotations'][-1],measured_hash)
    elif typ=='DIMENSION':c['extraction_gaps'].append('dimension_text_unavailable:'+h)
   if typ in ('LEADER','MLEADER','MULTILEADER'):
    if field(rec,'LeaderEvidenceVersion') is not None:
