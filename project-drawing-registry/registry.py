@@ -104,6 +104,28 @@ def build_registry(project_id,inputs):
  instances={}
  for item in inputs:
   d=observe(project_id,item);iid=d['instance_id']
+  if item.get('layout_report_path'):
+   sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'drawing-sheet-identity'))
+   from identity import read_identity
+   evidence=read_identity(d,item['layout_report_path'],required(item.get('layout_report_sha256'),'layout_report_sha256'))
+   d['drawing_sheet_identity_evidence']=evidence
+   d['layout_inventory']=evidence['layouts']
+   d['layout_status']='acquired'
+   d['layout_inventory_status']='read'
+   d['paperspace_acquisition_status']='read' if all(x['layout_acquisition_status']=='read' for x in evidence['layouts']) else 'partial'
+   d['logical_identity_status']=evidence['identity_status']
+   d['sheet_identity_status']=evidence['sheet_identity_status']
+   # Preserve every role in identity evidence. The unchanged cross-sheet v1
+   # consumer only accepts its established alias kinds, never revision/title guesses.
+   compatible={'drawing_number_candidate','sheet_number_candidate','drawing_title_candidate'}
+   for c in evidence['candidates']:
+    if evidence['identity_status']=='candidate' and c['kind'] in compatible:
+     attachment={'project_id':project_id,'snapshot_id':d['report_sha256'],
+                 'drawing_instance_id':iid,'layout_evidence_sha256':item['layout_report_sha256'],
+                 'identity_kind':'registry_acquisition_attachment; actual carrier retained separately'}
+     d['labels'].append(dict(c,instance_id=iid,source_type='layout_title_block',
+                           source_identity=attachment,provenance=d['provenance']+c['provenance']))
+   d['labels']=sorted(d['labels'],key=content_hash)
   if iid in instances and instances[iid]!=d:raise ValueError('same instance has conflicting metadata')
   instances[iid]=d
  drawings=[instances[k] for k in sorted(instances)]
@@ -113,11 +135,11 @@ def build_registry(project_id,inputs):
  ambiguities=[{'alias':k,'instance_ids':sorted(v),'status':'ambiguous'} for k,v in sorted(index.items()) if len(v)>1]
  return {'registry_version':1,'project_id':project_id,'drawing_instances':drawings,'aliases':aliases,
   'lookup_index':{k:sorted(v) for k,v in sorted(index.items())},'ambiguities':ambiguities,'conflicts':[],
-  'unresolved':[{'instance_id':d['instance_id'],'logical_identity':'unresolved','sheet_identity':'unresolved','formal_revision':'unresolved'} for d in drawings],
+  'unresolved':[{'instance_id':d['instance_id'],'logical_identity':d['logical_identity_status'],'sheet_identity':d['sheet_identity_status'],'formal_revision':'unresolved'} for d in drawings],
   'provenance':[{'instance_id':d['instance_id'],'sources':d['provenance']} for d in drawings],
   'summary':{'drawing_instance_count':len(drawings),'supported_instance_count':sum(d['registry_status']=='supported' for d in drawings),
-    'ambiguous_identity_count':len(ambiguities),'unresolved_logical_identity_count':len(drawings),
-    'layout_coverage':'unresolved_out_of_scope','report_version_distribution':dict(sorted(Counter(d['report_version'] for d in drawings).items()))}}
+    'ambiguous_identity_count':len(ambiguities),'unresolved_logical_identity_count':sum(d['logical_identity_status']=='unresolved' for d in drawings),
+    'layout_coverage':'layout_evidence_present' if any('layout_inventory' in d for d in drawings) else 'unresolved_out_of_scope','report_version_distribution':dict(sorted(Counter(d['report_version'] for d in drawings).items()))}}
 
 def lookup(registry,value,kind=None):
  required(value,'lookup value')
