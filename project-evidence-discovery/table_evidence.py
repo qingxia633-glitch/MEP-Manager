@@ -5,6 +5,7 @@ import re
 import math
 from report_text import text_record
 from text_layout import layout_record
+from field_provenance import field_record
 
 EXPORTER='2.6-table-cell-evidence-v1'
 
@@ -44,7 +45,7 @@ def table_record(record,identity,provenance,exporter):
             'table_evidence_version':one(record,'TableEvidenceVersion'),'gaps':[],
             'multiple_contents_status':'unsupported','cell_geometry_status':'unresolved'}
     if result['table_evidence_version'] is None:return result
-    if result['table_evidence_version']!='"1"' or exporter!=EXPORTER:
+    if result['table_evidence_version']!='"1"' or exporter not in (EXPORTER,'2.7-field-provenance-v1','2.8-field-graph-evidence-v1'):
         result['acquisition_status']='unsupported';return result
     result['table_evidence_version']='1'
     if (identity.get('parent_path')!=[] or identity.get('space')!='ModelSpace' or
@@ -96,6 +97,9 @@ def table_record(record,identity,provenance,exporter):
             except (ValueError,AssertionError):result['acquisition_status']='invalid_result';cell['merged_status']='unresolved'
         if empty is True and text not in ('',None):
             result['acquisition_status']='conflicting';cell['acquisition_status']='conflicting'
+        fe=field_record(chunk,cid,'TABLE_CELL',text,fields['Text']['status'],provenance,exporter,
+                        present=kind=='field')
+        cell['field_evidence']=[] if fe is None else [fe]
         result['cells'].append(cell)
     if len(seen)!=rows*cols:result['gaps'].append('cell_grid_incomplete')
     indexed={(c['row_index'],c['column_index']):c for c in result['cells']}

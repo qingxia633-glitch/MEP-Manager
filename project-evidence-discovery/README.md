@@ -144,3 +144,13 @@ Optional sidecar v2 validation adds verified byte provenance, not semantic appro
 See [Shadow readiness contract](SHADOW-READINESS.md). Use `resolve.py --shadow
 --snapshot REPORT --manifest MANIFEST --project-id PROJECT --xy-tolerance 0.001` for the verified
 bytes path. Generic `discover(context)` does not authenticate caller JSON.
+# Field Provenance
+
+See [FIELD-PROVENANCE.md](FIELD-PROVENANCE.md). Independent `field_evidence`
+preserves source/display separation; it never enters binding admission.
+# FIELD child graph acquisition extension
+
+Report `2.8-field-graph-evidence-v1` / FieldEvidenceVersion `2` adds carrier-qualified
+FIELD node/edge observations. See [FIELD-GRAPH.md](FIELD-GRAPH.md) for completeness,
+limits and legacy behavior. This is evidence collection only; no new admission.
+New real-host acquisition is required to establish child/reference coverage.

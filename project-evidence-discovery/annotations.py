@@ -8,6 +8,7 @@ from line_style import style_evidence
 from text_layout import layout_record
 from mtext_structure import structure_record
 from table_evidence import table_record,consolidate_tables
+from field_provenance import field_record
 
 def field(text,key):
  m=re.search(r'^'+re.escape(key)+r'=(.*?)\r?$',text,re.M)
@@ -53,7 +54,7 @@ def load_report(path,project_id=None,encoding='utf-8-sig',manifest=None):
  if verified:src['verified_report_sha256']=verified['report_sha256']
  c={'project_id':project_id,'drawing_ref':drawing,'annotations':[],'unresolved_attributes':[],'targets':[],'leaders':[],
     'report_identity':src['report_identity'],'report_integrity':src['report_integrity'],'snapshot_id':measured_hash,
-    'object_associations':[],'bounded_groups':[],'memberships':[],'provenance':[src],'style_evidence':[],'table_evidence':[],
+    'object_associations':[],'bounded_groups':[],'memberships':[],'provenance':[src],'style_evidence':[],'table_evidence':[],'field_evidence':[],
     'extraction_gaps':['nested_blocks_not_expanded','xref_contents_not_expanded','layouts_not_included','proxy_semantics_not_recovered']}
  counts={}
  for rec in re.split(r'(?m)(?=^EntityHandle=)',raw):
@@ -93,6 +94,10 @@ def load_report(path,project_id=None,encoding='utf-8-sig',manifest=None):
        'provenance':[dict(src,handle=match[1],parent_handle=h)],'layer':field(att,'AttributeLayer')}
      a.update(text_record(serialized_field(att,'AttributeText_RAW')))
      a.update(layout_record(att,'ATTRIB'))
+     fe=field_record(att,{'project_id':project_id,'drawing_ref':drawing,'snapshot_id':measured_hash,
+         'handle':match[1],'parent_path':a['parent_path'],'owner_insert_handle':h},'ATTRIB',
+         a['decoded_text'],a['text_decode_status'],a['provenance'],field(header,'ExtractorVersion'))
+     if fe is not None:c['field_evidence'].append(fe)
      a['tag']=text_record(serialized_field(att,'AttributeTag')).get('decoded_text')
      c['annotations' if top_level else 'unresolved_attributes'].append(a)
   if typ in ('TEXT','MTEXT','DIMENSION'):
@@ -104,6 +109,12 @@ def load_report(path,project_id=None,encoding='utf-8-sig',manifest=None):
         **text_record(serialized_field(rec,key)),
         'position_wcs':point(field(rec,'Insertion_WCS')),'bounds':None,'provenance':provenance})
     if typ in ('TEXT','MTEXT'):c['annotations'][-1].update(layout_record(rec,typ))
+    if typ in ('TEXT','MTEXT'):
+     a=c['annotations'][-1]
+     fe=field_record(rec,{'project_id':project_id,'drawing_ref':drawing,'snapshot_id':measured_hash,
+         'handle':h,'parent_path':a['parent_path']},typ,a['decoded_text'],a['text_decode_status'],
+         provenance,field(header,'ExtractorVersion'))
+     if fe is not None:c['field_evidence'].append(fe)
     if typ=='MTEXT':c['annotations'][-1]['mtext_structure']=structure_record(c['annotations'][-1],measured_hash)
    elif typ=='DIMENSION':c['extraction_gaps'].append('dimension_text_unavailable:'+h)
   if typ in ('LEADER','MLEADER','MULTILEADER'):
@@ -152,4 +163,6 @@ def load_report(path,project_id=None,encoding='utf-8-sig',manifest=None):
   leader.update(validate_leader_evidence_record(leader,c['annotations'],c))
  c['entity_counts']=counts
  c['table_evidence']=consolidate_tables(c['table_evidence'])
+ for table in c['table_evidence']:
+  for cell in table['cells']:c['field_evidence'].extend(cell.get('field_evidence',[]))
  return c
