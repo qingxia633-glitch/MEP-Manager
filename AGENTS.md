@@ -2,6 +2,10 @@
 
 适用于本仓库及其子目录。开始代码分析、模块设计、实现、修复、迁移或 Review 前，必须读取并应用 [mep-contract-development](.agents/skills/mep-contract-development/SKILL.md)。若运行环境未自动发现 Skill，直接读取该文件并按其执行；不能把未加载当作已应用。
 
+## Drawing / CAD 研究路由
+
+涉及新的 CAD/drawing semantics、drawing registry / identity、cross-sheet、Xref / Layout / Sheet、Field / TABLE / Leader / MLeader、drawing notes / scope、Circuit / Network Trace 或新 CAD 对象解释时，在正式设计前先判断是否已有当前且适用的研究。已有足够结论则复用；否则读取 [mep-drawing-research](.agents/skills/mep-drawing-research/SKILL.md)，完成最小 Research Gate，再使用 mep-contract-development 进行契约设计、实现与验证。已有明确 contract 的 bug/test/refactor 等任务不重复完整研究；发现未知行为时仅补相关缺口。
+
 - 先检查实际 checkout、HEAD、工作区改动及相关源码/证据；历史聊天和测试成绩只作线索。
 - 每个新模块先写 Contract / Invariant / Failure / Acceptance；Bug 先复现，Review finding 先归纳根因再设计修复。
 - 执行入口独立验收不可信输入；缺证据、冲突或适用条件不明时 fail closed，禁止默认补齐或伪造批准。
