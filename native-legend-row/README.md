@@ -1,0 +1,17 @@
+# Native legend row evidence v0.1
+
+**Contract.** Run `python native-legend-row/resolve.py REPORT MANIFEST --project PROJECT --region NAME --window LEFT BOTTOM RIGHT TOP --output NEW.json`. The window is a caller-selected ModelSpace region in report WCS on the specified plane (default Z=0). NativeLegendRowEvidenceVersion is 1. Native TABLE cells retain the existing TABLE contract. Drawn-grid rows describe geometric containment of independent entities. Output is local evidence for review.
+
+**Invariant.** Window sides are never grid edges. A drawn cell needs two observed horizontal edges and two spanning rails, with witnessed intersections. Several glyphs, text entities and whole block insertions can occupy one cell. Attribute evidence stays with its INSERT. Insertion-point membership only locates the block anchor. Raw records remain addressable by snapshot, handle and report line. Source text, row number and style have no role in identity or cell construction.
+
+**Failure.** Aligned text with no grid yields no rows. Missing sides, coincident competing boundaries, possible merges and crossing contents retain uncertainty. Angled tables, recursive blocks, curves as grid boundaries, and visual interpretation are outside v1. A separator absent everywhere cannot be distinguished from an intentionally large cell without another witness. Native TABLE getter gaps remain visible.
+
+**Acceptance.** Synthetic tests exercise positive closed grids, multi-object cells, incomplete and repeated boundaries, crossings, independent tables, order invariance and native TABLE routing. Independently compare fresh region results with the nine reviewed BX rows only after reconstruction. No downstream semantic, applicability or quantity entry point is called.
+
+## Reading the result
+
+The selected project, drawing, exact report digest, region name, WCS window and plane qualify the region ID. Cell IDs add the four witnessed corners and side handles. Row IDs add the band and the ordered cell boundaries. `row_index_candidate` starts at zero in the selected window. Printed ordinal text remains a member observation. The object catalog stores each source handle once, with report-line provenance, layout/style or block evidence. The named region and all source IDs must be reproduced to replay these identities.
+
+Horizontal rails use the six-decimal WCS export with an absolute tolerance of 0.0001 source units. Predominantly vertical straight rails may incline by up to 1% in X/Y. Their actual X at each intersection determines the cell corners. These are geometric implementation limits, not project units or design allowances. The rectangular outer envelope has an independent status. Observed internal cells can be bounded even if the perimeter cannot be verified. Segmented or curved outer rails and rotated grids may remain incomplete.
+
+`members` lists contents geometrically inside one candidate cell. If boundary witnesses overlap the cell retains its ambiguous status. `row_only_candidates` preserves objects between the observed horizontal spans whose cell could not be determined. A missing text bounding box or a shape intersecting two cells cannot yield a unique cell. A header label is a lexical column-role candidate along shared observed side rails. Matching text or appearance across rows never unifies identities. The native TABLE branch retains indexed cells, merges, Field observations and getter failures separately.
