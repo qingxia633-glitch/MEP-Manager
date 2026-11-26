@@ -12,6 +12,9 @@ def number(value):
     except (InvalidOperation,ValueError):return None
 
 def resolve_eligibility(item):
+    if item.get('schema_version') == '0.4':
+        from multi_source import decision
+        return decision(item)
     gate=item.get('semantic_gate',{})
     out={'model_type':'QuantityEligibilityDecision','resolver_version':'0.1','object_id':item.get('object_id'),
          'quantity_type_candidate':item.get('quantity_type_candidate'),'semantic_gate':deepcopy(gate),

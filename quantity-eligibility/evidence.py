@@ -24,5 +24,8 @@ def load_evidence(path):
         # Upstream Gate provenance has its own source-id namespace; consume it opaquely.
         for key,value in obj.items():
             if key!='semantic_gate':visit(value)
-        obj['verified_sources']=sources
+        # Composite plans retain their exact reviewed payload. Their evaluator
+        # checks the RoutePath projection and independently resolves issue authority.
+        if obj.get('schema_version')!='0.4':
+            obj['verified_sources']=sources
     return bundle
