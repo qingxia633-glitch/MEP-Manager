@@ -1,0 +1,11 @@
+# RegionalDeviceInventoryVersion 1
+
+Supply a pinned project input map and a review directory containing a frozen rectangular WCS scope (`scope.json`) and a blank native review pack (`review-pack.md`). Run `python regional-device-inventory/run.py <input-map.json> <review-directory>` from the repository root. The runner verifies inputs, freezes the top-level survey, then evaluates strictly interior INSERTs against the specified legend set and DeviceRoleResolver. Every source object retains a spatial disposition. Replays verify existing output bytes and reject changes.
+
+Invariants. A stable native identity includes project, drawing instance, snapshot, complete parent path and handle. Merge evidence only at identical identity. Keep separate instances at identical coordinates. Treat nested components as coverage evidence until independently qualified. Keep curve geometry, actual role attributes, inherited defaults, diagnostics, and human review in separate fields. Counts use unique instances. One instance may contribute to several category hits. Approved quantity is null.
+
+Failure. Reject mismatched hashes, drawing, scope, duplicate native handles and conflicting identity joins. Unqualified locations, ambiguous boundaries, definitions and roles remain observable. An intersection or partially located symbol stays in the boundary review queue. A whole-device engineering role requires evidence beyond a rejected individual geometry comparison. Missing geometry does not suppress readable role text.
+
+Acceptance. Verify deterministic identities and counts, border and overlap behavior, named definition reuse, independent role/geometry evidence, and all population equations. Blank manual materials and the scope hash precede prediction. Authorized units apply only to the specified drawing version. Only a verified floor binding permits a formal floor statistic.
+
+Research reused: Native Legend Row v1 for row/cell membership, verified top-level reports for coordinates and native identities, revision-3 probes for definition members, Device Legend Matching for geometry and Device Role for role evidence. Drawing Registry v2 identifies the source drawing. Layout title and ModelSpace alone do not establish the window's floor. No new CAD acquisition or recognition dictionary is part of this contract.
