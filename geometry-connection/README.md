@@ -1,9 +1,11 @@
 # GeometryConnectionResolver v0.1
 
 独立 Python 3 标准库模块，仅输出二维几何连接证据。无 AutoCAD 调用，无电气语义或工程量推断。
-遵守 `outputs/fire-alarm-project-candidate-rules-20261005/geometry-connection-evidence-rules.json`；容差为必填参数，不内置项目的 0.001。
+容差为必填参数，取自当前项目适用的几何接触规则，单位为图纸单位。
 
 ## API / CLI
+
+从已核验线端反查同一设备实例各 POINT 上的邻线，见[设备接点一跳查询契约和 CLI](DEVICE-NEIGHBORS.md)。
 
 `DrawingContext.from_reports(snapshot, probes)` 从 MEPFULLREAD 的 INSERT 和一层 probe 的原始 DXF 自动建立定义表，不要求调用方提供 POINT 坐标。调用方负责提供同一图纸版本的取证集合，禁止混入其他 DWG 的同名块。
 
@@ -13,7 +15,7 @@
 CLI 输出采用 exclusive create，已有文件和输入输出别名均拒绝覆盖。
 
 ```powershell
-python geometry-connection/resolve.py --snapshot <report.txt> --probe <probe.txt> --probe <child-probe.txt> --edge 14147 --endpoint-index -1 --target 13017 --tolerance 0.001 --output <new-evidence.json>
+python geometry-connection/resolve.py --snapshot <report.txt> --probe <probe.txt> --probe <child-probe.txt> --edge <edge-handle> --endpoint-index -1 --target <insert-handle> --tolerance <drawing-unit-tolerance> --output <new-evidence.json>
 python geometry-connection/tests/test_resolver.py
 pwsh -NoProfile -File model-core/tests/Run-Regressions.ps1
 ```

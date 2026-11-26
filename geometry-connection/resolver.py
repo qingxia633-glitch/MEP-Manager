@@ -66,7 +66,7 @@ class DrawingContext:
         self.project_id,self.drawing_ref=project_id,drawing_ref
 
     @classmethod
-    def from_reports(cls, snapshot, probes):
+    def from_reports(cls, snapshot, probes, *, strict_endpoint_inventory=False):
         entities, definitions, provenance = {}, {}, []
         def read(path):
             data = Path(path).read_bytes()
@@ -79,6 +79,8 @@ class DrawingContext:
             if not h:
                 continue
             e = dict(handle=h,type=typ)
+            if strict_endpoint_inventory and h in entities:
+                raise ValueError('duplicate top-level handle: '+h)
             if typ == 'INSERT':
                 values = {}
                 for code in (41,42,43,50):
@@ -92,6 +94,13 @@ class DrawingContext:
             e['vertices'] = [_point(p) for p in re.findall(r'^Vertex_WCS=(.*?)\r?$',rec,re.M)]
             if typ == 'LWPOLYLINE':
                 e['closed'] = {'T':True, 'nil':False}.get(_field(rec,'Closed'))
+                if strict_endpoint_inventory:
+                    vertices = e['vertices']
+                    e['profile_dxf'] = re.findall(r'^Width_or_bulge_DXF=(.*?)\r?$',rec,re.M)
+                    e['path_verified'] = (len(vertices) >= 2 and
+                        len(vertices) == len(re.findall(r'^Vertex_OCS=',rec,re.M)) and
+                        vertices[0] == _point(_field(rec,'FirstVertex_WCS')) and
+                        vertices[-1] == _point(_field(rec,'LastVertex_WCS')))
             if typ == 'LINE' and not e['vertices']:
                 start,end = _field(rec,'Start_WCS'),_field(rec,'End_WCS')
                 if start and end:
@@ -156,7 +165,7 @@ def _nearest_segment(p,a,b):
 
 
 def resolve_connection(edge_handle, edge_endpoint, target_insert_handle, context,
-                       connection_xy_tolerance, max_depth=16):
+                       connection_xy_tolerance, max_depth=16, *, include_point_inventory=False):
     """Classify XY geometry only. Unknown Z meaning cannot veto XY contact.
 
     Only explicit POINT/line endpoints/open-polyline endpoints are anchors.
@@ -280,7 +289,7 @@ def resolve_connection(edge_handle, edge_endpoint, target_insert_handle, context
     elif touch:status,reason='partial','real_geometry_or_conservative_width_envelope_contact_not_anchor'
     elif issues or not (anchors or surfaces):status,reason='unresolved','missing_or_unsupported_evidence'
     else:status,reason='rejected','complete_geometry_disjoint_in_xy; indirect_relationship_not_evaluated'
-    return dict(edge_handle=edge_handle,edge_endpoint_wcs=ep,endpoint_source=endpoint_source,target_handle=target_insert_handle,
+    result = dict(edge_handle=edge_handle,edge_endpoint_wcs=ep,endpoint_source=endpoint_source,target_handle=target_insert_handle,
                 evidence_identity={'project_id':context.project_id,'drawing_ref':context.drawing_ref,
                     'edge_parent_path':source.get('parent_path',[]),'target_parent_path':(target or {}).get('parent_path',[])},
                 target_block_name=target.get('block') if target else None,
@@ -293,3 +302,6 @@ def resolve_connection(edge_handle, edge_endpoint, target_insert_handle, context
                              'Z semantic meaning unresolved; xyz_distance is descriptive only',
                              'Rejection applies only to direct geometric contact',
                              'Instance attributes and definition text never used as connection anchors'])
+    if include_point_inventory:
+        result['point_inventory'] = [a for a in anchors if a['source_entity_type'] == 'POINT']
+    return result
