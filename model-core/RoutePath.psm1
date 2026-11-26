@@ -61,4 +61,10 @@ function Find-PlanRoutePath {
  $gold=@($paths|Where-Object eligibleGolden|Sort-Object @{Expression={$_.visualContinuityRefs.Count}},@{Expression={$_.explicitEndDeviceCount};Descending=$true},@{Expression={$_.realEdgeCount};Descending=$true},@{Expression={$_.orderedEdgeHandles -join ','}}|Select-Object -First 1)
  [pscustomobject]@{golden=$gold;selectionPolicy='supported two-device-ended simple component; fewer jumps, more explicit terminal roles, more real edges, stable handle tie-break';eligibleCount=@($paths|Where-Object eligibleGolden).Count;topologyAudit=@($paths|Select-Object pathTopology,eligibleGolden,realEdgeCount,branchRefs);rejectedContinuities=$rejected;deviceBridgeCreated=$false;sourceGraphModified=$false}
 }
-Export-ModuleMember -Function Find-PlanRoutePath
+function Get-ReviewedRoutePathComponent {
+    param([string]$ComponentRequest,[string]$PairReview,[string]$ApprovedReviewSha256,[string]$PythonExecutable='python')
+    $json = & $PythonExecutable -B (Join-Path $PSScriptRoot 'route_path_gap.py') $ComponentRequest $PairReview $ApprovedReviewSha256
+    if ($LASTEXITCODE -ne 0) { throw 'RoutePath component validation failed' }
+    $json | ConvertFrom-Json -AsHashtable
+}
+Export-ModuleMember -Function Find-PlanRoutePath,Get-ReviewedRoutePathComponent
