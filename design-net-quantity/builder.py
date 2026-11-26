@@ -160,17 +160,88 @@ def _execute(p):
     except (ValueError,KeyError,TypeError,DecimalException) as e:
         return result('contract_violation',str(e))
 
+def _verified_composite_entry(entry):
+    previous=entry.get('source_plan')
+    return (isinstance(previous,dict) and previous.get('schema_version')=='0.4'
+            and _build_composite(previous,[]).get('quantity')==entry)
+
+
+def _build_composite(plan,registry):
+    from multi_source import BASES, evaluate, overlapping_items
+    decision=evaluate(plan)
+    if decision['status']!='eligible':
+        return decision
+    if not isinstance(registry,list):
+        return result('blocked','Explicit complete quantity registry required',quantity=None)
+    audit=decision['audit']
+    family=BASES[plan['material']['issue_basis']]
+    for entry in registry:
+        if not isinstance(entry,dict):
+            return result('blocked','Invalid registry entry',quantity=None)
+        if entry.get('build_plan_version')!='0.4':
+            try:
+                legacy_project=scope_identity(entry['scope'])[0]
+            except (KeyError,TypeError,ValueError):
+                return result('blocked','Invalid legacy registry scope',quantity=None)
+            if legacy_project==plan['scope']['project_id']:
+                return result('blocked','Same-project legacy component ownership requires reconciliation',quantity=None)
+            continue
+        # Replay the earlier item against its own operator receipt. A caller
+        # cannot re-label conductor metres as conduit by resealing the registry row.
+        if not _verified_composite_entry(entry):
+            return result('blocked','Unverified registry ownership',quantity=None)
+        if entry['material_family']==family and overlapping_items(plan,audit,entry):
+            return result('duplicate_detected','Material already owns path components',quantity=None)
+    basis=plan['material']['issue_basis']
+    policy=audit['grant']['reporting_policy']
+    try:
+        with localcontext() as ctx:
+            exact=Decimal(audit['views'][basis])
+            ctx.prec=min(10000,max(160,exact.adjusted()+policy['decimal_places']+2))
+            ctx.traps[Rounded]=ctx.traps[Inexact]=False
+            reported=exact.quantize(
+                Decimal(1).scaleb(-policy['decimal_places']),rounding=ROUND_HALF_EVEN)
+    except DecimalException:
+        return result('blocked','Reporting precision limit',quantity=None)
+    output=deepcopy(audit)
+    ownership=[family,audit['source_ids']]
+    if 'item_id' in plan['material']:
+        ownership.append(plan['material']['item_id'])
+    output.update(object_type='DesignNetQuantity',build_plan_version='0.4',
+                  quantity_id='design-net:'+digest(ownership),
+                  material_family=family,measurement_basis=basis,material=deepcopy(plan['material']),
+                  source_plan=deepcopy(plan),source_plan_sha256=digest(plan),role=plan['role'],
+                  computed_quantity=dict(exact_value=audit['views'][basis],reported_value=str(reported),
+                                         decimal_places=policy['decimal_places'],rounding_mode=policy['rounding_mode'],
+                                         unit={'conduit':'m','grouped_wire':'group.m','conductor':'conductor.m'}[basis]))
+    return result('built',quantity=seal(output))
+
+
 def build(plan,existing_quantities=None):
+    if isinstance(plan,dict) and plan.get('schema_version')=='0.4':
+        return _build_composite(plan,existing_quantities)
     r=_execute(plan)
     if r['status']!='built': return r
     if not isinstance(existing_quantities,list): return result('blocked','Explicit complete quantity registry required')
     try:
-        if any(key(q)==key(r['quantity']) for q in existing_quantities):
-            return result('duplicate_detected','Scope/kind/approved role already issued')
-    except (KeyError,TypeError): return result('contract_violation','Invalid registry entry')
+        for q in existing_quantities:
+            if isinstance(q,dict) and q.get('build_plan_version')=='0.4':
+                if (not _verified_composite_entry(q)
+                        or q['scope']['project_id']==plan['binding']['project_id']):
+                    return result('blocked','Composite component ownership requires reconciliation')
+            elif key(q)==key(r['quantity']):
+                return result('duplicate_detected','Scope/kind/approved role already issued')
+    except (KeyError,TypeError,ValueError): return result('contract_violation','Invalid registry entry')
     return r
 
 def replay_validate(plan,frozen_quantity):
+    if isinstance(plan,dict) and plan.get('schema_version')=='0.4':
+        checked=_build_composite(plan,[])
+        if checked['status']!='built':
+            return checked
+        matched=checked['quantity']==frozen_quantity
+        return result('replay_matched' if matched else 'replay_mismatch',
+                      evidence_contract_match=matched,issued=False)
     r=_execute(plan)
     if r['status']!='built': return r
     q=r['quantity']

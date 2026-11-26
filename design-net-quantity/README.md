@@ -1,9 +1,8 @@
 # DesignNetQuantityBuilder v0.1
 
-Only executes QuantityBuildPlan v0.2. No CAD reads, semantic inference, ownership
-decisions, upstream changes, procurement or pricing. The versioned schema is validated
-in full by jsonschema Draft202012Validator; additional execution checks enforce
-formula/component consistency, provenance, hashes and unit contracts.
+Single-source execution uses QuantityBuildPlan v0.3; v0.2 is retained for legacy
+replay diagnosis. For a reviewed composite path, the same build and replay CLI
+accepts [QuantityBuildPlan v0.4](../quantity-eligibility/MULTI-SOURCE.md).
 
 Install `python -m pip install --target .builder-deps -r design-net-quantity/requirements.txt`.
 Run `python -m unittest discover -s design-net-quantity/tests -v`.

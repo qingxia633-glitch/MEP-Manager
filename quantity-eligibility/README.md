@@ -1,5 +1,7 @@
 # QuantityEligibilityResolver v0.1
 
+两条以上原生母线和批准恢复段使用独立的 [QuantityBuildPlan 0.4 契约](MULTI-SOURCE.md)。同一证据入口按版本分派，返回材料项资格和可复算步骤。
+
 消费ProjectSpecificSemanticDecision和已审核的结构化计量证据，返回资格判断及未求值的QuantityBuildPlan。不导入或重跑前四个Resolver，不生成DesignNetQuantity，不计算最终净量。
 
 ## 使用
