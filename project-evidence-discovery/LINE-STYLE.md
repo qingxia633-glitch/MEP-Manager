@@ -67,6 +67,10 @@ entity effective style. Malformed/contradictory values cannot yield direct or
 bylayer_candidate hints. Partial acquisition retains raw fields but no direct
 resolution hint. No LTYPE pattern, MLINESTYLE or proxy-graphics interpretation.
 
+An optional [targeted LTYPE sidecar](LTYPE-DEFINITION.md) preserves the ordered
+pattern for a verified raw linetype name in the same drawing. The existing
+full-report format and Discovery entry points are independent of this sidecar.
+
 ## Runtime validation scope
 
 `tests/validate-line-style-acquisition.lsp` requires an empty, unmodified isolated

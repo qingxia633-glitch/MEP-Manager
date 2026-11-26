@@ -1,0 +1,37 @@
+; Load TargetedNativeProbe.lsp first. Caller supplies pinned request hash and names.
+(defun ltd:run (expected names request-id output tracefile initial / *error* tnp:fh tnp:handles
+                 tnp:trace-path h name en data pair ref style seen active)
+  (defun *error* (msg)
+    (if tnp:fh (close tnp:fh))
+    (princ (strcat "\nIncomplete LTYPE capture: " msg)) (princ))
+  (setq active (strcat (getvar "DWGPREFIX") (getvar "DWGNAME")))
+  (if (or (/= 0 initial) (/= initial (getvar "DBMOD"))
+          (/= (strcase (vl-string-translate "\\" "/" active)) (strcase expected))
+          (findfile output) (null names))
+    (progn (princ "\nCheck clean active Shadow, request and fresh output path.") (exit)))
+  (setq tnp:trace-path tracefile tnp:fh (open output "w" "utf8-bom"))
+  (tnp:emit (list '("kind" . "header") '("LinetypeDefinitionEvidenceVersion" . 1)
+    (cons "active_document" active) (cons "request_sha256" request-id)
+    (cons "acad_version" (getvar "ACADVER")) (cons "acquired_local" (rtos (getvar "CDATE") 2 8))
+    (cons "names" names) (cons "before_load" initial) (cons "after_load" (getvar "DBMOD"))))
+  (foreach name names
+    (setq h name en (tnp:call "ltype_lookup" 'tblobjname (list "LTYPE" name)) data nil)
+    (if (= (type en) 'ENAME)
+      (setq data (tnp:call "ltype_read" 'entget (list en))))
+    (if (and (listp data) data)
+      (progn
+        (foreach pair data
+          (if (and (= (car pair) 340) (= (type (cdr pair)) 'ENAME)
+                   (not (member (cdr pair) seen)))
+            (progn
+              (setq ref (cdr pair) seen (cons ref seen)
+                    style (tnp:call "style_read" 'entget (list ref)))
+              (if (and (listp style) style)
+                (tnp:emit (list '("kind" . "style") (cons "raw" (tnp:raw style))))))))
+        (tnp:emit (list '("kind" . "definition") (cons "requested" name)
+                       (cons "raw" (tnp:raw data)))))
+      (tnp:emit (list '("kind" . "unavailable") (cons "requested" name)))))
+  (if (/= (getvar "DBMOD") initial) (exit))
+  (tnp:emit (list '("kind" . "complete") (cons "dbmod" (getvar "DBMOD"))))
+  (close tnp:fh) (setq tnp:fh nil)
+  (princ))
